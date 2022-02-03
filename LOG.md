@@ -7,19 +7,6 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ---
 
-### Di 02. Feb / Mi 03. Feb
-
-#### Objects
-make basic technic run, pose detection, box detection
-
-#### Done 
-all
-
-#### Review 
-the objects where backdated formualted, so it's not a real review, but anyway we have a good state
-
----
-
 ### Do 04. Feb
 
 #### Objects
@@ -36,3 +23,17 @@ the objects where backdated formualted, so it's not a real review, but anyway we
 4. build a prototype of "image -> box detection -> pose estimation -> camera position -> image" pipeline
 
 ---
+
+### Di 02. Feb / Mi 03. Feb
+
+#### Objects
+make basic technic run, pose detection, box detection
+
+#### Done 
+all
+
+#### Review 
+the objects where backdated formualted, so it's not a real review, but anyway we have a good state
+
+---
+
