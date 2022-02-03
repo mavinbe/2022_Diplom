@@ -5,7 +5,7 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Logs
 
-
+---
 
 ### Di 02. Feb / Mi 03. Feb
 
@@ -18,7 +18,7 @@ all
 #### Review 
 the objects where backdated formualted, so it's not a real review, but anyway we have a good state
 
-
+---
 
 ### Do 04. Feb
 
@@ -28,6 +28,11 @@ the objects where backdated formualted, so it's not a real review, but anyway we
     b. images are shown as they arrise, and position is delayed
     c. or implemenmt both possibilities
 
-2. create an app that reads video and display it
+2. decide which concurrency model to use
+    https://realpython.com/python-concurrency/
 
-3. build a prototype of "image -> box detection -> pose estimation -> camera position -> image" pipeline
+3. create an app that reads video and display it
+
+4. build a prototype of "image -> box detection -> pose estimation -> camera position -> image" pipeline
+
+---
