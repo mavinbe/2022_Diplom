@@ -22,6 +22,17 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 4. build a prototype of "image -> box detection -> pose estimation -> camera position -> image" pipeline
 
+
+#### Ideas
+- implement playback with gstreamer, it a little work but maybe we can use it @see 2021_Diplom/2021_Diplom_Lab/google-coral/examples-camera/gstreamer/detect.py
+
+
+#### Done
+1. I choose a. for now, its good enough for now, later I can implemenmt it other wise
+2. is obsolet cause of 1.
+
+canceled at 13:30 cause M is not sleeping, so I go support P
+
 ---
 
 ### Di 02. Feb / Mi 03. Feb
