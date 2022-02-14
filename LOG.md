@@ -5,9 +5,21 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Logs
 
+### 03 -- Fr 11. Feb
+
+#### Objects
+1. Make a timetable till end of next week
+2. define interfaces of app parts
+
+opt
+3. create an app that reads video and display it
+
+#### DONE 
+
+nothing finished, was not focused and later interrupted by familie
 ---
 
-### Do 04. Feb
+### 02 -- Do 04. Feb
 
 #### Objects
 1. decide how video playback is made,
@@ -33,9 +45,14 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 canceled at 13:30 cause M is not sleeping, so I go support P
 
+#### Review 11.02.2022
+3. defer 
+4. defer 
+cause its 
+
 ---
 
-### Di 02. Feb / Mi 03. Feb
+### 01 -- Di 02. Feb / Mi 03. Feb
 
 #### Objects
 make basic technic run, pose detection, box detection
