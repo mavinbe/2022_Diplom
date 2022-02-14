@@ -33,50 +33,134 @@ python3 examples/movenet_pose_estimation.py \
 
 import argparse
 
+import numpy
 from PIL import Image
 from PIL import ImageDraw
 from pycoral.adapters import common
 from pycoral.utils.edgetpu import make_interpreter
+import os
 
 _NUM_KEYPOINTS = 17
 
+# Dictionary that maps from joint names to keypoint indices.
+KEYPOINT_DICT = {
+    'nose': 0,
+    'left_eye': 1,
+    'right_eye': 2,
+    'left_ear': 3,
+    'right_ear': 4,
+    'left_shoulder': 5,
+    'right_shoulder': 6,
+    'left_elbow': 7,
+    'right_elbow': 8,
+    'left_wrist': 9,
+    'right_wrist': 10,
+    'left_hip': 11,
+    'right_hip': 12,
+    'left_knee': 13,
+    'right_knee': 14,
+    'left_ankle': 15,
+    'right_ankle': 16
+}
+
+KEYPOINT_COLORS = {
+    0: (255, 0, 0),
+    1: (255, 255, 0),
+    2: (255, 255, 0),
+    3: (255, 0, 0),
+    4: (255, 0, 0),
+    5: (255, 0, 0),
+    6: (255, 0, 0),
+    7: (255, 0, 0),
+    8: (255, 0, 0),
+    9: (255, 0, 0),
+    10: (255, 0, 0),
+    11: (0, 255, 255),
+    12: (0, 255, 255),
+    13: (255, 0, 0),
+    14: (255, 0, 0),
+    15: (255, 0, 0),
+    16: (255, 0, 0)
+}
+
+file_path = os.path.dirname(__file__)
+
 
 def main():
-  parser = argparse.ArgumentParser(
-      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-  parser.add_argument(
-      '-m', '--model', required=True, help='File path of .tflite file.')
-  parser.add_argument(
-      '-i', '--input', required=True, help='Image to be classified.')
-  parser.add_argument(
-      '--output',
-      default='movenet_result.jpg',
-      help='File path of the output image.')
-  args = parser.parse_args()
+    interpreter = get_interpreter()
+    img = get_image()
+    resized_img = get_resized_img(img, interpreter)
+    pose = get_pose(interpreter, resized_img)
+    width, height = img.size
+    pose_in_original_coordinates = transform_pose_to_orignal_coordinates(pose, width, height)
+    serialized_pose = serialize_pose_list(pose_in_original_coordinates)
+    write_to_result_file(serialized_pose)
+    draw_pose_and_save_img(img, pose)
 
-  interpreter = make_interpreter(args.model)
-  interpreter.allocate_tensors()
 
-  img = Image.open(args.input)
-  resized_img = img.resize(common.input_size(interpreter), Image.ANTIALIAS)
-  common.set_input(interpreter, resized_img)
+def write_to_result_file(serialized_pose):
+    f = open(file_path + "/result.txt", "w")
+    f.write(serialized_pose)
+    f.close()
 
-  interpreter.invoke()
 
-  pose = common.output_tensor(interpreter, 0).copy().reshape(_NUM_KEYPOINTS, 3)
-  print(pose)
-  draw = ImageDraw.Draw(img)
-  width, height = img.size
-  for i in range(0, _NUM_KEYPOINTS):
-    draw.ellipse(
-        xy=[
-            pose[i][1] * width - 2, pose[i][0] * height - 2,
-            pose[i][1] * width + 2, pose[i][0] * height + 2
-        ],
-        fill=(255, 0, 0))
-  img.save(args.output)
-  print('Done. Results saved at', args.output)
+def serialize_pose_list(pose):
+    array_1_dim = pose.reshape(-1)
+    string = ' '.join(str(e) for e in array_1_dim)
+    return string
+
+
+def deserialize_pose_list(string):
+    array_1_dim_recover = numpy.asarray(string.split(' '), numpy.float64)
+    matrix_recover = array_1_dim_recover.reshape((-1, 17, 3))
+    return matrix_recover
+
+
+def transform_pose_to_orignal_coordinates(pose, width, height):
+    pose_clone = pose.copy()
+    for i in range(0, _NUM_KEYPOINTS):
+        #print(f"Hello, {pose_clone[i][1]}. You are {pose[i][1]} {width}.")
+        pose_clone[i][1] = round(pose[i][1] * width, 0)
+        pose_clone[i][0] = round(pose[i][0] * height)
+    return pose_clone
+
+
+def draw_pose_and_save_img(img, pose):
+    draw = ImageDraw.Draw(img)
+    width, height = img.size
+    for i in range(0, _NUM_KEYPOINTS):
+        if pose[i][2] >= 0.2:
+            draw.ellipse(
+                xy=[
+                    pose[i][1] * width - 2, pose[i][0] * height - 2,
+                    pose[i][1] * width + 2, pose[i][0] * height + 2
+                ],
+                fill=KEYPOINT_COLORS[i])
+    img.save(file_path + "/result.bmp")
+
+
+def get_pose(interpreter, resized_img):
+    common.set_input(interpreter, resized_img)
+    interpreter.invoke()
+    pose = common.output_tensor(interpreter, 0).copy().reshape(_NUM_KEYPOINTS, 3)
+    return pose
+
+
+def get_resized_img(img, interpreter):
+    resized_img = img.resize(common.input_size(interpreter), Image.ANTIALIAS)
+    return resized_img
+
+
+def get_interpreter():
+    interpreter = make_interpreter(file_path + "/movenet_single_pose_lightning_ptq_edgetpu.tflite")
+    interpreter.allocate_tensors()
+    return interpreter
+
+
+def get_image():
+    img = Image.open(file_path + "/squat.bmp")
+    return img
 
 
 if __name__ == '__main__':
-  main()
+    main()
