@@ -2,6 +2,8 @@
 
 This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
+## Backlog
+- smoother pose results with kalman filter( ask arkadi)
 
 ## Logs
 
