@@ -88,88 +88,87 @@ KEYPOINT_COLORS = {
 
 file_path = os.path.dirname(__file__)
 
+class MovenetEngine:
+    def __init__(self):
+        self.interpreter = self.get_interpreter()
 
-def main(img=None, frameId=0, detectionId=0):
-    print(numpy.shape(img))
-    img = Image.fromarray(img)
-    interpreter = get_interpreter()
-    if img is None:
-        img = get_image()
-    resized_img = get_resized_img(img, interpreter)
-    pose = get_pose(interpreter, resized_img)
-    width, height = img.size
-    pose_in_original_coordinates = transform_pose_to_orignal_coordinates(pose, width, height)
-    serialized_pose = serialize_pose_list(pose_in_original_coordinates)
-    write_to_result_file(serialized_pose)
-    draw_pose_and_save_img(img, pose, frameId, detectionId)
-    return pose
+    def run(self, img=None, frameId=0, detectionId=0):
+        assert img is not None
+        resized_img = self.get_resized_img(img, self.interpreter)
+        pose = self.get_pose(self.interpreter, resized_img)
+        width, height = img.size
+        pose_in_original_coordinates = self.transform_pose_to_orignal_coordinates(pose, width, height)
+        serialized_pose = self.serialize_pose_list(pose_in_original_coordinates)
+        self.write_to_result_file(serialized_pose)
+        self.draw_pose_and_save_img(img, pose, frameId, detectionId)
+        return pose
 
+    @staticmethod
+    def write_to_result_file(serialized_pose):
+        f = open(file_path + "/result.txt", "w")
+        f.write(serialized_pose)
+        f.close()
 
-def write_to_result_file(serialized_pose):
-    f = open(file_path + "/result.txt", "w")
-    f.write(serialized_pose)
-    f.close()
+    @staticmethod
+    def serialize_pose_list(pose):
+        array_1_dim = pose.reshape(-1)
+        string = ' '.join(str(e) for e in array_1_dim)
+        return string
 
+    @staticmethod
+    def deserialize_pose_list(string):
+        array_1_dim_recover = numpy.asarray(string.split(' '), numpy.float64)
+        matrix_recover = array_1_dim_recover.reshape((-1, 17, 3))
+        return matrix_recover
 
-def serialize_pose_list(pose):
-    array_1_dim = pose.reshape(-1)
-    string = ' '.join(str(e) for e in array_1_dim)
-    return string
+    @staticmethod
+    def transform_pose_to_orignal_coordinates(pose, width, height):
+        pose_clone = pose.copy()
+        for i in range(0, _NUM_KEYPOINTS):
+            #print(f"Hello, {pose_clone[i][1]}. You are {pose[i][1]} {width}.")
+            pose_clone[i][1] = round(pose[i][1] * width, 0)
+            pose_clone[i][0] = round(pose[i][0] * height)
+        return pose_clone
 
+    @staticmethod
+    def draw_pose_and_save_img(img, pose, frameId, detectionId):
+        draw = ImageDraw.Draw(img)
+        width, height = img.size
+        for i in range(0, _NUM_KEYPOINTS):
+            if pose[i][2] >= 0.2:
+                draw.ellipse(
+                    xy=[
+                        pose[i][1] * width - 2, pose[i][0] * height - 2,
+                        pose[i][1] * width + 2, pose[i][0] * height + 2
+                    ],
+                    fill=KEYPOINT_COLORS[i])
+        img.save(file_path + f"/result_{frameId}_{detectionId}.bmp")
 
-def deserialize_pose_list(string):
-    array_1_dim_recover = numpy.asarray(string.split(' '), numpy.float64)
-    matrix_recover = array_1_dim_recover.reshape((-1, 17, 3))
-    return matrix_recover
+    @staticmethod
+    def get_pose(interpreter, resized_img):
+        common.set_input(interpreter, resized_img)
+        print('----INFERENCE TIME----')
+        print('Note: The first inference is slow because it includes',
+              'loading the model into Edge TPU memory.')
+        for _ in range(1):
+            start = time.perf_counter()
+            interpreter.invoke()
+            inference_time = time.perf_counter() - start
+            pose = common.output_tensor(interpreter, 0).copy().reshape(_NUM_KEYPOINTS, 3)
+            print('%.2f ms' % (inference_time * 1000))
 
+        return pose
 
-def transform_pose_to_orignal_coordinates(pose, width, height):
-    pose_clone = pose.copy()
-    for i in range(0, _NUM_KEYPOINTS):
-        #print(f"Hello, {pose_clone[i][1]}. You are {pose[i][1]} {width}.")
-        pose_clone[i][1] = round(pose[i][1] * width, 0)
-        pose_clone[i][0] = round(pose[i][0] * height)
-    return pose_clone
+    @staticmethod
+    def get_resized_img(img, interpreter):
+        resized_img = img.resize(common.input_size(interpreter), Image.ANTIALIAS)
+        return resized_img
 
-
-def draw_pose_and_save_img(img, pose, frameId, detectionId):
-    draw = ImageDraw.Draw(img)
-    width, height = img.size
-    for i in range(0, _NUM_KEYPOINTS):
-        if pose[i][2] >= 0.2:
-            draw.ellipse(
-                xy=[
-                    pose[i][1] * width - 2, pose[i][0] * height - 2,
-                    pose[i][1] * width + 2, pose[i][0] * height + 2
-                ],
-                fill=KEYPOINT_COLORS[i])
-    img.save(file_path + f"/result_{frameId}_{detectionId}.bmp")
-
-
-def get_pose(interpreter, resized_img):
-    common.set_input(interpreter, resized_img)
-    print('----INFERENCE TIME----')
-    print('Note: The first inference is slow because it includes',
-          'loading the model into Edge TPU memory.')
-    for _ in range(5):
-        start = time.perf_counter()
-        interpreter.invoke()
-        inference_time = time.perf_counter() - start
-        pose = common.output_tensor(interpreter, 0).copy().reshape(_NUM_KEYPOINTS, 3)
-        print('%.2f ms' % (inference_time * 1000))
-
-    return pose
-
-
-def get_resized_img(img, interpreter):
-    resized_img = img.resize(common.input_size(interpreter), Image.ANTIALIAS)
-    return resized_img
-
-
-def get_interpreter():
-    interpreter = make_interpreter(file_path + "/movenet_single_pose_lightning_ptq_edgetpu.tflite")
-    interpreter.allocate_tensors()
-    return interpreter
+    @staticmethod
+    def get_interpreter():
+        interpreter = make_interpreter(file_path + "/movenet_single_pose_lightning_ptq_edgetpu.tflite")
+        interpreter.allocate_tensors()
+        return interpreter
 
 
 def get_image():
@@ -180,4 +179,6 @@ def get_image():
 
 if __name__ == '__main__':
     print('MAIN')
-    main()
+    movenet_engine = MovenetEngine()
+    img = get_image()
+    movenet_engine.run(img)
