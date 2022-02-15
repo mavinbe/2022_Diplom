@@ -7,19 +7,26 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Logs
 
-### 05 -- Mo 15. Feb
+### 05 -- Di 15. Feb
 
 #### Objects
 1. create an app that reads video and display it
-2. show pose detections on vid
+2. show pose detections on vi
+3. apply kalman filter to smooth
+
 
 opt
-2. run detection and store result
-3. run pose and store result
+4. run detection and store result
+5. run pose and store result
 
 #### DONE
 1. Done
 2. Done
+3. created prototype in lab/2d/py
+
+#### Reflection 
+was a good day, i accomplished a good batch of stuff
+i'm looking forward for tomorrow to finish kalman smoothining and intigrate it into my code
 
 ---
 
