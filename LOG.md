@@ -5,6 +5,18 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Logs
 
+### 05 -- Mo 15. Feb
+
+#### Objects
+1. create an app that reads video and display it
+2. show pose detections on vid
+
+opt
+2. run detection and store result
+3. run pose and store result
+
+---
+
 ### 04 -- Mo 14. Feb
 
 #### Objects
