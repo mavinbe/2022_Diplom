@@ -100,8 +100,8 @@ class MovenetEngine:
         pose_in_original_coordinates = self.transform_pose_to_orignal_coordinates(pose, width, height)
         serialized_pose = self.serialize_pose_list(pose_in_original_coordinates)
         self.write_to_result_file(serialized_pose)
-        self.draw_pose_and_save_img(img, pose, frameId, detectionId)
-        return pose
+        img = self.draw_pose_and_save_img(img, pose, frameId, detectionId)
+        return img
 
     @staticmethod
     def write_to_result_file(serialized_pose):
@@ -143,13 +143,12 @@ class MovenetEngine:
                     ],
                     fill=KEYPOINT_COLORS[i])
         img.save(file_path + f"/result_{frameId}_{detectionId}.bmp")
+        return img
 
     @staticmethod
     def get_pose(interpreter, resized_img):
         common.set_input(interpreter, resized_img)
         print('----INFERENCE TIME----')
-        print('Note: The first inference is slow because it includes',
-              'loading the model into Edge TPU memory.')
         for _ in range(1):
             start = time.perf_counter()
             interpreter.invoke()

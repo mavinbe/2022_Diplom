@@ -17,6 +17,10 @@ opt
 2. run detection and store result
 3. run pose and store result
 
+#### DONE
+1. Done
+2. Done
+
 ---
 
 ### 04 -- Mo 14. Feb
