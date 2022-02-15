@@ -5,6 +5,21 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Logs
 
+### 04 -- Mo 14. Feb
+
+#### Objects
+1. create an app that reads video and display it
+
+opt
+2. run detection and store result
+3. run pose and store result
+
+#### DONE
+
+1. took Yolo5 and just inserted movenet, for fast prototyping 
+
+---
+
 ### 03 -- Fr 11. Feb
 
 #### Objects
@@ -14,9 +29,9 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 opt
 3. create an app that reads video and display it
 
-#### DONE 
-
+#### DONE
 nothing finished, was not focused and later interrupted by familie
+
 ---
 
 ### 02 -- Do 04. Feb
