@@ -7,6 +7,17 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Logs
 
+### 06 -- Mi 16. Feb
+
+#### Objects
+1. apply kalman filter to smooth
+
+opt
+4. run detection and store result
+5. run pose and store result
+
+---
+
 ### 05 -- Di 15. Feb
 
 #### Objects
