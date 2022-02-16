@@ -60,8 +60,8 @@ def tracker1():
 
 # simulate robot movement
 N = 30
-sensor = PosSensor((0, 0), (2, .2), noise_std=R_std)
-sensor_ideal = PosSensor((0, 0), (2, .2), noise_std=0)
+sensor = PosSensor((0, 0), (2, 2), noise_std=R_std)
+sensor_ideal = PosSensor((0, 0), (2, 2), noise_std=0)
 
 ideal = np.array([sensor_ideal.read() for _ in range(N)])
 zs = np.array([sensor.read() for _ in range(N)])
@@ -69,7 +69,7 @@ zs = np.array([sensor.read() for _ in range(N)])
 # run filter
 robot_tracker = tracker1()
 mu, cov, _, _ = robot_tracker.batch_filter(zs)
-
+print(np.asarray(mu).astype(np.int16))
 # for x, P in zip(mu, cov):
 #     # covariance of x and y
 #     cov = np.array([[P[0, 0], P[2, 0]],
@@ -85,6 +85,7 @@ plot_measurements(zs[:, 0], zs[:, 1], None, 'r')
 plot_filter(ideal[:, 0], ideal[:, 1], None, 'g', "ideal")
 plt.legend(loc=2)
 plt.xlim(0, 20)
+plt.ylim(0, 20)
 
 plt.show()
 
