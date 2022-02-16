@@ -13,9 +13,11 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 1. apply kalman filter to smooth
 
 opt
-4. run detection and store result
-5. run pose and store result
+2.run detection and store result
+3. run pose and store result
 
+#### DONE
+1. nice results
 ---
 
 ### 05 -- Di 15. Feb
