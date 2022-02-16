@@ -81,7 +81,7 @@ mu, cov, _, _ = robot_tracker.batch_filter(zs)
 zs *= .3048  # convert to meters
 ideal *= .3048  # convert to meters
 plot_filter(mu[:, 0], mu[:, 2])
-plot_filter(zs[:, 0], zs[:, 1], None, 'r')
+plot_measurements(zs[:, 0], zs[:, 1], None, 'r')
 plot_filter(ideal[:, 0], ideal[:, 1], None, 'g', "ideal")
 plt.legend(loc=2)
 plt.xlim(0, 20)
