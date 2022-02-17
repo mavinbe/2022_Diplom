@@ -7,13 +7,28 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Logs
 
+### 07 -- Do 17. Feb
+
+#### Objects
+1. add 2. Order Filter
+2. implement view controll
+3. integrate smooter into view controll
+4. create physical controller model
+
+
+
+#### DONE
+1. Done (before i updated this file)
+
+---
+
 ### 06 -- Mi 16. Feb
 
 #### Objects
 1. apply kalman filter to smooth
 
 opt
-2.run detection and store result
+2. run detection and store result
 3. run pose and store result
 
 #### DONE
