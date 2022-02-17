@@ -25,9 +25,10 @@ class PosSensor(object):
 
     def read(self):
         self.count += 1
-        # if self.count == 40:
-        #     self.vel[1] *= 4
-        # print(self.vel)
+        if self.count == 40:
+            self.vel[1] = 8
+        if self.count == 80:
+            self.vel[1] = 1
         self.pos[0] += self.vel[0]
         self.pos[1] += self.vel[1]
 
@@ -40,7 +41,7 @@ class PosSensor(object):
 # Sensor Noise
 R_sensor = 20
 # Measurement Noise
-R_std = sqrt(1)
+R_std = sqrt(R_sensor)
 # Process Noise
 Q_std = 0.00001
 
@@ -63,7 +64,7 @@ fls.R = np.eye(2) * R_std ** 2
 fls.Q *= Q_std
 
 # simulate robot movement
-N = 100
+N = 500
 sensor = PosSensor((0, 0), (1, 1), noise_std=R_sensor)
 # zs = np.array([])
 # for _ in range(N):
