@@ -1,8 +1,9 @@
 # limit the number of cpus used by high performance libraries
 import os
+from math import sqrt
 
 import numpy
-from PIL import Image
+from PIL import Image, ImageDraw
 
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
@@ -42,13 +43,9 @@ from deep_sort.utils.parser import get_config
 from deep_sort.deep_sort import DeepSort
 
 sys.path.insert(0, './movenet')
-from movenet_pose_estimation import MovenetEngine
+from movenet_pose_estimation import MovenetEngine, NUM_KEYPOINTS, KEYPOINT_COLORS
 
-FILE = Path(__file__).resolve()
-ROOT = FILE.parents[0]  # yolov5 deepsort root directory
-if str(ROOT) not in sys.path:
-    sys.path.append(str(ROOT))  # add ROOT to PATH
-ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
+from Smoother.KalmanFixedLagSmooterFactorys import SecondOrderSmoother, FirstOrderSmoother
 
 
 def detect(opt):
@@ -126,6 +123,17 @@ def detect(opt):
     if pt and device.type != 'cpu':
         model(torch.zeros(1, 3, *imgsz).to(device).type_as(next(model.model.parameters())))  # warmup
     dt, seen = [0.0, 0.0, 0.0, 0.0], 0
+
+    R_std = 10
+    Q_std = 0.00001
+    lag_N = 8
+    kalman_order = 1
+    
+    fls = None
+    if kalman_order == 1:
+        fls = FirstOrderSmoother(R_std, Q_std, lag_N)
+    elif kalman_order == 2:
+        fls = SecondOrderSmoother(R_std, Q_std, lag_N)
     for frame_idx, (path, img, im0s, vid_cap, s) in enumerate(dataset):
         t1 = time_sync()
         img = torch.from_numpy(img).to(device)
@@ -197,11 +205,35 @@ def detect(opt):
                                          ]
                         cropped_image = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB)
                         cropped_image = Image.fromarray(cropped_image)
-                        result_image = movenet_engine.run(
+                        pose = movenet_engine.run(
                             cropped_image, frame_idx + 1, id)
-                        result_image = numpy.asarray(result_image)
-                        result_image = cv2.cvtColor(result_image, cv2.COLOR_RGB2BGR)
-                        im0[bboxes[1]:bboxes[3], bboxes[0]:bboxes[2]] = result_image
+                        print(pose)
+                        fls.smooth(pose[0, 0:2])
+                        x_smooth = numpy.array(fls.xSmooth)[:, 0]
+
+                        #print(pose)
+                        print(x_smooth)
+                        for i in range(0, NUM_KEYPOINTS):
+
+                            if pose[i][2] >= 0.2:
+
+                                absolute = (
+                                    int(pose[i][1]
+                                        + bboxes[0]),
+                                    int(pose[i][0]
+                                        + bboxes[1]))
+                                color = KEYPOINT_COLORS[i]
+                                cv2.circle(im0, absolute, 4, color, 1, cv2.LINE_AA)  # filled
+                        #for i in range(0, 4):
+                        if pose[0][2] >= 0.2:
+                            absolute = (
+                                int(x_smooth[0][1]
+                                    + bboxes[0]),
+                                int(x_smooth[0][0]
+                                    + bboxes[1]))
+                            color = KEYPOINT_COLORS[i]
+                            cv2.circle(im0, absolute, 4, (255, 0, 0), -1, cv2.LINE_AA)  # filled
+
                         c = int(cls)  # integer class
                         label = f'{id} {names[c]} {conf:.2f}'
                         annotator.box_label(bboxes, label, color=colors(c, True))

@@ -43,7 +43,7 @@ import os
 
 from matplotlib import cm
 
-_NUM_KEYPOINTS = 17
+NUM_KEYPOINTS = 17
 
 # Dictionary that maps from joint names to keypoint indices.
 KEYPOINT_DICT = {
@@ -67,7 +67,7 @@ KEYPOINT_DICT = {
 }
 
 KEYPOINT_COLORS = {
-    0: (255, 0, 0),
+    0: (100, 255, 0),
     1: (255, 255, 0),
     2: (255, 255, 0),
     3: (255, 0, 0),
@@ -98,10 +98,10 @@ class MovenetEngine:
         pose = self.get_pose(self.interpreter, resized_img)
         width, height = img.size
         pose_in_original_coordinates = self.transform_pose_to_orignal_coordinates(pose, width, height)
-        serialized_pose = self.serialize_pose_list(pose_in_original_coordinates)
-        self.write_to_result_file(serialized_pose)
-        img = self.draw_pose_and_save_img(img, pose, frameId, detectionId)
-        return img
+        # serialized_pose = self.serialize_pose_list(pose_in_original_coordinates)
+        # self.write_to_result_file(serialized_pose)
+        # img = self.draw_pose_and_save_img(img, pose, frameId, detectionId)
+        return pose_in_original_coordinates
 
     @staticmethod
     def write_to_result_file(serialized_pose):
@@ -124,7 +124,7 @@ class MovenetEngine:
     @staticmethod
     def transform_pose_to_orignal_coordinates(pose, width, height):
         pose_clone = pose.copy()
-        for i in range(0, _NUM_KEYPOINTS):
+        for i in range(0, NUM_KEYPOINTS):
             #print(f"Hello, {pose_clone[i][1]}. You are {pose[i][1]} {width}.")
             pose_clone[i][1] = round(pose[i][1] * width, 0)
             pose_clone[i][0] = round(pose[i][0] * height)
@@ -134,7 +134,7 @@ class MovenetEngine:
     def draw_pose_and_save_img(img, pose, frameId, detectionId):
         draw = ImageDraw.Draw(img)
         width, height = img.size
-        for i in range(0, _NUM_KEYPOINTS):
+        for i in range(0, NUM_KEYPOINTS):
             if pose[i][2] >= 0.2:
                 draw.ellipse(
                     xy=[
@@ -153,7 +153,7 @@ class MovenetEngine:
             start = time.perf_counter()
             interpreter.invoke()
             inference_time = time.perf_counter() - start
-            pose = common.output_tensor(interpreter, 0).copy().reshape(_NUM_KEYPOINTS, 3)
+            pose = common.output_tensor(interpreter, 0).copy().reshape(NUM_KEYPOINTS, 3)
             print('%.2f ms' % (inference_time * 1000))
 
         return pose
