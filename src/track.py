@@ -11,6 +11,13 @@ os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 
 import sys
+from pathlib import Path
+
+FILE = Path(__file__).resolve()
+ROOT = str(FILE.parents[0])+"/../Yolov5_DeepSort_Pytorch" # yolov5 deepsort root directory
+if str(ROOT) not in sys.path:
+    sys.path.append(str(ROOT))  # add ROOT to PATH
+ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 sys.path.insert(0, './Yolov5_DeepSort_Pytorch/yolov5')
 
 import argparse
