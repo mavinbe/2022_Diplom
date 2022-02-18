@@ -4,7 +4,7 @@ sys.path.append('/home/mavinbe/2021_Diplom/2022_Diplom')
 sys.path.append('/home/mavinbe/2021_Diplom/2021_Diplom_Lab/Kalman-and-Bayesian-Filters-in-Python')
 
 
-from src.Smoother.KalmanFixedLagSmooterFactorys import SecondOrderSmoother
+from src.Smoother.KalmanFixedLagSmooterFactorys import SecondOrderSmoother, ZeroOrderSmoother, FirstOrderSmoother
 
 from math import sqrt
 
@@ -49,7 +49,12 @@ R_std = sqrt(R_sensor)
 # Process Noise
 Q_std = 0.00001
 
-fls = SecondOrderSmoother(R_std, Q_std)
+fls = [
+    (ZeroOrderSmoother(R_std, Q_std,    8), 'r'),
+    (FirstOrderSmoother(R_std, Q_std,    8), 'g'),
+    (SecondOrderSmoother(R_std, Q_std, 8), 'b')
+]
+
 
 # simulate robot movement
 N = 500
@@ -65,21 +70,28 @@ sensor = PosSensor((0, 0), (1, 1), noise_std=R_sensor)
 s_read = np.array([sensor.read() for _ in range(N)])
 zs = s_read[:, 0, :]
 nom = s_read[:, 1, :]
-print(zs.shape)
-for z in zs:
-    fls.smooth(z)
 
-# kf_x, _, _, _ = kf.batch_filter(zs)
-x_smooth = np.array(fls.xSmooth)[:, 0]
 
-fls_res = abs(x_smooth - nom)
-print(f'standard deviation fixed-lag: {np.mean(fls_res):.3f}')
+def smooth_and_draw(zs, fls,  color):
+    for z in zs:
+        fls.smooth(z)
+    x_smooth = np.array(fls.xSmooth)[:, 0]
+    plot_filter(x_smooth[:, 0], x_smooth[:, 1], None, color, "fls")
+    fls_res = abs(x_smooth - nom)
+    print(f'standard deviation fixed-lag: {np.mean(fls_res):.3f}')
+
+
+for current_fls in fls:
+    (current_fls, color) = current_fls
+    smooth_and_draw(zs, current_fls, color)
+
+
 # kf_res = abs(kf_x[:, 0] - nom)
 
 
 # zs *= .3048
 plot_measurements(zs[:, 0], zs[:, 1], None, 'r')
-plot_filter(x_smooth[:, 0], x_smooth[:, 1], None, 'g', "fls")
+
 plot_filter(nom[:, 0], nom[:, 1], None, 'b', "nom")
 
 plt.legend(loc=1)

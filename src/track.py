@@ -45,7 +45,7 @@ from deep_sort.deep_sort import DeepSort
 sys.path.insert(0, './movenet')
 from movenet_pose_estimation import MovenetEngine, NUM_KEYPOINTS, KEYPOINT_COLORS
 
-from Smoother.KalmanFixedLagSmooterFactorys import SecondOrderSmoother, FirstOrderSmoother
+from Smoother.KalmanFixedLagSmooterFactorys import ZeroOrderSmoother, SecondOrderSmoother, FirstOrderSmoother
 
 
 def detect(opt):
@@ -124,16 +124,24 @@ def detect(opt):
         model(torch.zeros(1, 3, *imgsz).to(device).type_as(next(model.model.parameters())))  # warmup
     dt, seen = [0.0, 0.0, 0.0, 0.0], 0
 
-    R_std = 10
-    Q_std = 0.00001
-    lag_N = 8
-    kalman_order = 1
-    
-    fls = None
-    if kalman_order == 1:
-        fls = FirstOrderSmoother(R_std, Q_std, lag_N)
-    elif kalman_order == 2:
-        fls = SecondOrderSmoother(R_std, Q_std, lag_N)
+    # R_std = 10
+    # Q_std = 0.00001
+    # lag_N = 8
+    # kalman_order = 1
+    #
+    # fls = None
+    # if kalman_order == 1:
+    #     fls = FirstOrderSmoother(R_std, Q_std, lag_N)
+    # elif kalman_order == 2:
+    #     fls = SecondOrderSmoother(R_std, Q_std, lag_N)
+
+    fls = [
+        (ZeroOrderSmoother(10,      0.00001,    8), (255, 0, 0)),
+        (FirstOrderSmoother(10,      0.00001,    8), (0, 255, 0)),
+        #(FirstOrderSmoother(100,      0.00001,    8), (0, 0, 255))
+    ]
+
+
     for frame_idx, (path, img, im0s, vid_cap, s) in enumerate(dataset):
         t1 = time_sync()
         img = torch.from_numpy(img).to(device)
@@ -197,8 +205,6 @@ def detect(opt):
                         id = output[4]
                         cls = output[5]
 
-                        print(bboxes)
-                        print(numpy.shape(im0))
                         cropped_image = im0[
                                          bboxes[1]:bboxes[3],
                                          bboxes[0]:bboxes[2],
@@ -207,36 +213,48 @@ def detect(opt):
                         cropped_image = Image.fromarray(cropped_image)
                         pose = movenet_engine.run(
                             cropped_image, frame_idx + 1, id)
-                        print(pose)
-                        fls.smooth(pose[0, 0:2])
-                        x_smooth = numpy.array(fls.xSmooth)[:, 0]
 
-                        #print(pose)
-                        print(x_smooth)
-                        for i in range(0, NUM_KEYPOINTS):
+                        def smooth_and_draw(bboxes, fls, im0, pose, color):
 
-                            if pose[i][2] >= 0.2:
+                            # IDIOT, YOU MUST TRANSLATE THE POSE COORDINATE IN GLOBAL COORS
 
-                                absolute = (
-                                    int(pose[i][1]
-                                        + bboxes[0]),
-                                    int(pose[i][0]
-                                        + bboxes[1]))
-                                color = KEYPOINT_COLORS[i]
-                                cv2.circle(im0, absolute, 4, color, 1, cv2.LINE_AA)  # filled
-                        #for i in range(0, 4):
-                        if pose[0][2] >= 0.2:
+                            global_pose = [
+                                int(pose[0][1] + bboxes[0]),
+                                int(pose[0][0] + bboxes[1])]
+                            fls.smooth(pose[0, 0:2])
+                            x_smooth = numpy.array(fls.xSmooth)[-1:, 0]
+                            asd = numpy.array(fls.xSmooth)
+                            # print(asd.shape)
+                            # print(asd)
+                            # print(pose[0, 0:2])
+                            #print(pose)
                             absolute = (
                                 int(x_smooth[0][1]
                                     + bboxes[0]),
                                 int(x_smooth[0][0]
                                     + bboxes[1]))
-                            color = KEYPOINT_COLORS[i]
-                            cv2.circle(im0, absolute, 4, (255, 0, 0), -1, cv2.LINE_AA)  # filled
+                            cv2.circle(im0, absolute, 6, color, -1, cv2.LINE_AA)  # filled
+
+
+                        for current_fls in fls:
+                            (current_fls, color) = current_fls
+                            smooth_and_draw(bboxes, current_fls, im0, pose, color)
+
+                        for i in range(0, 1):
+                            #color = (255*pose[i][2], 0, 0) if pose[i][2] >= 0.2 else (0, 0, 255)
+                            absolute = (
+                                int(pose[i][1]
+                                    + bboxes[0]),
+                                int(pose[i][0]
+                                    + bboxes[1]))
+
+                            cv2.circle(im0, absolute, 10, (0,0,255), 3, cv2.LINE_AA)
+                        #for i in range(0, 4):
+
 
                         c = int(cls)  # integer class
                         label = f'{id} {names[c]} {conf:.2f}'
-                        annotator.box_label(bboxes, label, color=colors(c, True))
+                        #annotator.box_label(bboxes, label, color=colors(c, True))
 
 
                         if save_txt:
@@ -287,6 +305,8 @@ def detect(opt):
         print('Results saved to %s' % save_path)
         if platform == 'darwin':  # MacOS
             os.system('open ' + save_path)
+
+
 
 
 if __name__ == '__main__':
