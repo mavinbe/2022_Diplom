@@ -1,10 +1,10 @@
-from filterpy.kalman import FixedLagSmoother, KalmanFilter
-from filterpy.common import Q_discrete_white_noise
-
 import numpy as np
 
+from .fixed_lag_smoother import MyFixedLagSmoother
+
+
 def ZeroOrderSmoother(_R_std, _Q_std, _N):
-    fls = FixedLagSmoother(dim_x=2, dim_z=2, N=_N)
+    fls = MyFixedLagSmoother(dim_x=2, dim_z=2, N=_N)
     dt = 1.0  # time step
 
     fls.x = np.array([[0, 0]]).T
@@ -20,7 +20,7 @@ def ZeroOrderSmoother(_R_std, _Q_std, _N):
     return fls
 
 def FirstOrderSmoother(_R_std, _Q_std, _N):
-    fls = FixedLagSmoother(dim_x=4, dim_z=2, N=_N)
+    fls = MyFixedLagSmoother(dim_x=4, dim_z=2, N=_N)
     dt = 1.0  # time step
 
     fls.x = np.array([[0, 0, 0, 0]]).T
@@ -39,7 +39,7 @@ def FirstOrderSmoother(_R_std, _Q_std, _N):
     return fls
 
 def SecondOrderSmoother(_R_std, _Q_std, _N):
-    fls = FixedLagSmoother(dim_x=6, dim_z=2, N=_N)
+    fls = MyFixedLagSmoother(dim_x=6, dim_z=2, N=_N)
     dt = 1.0  # time step
 
     fls.x = np.array([[0, 0, 0, 0, 0, 0]]).T
