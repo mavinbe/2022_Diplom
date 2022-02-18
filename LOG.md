@@ -3,9 +3,23 @@
 This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Backlog
-- smoother pose results with kalman filter( ask arkadi)
+- refactor Track, to more modal design
 
 ## Logs
+
+### 08 -- Fr 18. Feb
+
+#### Objects
+1. implement view controll
+   1. with fixed zoom, just controlles by (x,y)
+2. integrate smooter into view controll
+3. create physical controller model
+4. fix smoother bugs:
+   1. add kalman smoother for every trackId
+   2. apply world coordinates to kalman filter
+
+
+#### DONE
 
 ### 07 -- Do 17. Feb
 
@@ -16,10 +30,11 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 4. create physical controller model
 
 
-
 #### DONE
 1. Done (before i updated this file)
 
+#### Reflection
+i was so obsessed to fix the kalman bad results that i didn't caught the objects 2.- 4.
 ---
 
 ### 06 -- Mi 16. Feb
