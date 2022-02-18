@@ -136,7 +136,7 @@ def detect(opt):
     #     fls = SecondOrderSmoother(R_std, Q_std, lag_N)
 
     fls = [
-        (ZeroOrderSmoother(10,      0.00001,    8), (255, 0, 0)),
+        #(ZeroOrderSmoother(10,      0.00001,    8), (255, 0, 0)),
         (FirstOrderSmoother(10,      0.00001,    8), (0, 255, 0)),
         #(FirstOrderSmoother(100,      0.00001,    8), (0, 0, 255))
     ]
@@ -196,7 +196,8 @@ def detect(opt):
                 outputs = deepsort.update(xywhs.cpu(), confs.cpu(), clss.cpu(), im0)
                 t5 = time_sync()
                 dt[3] += t5 - t4
-
+                print('-----------')
+                print(frame_idx)
                 # draw boxes for visualization
                 if len(outputs) > 0:
                     for j, (output, conf) in enumerate(zip(outputs, confs)):
@@ -204,6 +205,9 @@ def detect(opt):
                         bboxes = output[0:4]
                         id = output[4]
                         cls = output[5]
+
+                        if id != 1:
+                            continue
 
                         cropped_image = im0[
                                          bboxes[1]:bboxes[3],
@@ -222,6 +226,9 @@ def detect(opt):
                                 int(pose[0][1] + bboxes[0]),
                                 int(pose[0][0] + bboxes[1])]
                             fls.smooth(pose[0, 0:2])
+
+                            #if frame_idx > 10:
+                                #exit()
                             x_smooth = numpy.array(fls.xSmooth)[-1:, 0]
                             asd = numpy.array(fls.xSmooth)
                             # print(asd.shape)
@@ -248,13 +255,13 @@ def detect(opt):
                                 int(pose[i][0]
                                     + bboxes[1]))
 
-                            cv2.circle(im0, absolute, 10, (0,0,255), 3, cv2.LINE_AA)
+                            cv2.circle(im0, absolute, 10, (0, 0, 255), 3, cv2.LINE_AA)
                         #for i in range(0, 4):
 
 
                         c = int(cls)  # integer class
                         label = f'{id} {names[c]} {conf:.2f}'
-                        #annotator.box_label(bboxes, label, color=colors(c, True))
+                        annotator.box_label(bboxes, label, color=colors(c, True))
 
 
                         if save_txt:
