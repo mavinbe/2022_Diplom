@@ -3,9 +3,24 @@
 This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Backlog
+- try AlphaPose
 - refactor Track, to more modal design
+- create physical controller model
+- fix smoother bugs:
+   1. add kalman smoother for every trackId
+   2. apply world coordinates to kalman filter
+
 
 ## Logs
+
+### 09 -- Sa 19. Feb
+
+#### Objects
+1. try AlphaPose
+  
+#### DONE
+
+---
 
 ### 08 -- Fr 18. Feb
 
@@ -13,23 +28,25 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 1. implement view controll
    1. with fixed zoom, just controlles by (x,y)
 2. integrate smooter into view controll
-3. create physical controller model
-4. fix smoother bugs:
-   1. add kalman smoother for every trackId
-   2. apply world coordinates to kalman filter
+3. ~~create physical controller model~~
+4. ~~fix smoother bugs:~~
+   1. ~~add kalman smoother for every trackId~~
+   2. ~~apply world coordinates to kalman filter~~
 
 
 #### DONE
 1. DONE, uglq but works
 2. DONE
 
+---
+
 ### 07 -- Do 17. Feb
 
 #### Objects
 1. add 2. Order Filter
-2. implement view controll
-3. integrate smooter into view controll
-4. create physical controller model
+2. ~~implement view controll~~
+3. ~~integrate smooter into view controll~~
+4. ~~create physical controller model~~
 
 
 #### DONE
