@@ -1,1 +1,5 @@
 .idea
+**/__pycache__
+env/Yolov5_DeepSort_Pytorch/
+data/
+movenet/movenet_single_pose_lightning_ptq_edgetpu.tflite
