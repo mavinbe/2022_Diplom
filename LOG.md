@@ -3,7 +3,7 @@
 This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Backlog
-- try AlphaPose
+- try mediapipe
 - refactor Track, to more modal design
 - create physical controller model
 - fix smoother bugs:
@@ -16,9 +16,10 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 ### 09 -- Sa 19. Feb
 
 #### Objects
-1. try AlphaPose
+1. ~~try AlphaPose~~
   
 #### DONE
+1. DONE, was not so good, was not stable and just 8 fps
 
 ---
 
