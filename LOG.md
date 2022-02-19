@@ -20,6 +20,8 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 
 #### DONE
+1. DONE, uglq but works
+2. DONE
 
 ### 07 -- Do 17. Feb
 
