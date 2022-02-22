@@ -3,15 +3,27 @@
 This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Backlog
-- try mediapipe
 - refactor Track, to more modal design
 - create physical controller model
 - fix smoother bugs:
    1. add kalman smoother for every trackId
    2. apply world coordinates to kalman filter
+- write expressions
 
 
 ## Logs
+
+### 10 -- Mo 21. Feb
+
+#### Objects
+1. try mediapose
+   1. compile with gpu and test
+      1. compile opencv2 by hand
+  
+#### DONE
+1. DONE, was okay with 15fps aka 70ms runtime, maybe it will be better if it's compiled with GPU/Cuda support
+
+---
 
 ### 09 -- Sa 19. Feb
 
