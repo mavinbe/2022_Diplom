@@ -13,10 +13,26 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Logs
 
+### 11 -- Di 22. Feb
+
+#### Objects
+1. make a KW plan
+2. try mediapipe
+   1. compile with gpu and test example
+      1. compile opencv2 by hand
+      2. test example
+      3. compile python bindings and test
+      4. compare speed
+3. create basic app structure with or real code
+   1. pseudo code
+   2. define interfaces for modules
+
+---
+
 ### 10 -- Mo 21. Feb
 
 #### Objects
-1. try mediapose
+1. try mediapipe
    1. compile with gpu and test
       1. compile opencv2 by hand
   
