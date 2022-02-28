@@ -13,6 +13,15 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Logs
 
+
+
+### 13 -- Do 24. Feb
+### 12 -- Mi 23. Feb
+
+#### DONE
+destoyed my system, and ordered a new PC, with financial support by karin
+
+
 ### 11 -- Di 22. Feb
 
 #### Objects
@@ -26,6 +35,9 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 3. create basic app structure with or real code
    1. pseudo code
    2. define interfaces for modules
+
+#### DONE
+2. mediapipe compilation freezes my system, i was trying to fix it rest of the week
 
 ---
 
