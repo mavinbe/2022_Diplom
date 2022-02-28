@@ -13,7 +13,17 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Logs
 
+### 14 -- Mo 28. Feb
+#### Objects
+1. revert to ubuntu 20.04
+2. create basic app structure with or real code
+   1. pseudo code
+   2. define interfaces for modules
 
+#### DONE
+1. done
+
+---
 
 ### 13 -- Do 24. Feb
 ### 12 -- Mi 23. Feb
@@ -21,6 +31,7 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 #### DONE
 destoyed my system, and ordered a new PC, with financial support by karin
 
+---
 
 ### 11 -- Di 22. Feb
 
