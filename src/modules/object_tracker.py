@@ -117,23 +117,16 @@ class ObjectTracker:
 
         if pt and device.type != 'cpu':
             model(torch.zeros(1, 3, *imgsz).to(device).type_as(next(model.model.parameters())))  # warmup
-        dt, seen = [0.0, 0.0, 0.0, 0.0], 0
+
         for frame_idx, (path, img, im0s, vid_cap, s) in enumerate(dataset):
-            save_path, seen = self.inference_frame(dataset, deepsort, device, dt, frame_idx, half, im0s, img, model,
-                                                   names, opt, path, s, save_dir, save_txt, save_vid, seen, show_vid,
+            save_path = self.inference_frame(dataset, deepsort, device, frame_idx, half, im0s, img, model,
+                                                   names, opt, path, s, save_dir, save_txt, save_vid, show_vid,
                                                    txt_path, vid_cap, vid_path, vid_writer, webcam)
 
-        # Print results
-        t = tuple(x / seen * 1E3 for x in dt)  # speeds per image
-        LOGGER.info(f'Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS, %.1fms deep sort update \
-            per image at shape {(1, 3, *imgsz)}' % t)
-        if save_txt or save_vid:
-            print('Results saved to %s' % save_path)
-            if platform == 'darwin':  # MacOS
-                os.system('open ' + save_path)
 
-    def inference_frame(self, dataset, deepsort, device, dt, frame_idx, half, im0s, img, model, names, opt, path, s,
-                        save_dir, save_txt, save_vid, seen, show_vid, txt_path, vid_cap, vid_path, vid_writer, webcam):
+
+    def inference_frame(self, dataset, deepsort, device, frame_idx, half, im0s, img, model, names, opt, path, s,
+                        save_dir, save_txt, save_vid, show_vid, txt_path, vid_cap, vid_path, vid_writer, webcam):
         t1 = time_sync()
         img = torch.from_numpy(img).to(device)
         img = img.half() if half else img.float()  # uint8 to fp16/32
@@ -141,19 +134,15 @@ class ObjectTracker:
         if img.ndimension() == 3:
             img = img.unsqueeze(0)
         t2 = time_sync()
-        dt[0] += t2 - t1
         # Inference
         visualize = increment_path(save_dir / Path(path).stem, mkdir=True) if opt.visualize else False
         pred = model(img, augment=opt.augment, visualize=visualize)
         t3 = time_sync()
-        dt[1] += t3 - t2
         # Apply NMS
         pred = non_max_suppression(pred, opt.conf_thres, opt.iou_thres, opt.classes, opt.agnostic_nms,
                                    max_det=opt.max_det)
-        dt[2] += time_sync() - t3
         # Process detections
         for i, det in enumerate(pred):  # detections per image
-            seen += 1
             if webcam:  # batch_size >= 1
                 p, im0, _ = path[i], im0s[i].copy(), dataset.count
                 s += f'{i}: '
@@ -184,7 +173,6 @@ class ObjectTracker:
                 t4 = time_sync()
                 outputs = deepsort.update(xywhs.cpu(), confs.cpu(), clss.cpu(), im0)
                 t5 = time_sync()
-                dt[3] += t5 - t4
 
                 # draw boxes for visualization
                 if len(outputs) > 0:
@@ -237,7 +225,7 @@ class ObjectTracker:
 
                     vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                 vid_writer.write(im0)
-        return save_path, seen
+        return save_path
 
 
 if __name__ == '__main__':
