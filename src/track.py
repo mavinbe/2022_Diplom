@@ -15,11 +15,12 @@ import sys
 from pathlib import Path
 
 FILE = Path(__file__).resolve()
-ROOT = str(FILE.parents[0])+"/../Yolov5_DeepSort_Pytorch" # yolov5 deepsort root directory
+PATH = str(FILE.parents[0])
+ROOT = PATH+"/../Yolov5_DeepSort_Pytorch" # yolov5 deepsort root directory
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
-sys.path.insert(0, './Yolov5_DeepSort_Pytorch/yolov5')
+sys.path.insert(0, str(ROOT) + '/yolov5')
 
 import argparse
 import os
@@ -67,7 +68,7 @@ def detect(opt):
                         )
 
     # Initialize
-    
+
     half &= device.type != 'cpu'  # half precision only supported on CUDA
 
     # The MOT16 evaluation runs multiple inference streams in parallel, each one writing to
