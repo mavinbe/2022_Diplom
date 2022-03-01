@@ -1,5 +1,4 @@
 # limit the number of cpus used by high performance libraries
-import math
 import os
 from math import sqrt
 
@@ -137,12 +136,12 @@ def detect(opt):
     #     fls = SecondOrderSmoother(R_std, Q_std, lag_N)
 
     fls = [
-        (FirstOrderSmoother(10,      0.00001,    8), (255, 0, 0)),
+        #(ZeroOrderSmoother(10,      0.00001,    8), (255, 0, 0)),
         (FirstOrderSmoother(10,      0.00001,    8), (0, 255, 0)),
         #(FirstOrderSmoother(100,      0.00001,    8), (0, 0, 255))
     ]
 
-    hightest_id = 0
+
     for frame_idx, (path, img, im0s, vid_cap, s) in enumerate(dataset):
         t1 = time_sync()
         img = torch.from_numpy(img).to(device)
@@ -177,7 +176,7 @@ def detect(opt):
             s += '%gx%g ' % img.shape[2:]  # print string
 
             annotator = Annotator(im0, line_width=2, pil=not ascii)
-            absolute = None
+
             if det is not None and len(det):
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_coords(
@@ -207,9 +206,8 @@ def detect(opt):
                         id = output[4]
                         cls = output[5]
 
-                        hightest_id = 1
-                        if id != hightest_id:
-                            continue
+                        # if id != 1:
+                        #     continue
 
                         cropped_image = im0[
                                          bboxes[1]:bboxes[3],
@@ -220,14 +218,14 @@ def detect(opt):
                         pose = movenet_engine.run(
                             cropped_image, frame_idx + 1, id)
 
-                        def smooth_and_draw(bboxes, fls, im0, pose_keypoint, color):
+                        def smooth_and_draw(bboxes, fls, im0, pose, color):
 
                             # IDIOT, YOU MUST TRANSLATE THE POSE COORDINATE IN GLOBAL COORS
 
                             global_pose = [
-                                int(pose_keypoint[1] + bboxes[0]),
-                                int(pose_keypoint[0] + bboxes[1])]
-                            fls.smooth(pose_keypoint)
+                                int(pose[0][1] + bboxes[0]),
+                                int(pose[0][0] + bboxes[1])]
+                            fls.smooth(pose[0, 0:2])
 
                             #if frame_idx > 10:
                                 #exit()
@@ -242,45 +240,28 @@ def detect(opt):
                                     + bboxes[0]),
                                 int(x_smooth[0][0]
                                     + bboxes[1]))
-                            #cv2.circle(im0, absolute, 6, color, -1, cv2.LINE_AA)  # filled
-                            return numpy.asarray(absolute)
-
-                        (current_fls, color) = fls[0]
-                        absolute_nose = smooth_and_draw(bboxes, current_fls, im0, pose[0, 0:2], color)
-
-                        (current_fls, color) = fls[1]
-                        absolute_right_ankle = smooth_and_draw(bboxes, current_fls, im0, pose[16, 0:2], color)
-                        absolute_right_ankle = [absolute_right_ankle[0]-80, absolute_right_ankle[1]]
+                            cv2.circle(im0, absolute, 6, color, -1, cv2.LINE_AA)  # filled
 
 
-                        absolute_distance = absolute_right_ankle - absolute_nose
-                        if frame_idx < 30:
-                            absolute = absolute_nose
-                        elif frame_idx < 95:
-                            absolute =  absolute_nose + absolute_distance /2 + absolute_distance * math.sin((frame_idx-45)/10) /2
-                        else:
-                            absolute = absolute_nose
+                        for current_fls in fls:
+                            (current_fls, color) = current_fls
+                            smooth_and_draw(bboxes, current_fls, im0, pose, color)
 
-
-                        print(frame_idx)
-                        absolute = numpy.asarray(absolute).astype(numpy.int16)
-
-                        #for i in range(0, 1):
+                        for i in range(0, 1):
                             #color = (255*pose[i][2], 0, 0) if pose[i][2] >= 0.2 else (0, 0, 255)
-                            # absolute = (
-                            #     int(pose[i][1]
-                            #         + bboxes[0]),
-                            #     int(pose[i][0]
-                            #         + bboxes[1]))
+                            absolute = (
+                                int(pose[i][1]
+                                    + bboxes[0]),
+                                int(pose[i][0]
+                                    + bboxes[1]))
 
-                            #cv2.circle(im0, absolute, 10, (0, 0, 255), 3, cv2.LINE_AA)
-
+                            cv2.circle(im0, absolute, 10, (0, 0, 255), 3, cv2.LINE_AA)
                         #for i in range(0, 4):
 
 
                         c = int(cls)  # integer class
                         label = f'{id} {names[c]} {conf:.2f}'
-                        #annotator.box_label(bboxes, label, color=colors(c, True))
+                        annotator.box_label(bboxes, label, color=colors(c, True))
 
 
                         if save_txt:
@@ -302,11 +283,6 @@ def detect(opt):
 
             # Stream results
             im0 = annotator.result()
-            if absolute is not None:
-                absolute = (max(0,absolute[0]-120), max(0,absolute[1]-120))
-                im0_height, im0_width, _ = im0.shape
-                zoom = im0[absolute[1]:absolute[1]+int(im0_height/7), absolute[0]:absolute[0]+int(im0_width/7)]
-                im0 = cv2.resize(zoom, (im0_width, im0_height), interpolation=cv2.INTER_CUBIC)
             if show_vid:
                 cv2.imshow(str(p), im0)
                 if cv2.waitKey(1) == ord('q'):  # q to quit
