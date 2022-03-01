@@ -119,112 +119,9 @@ class ObjectTracker:
             model(torch.zeros(1, 3, *imgsz).to(device).type_as(next(model.model.parameters())))  # warmup
         dt, seen = [0.0, 0.0, 0.0, 0.0], 0
         for frame_idx, (path, img, im0s, vid_cap, s) in enumerate(dataset):
-            t1 = time_sync()
-            img = torch.from_numpy(img).to(device)
-            img = img.half() if half else img.float()  # uint8 to fp16/32
-            img /= 255.0  # 0 - 255 to 0.0 - 1.0
-            if img.ndimension() == 3:
-                img = img.unsqueeze(0)
-            t2 = time_sync()
-            dt[0] += t2 - t1
-
-            # Inference
-            visualize = increment_path(save_dir / Path(path).stem, mkdir=True) if opt.visualize else False
-            pred = model(img, augment=opt.augment, visualize=visualize)
-            t3 = time_sync()
-            dt[1] += t3 - t2
-
-            # Apply NMS
-            pred = non_max_suppression(pred, opt.conf_thres, opt.iou_thres, opt.classes, opt.agnostic_nms,
-                                       max_det=opt.max_det)
-            dt[2] += time_sync() - t3
-
-            # Process detections
-            for i, det in enumerate(pred):  # detections per image
-                seen += 1
-                if webcam:  # batch_size >= 1
-                    p, im0, _ = path[i], im0s[i].copy(), dataset.count
-                    s += f'{i}: '
-                else:
-                    p, im0, _ = path, im0s.copy(), getattr(dataset, 'frame', 0)
-
-                p = Path(p)  # to Path
-                save_path = str(save_dir / p.name)  # im.jpg, vid.mp4, ...
-                s += '%gx%g ' % img.shape[2:]  # print string
-
-                annotator = Annotator(im0, line_width=2, pil=not ascii)
-
-                if det is not None and len(det):
-                    # Rescale boxes from img_size to im0 size
-                    det[:, :4] = scale_coords(
-                        img.shape[2:], det[:, :4], im0.shape).round()
-
-                    # Print results
-                    for c in det[:, -1].unique():
-                        n = (det[:, -1] == c).sum()  # detections per class
-                        s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
-
-                    xywhs = xyxy2xywh(det[:, 0:4])
-                    confs = det[:, 4]
-                    clss = det[:, 5]
-
-                    # pass detections to deepsort
-                    t4 = time_sync()
-                    outputs = deepsort.update(xywhs.cpu(), confs.cpu(), clss.cpu(), im0)
-                    t5 = time_sync()
-                    dt[3] += t5 - t4
-
-                    # draw boxes for visualization
-                    if len(outputs) > 0:
-                        for j, (output, conf) in enumerate(zip(outputs, confs)):
-
-                            bboxes = output[0:4]
-                            id = output[4]
-                            cls = output[5]
-
-                            c = int(cls)  # integer class
-                            label = f'{id} {names[c]} {conf:.2f}'
-                            annotator.box_label(bboxes, label, color=colors(c, True))
-
-                            if save_txt:
-                                # to MOT format
-                                bbox_left = output[0]
-                                bbox_top = output[1]
-                                bbox_w = output[2] - output[0]
-                                bbox_h = output[3] - output[1]
-                                # Write MOT compliant results to file
-                                with open(txt_path, 'a') as f:
-                                    f.write(('%g ' * 10 + '\n') % (frame_idx + 1, id, bbox_left,  # MOT format
-                                                                   bbox_top, bbox_w, bbox_h, -1, -1, -1, -1))
-
-                    LOGGER.info(f'{s}Done. YOLO:({t3 - t2:.3f}s), DeepSort:({t5 - t4:.3f}s)')
-
-                else:
-                    deepsort.increment_ages()
-                    LOGGER.info('No detections')
-
-                # Stream results
-                im0 = annotator.result()
-                if show_vid:
-                    cv2.imshow(str(p), im0)
-                    if cv2.waitKey(1) == ord('q'):  # q to quit
-                        raise StopIteration
-
-                # Save results (image with detections)
-                if save_vid:
-                    if vid_path != save_path:  # new video
-                        vid_path = save_path
-                        if isinstance(vid_writer, cv2.VideoWriter):
-                            vid_writer.release()  # release previous video writer
-                        if vid_cap:  # video
-                            fps = vid_cap.get(cv2.CAP_PROP_FPS)
-                            w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-                            h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                        else:  # stream
-                            fps, w, h = 30, im0.shape[1], im0.shape[0]
-
-                        vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
-                    vid_writer.write(im0)
+            save_path, seen = self.inference_frame(dataset, deepsort, device, dt, frame_idx, half, im0s, img, model,
+                                                   names, opt, path, s, save_dir, save_txt, save_vid, seen, show_vid,
+                                                   txt_path, vid_cap, vid_path, vid_writer, webcam)
 
         # Print results
         t = tuple(x / seen * 1E3 for x in dt)  # speeds per image
@@ -234,6 +131,113 @@ class ObjectTracker:
             print('Results saved to %s' % save_path)
             if platform == 'darwin':  # MacOS
                 os.system('open ' + save_path)
+
+    def inference_frame(self, dataset, deepsort, device, dt, frame_idx, half, im0s, img, model, names, opt, path, s,
+                        save_dir, save_txt, save_vid, seen, show_vid, txt_path, vid_cap, vid_path, vid_writer, webcam):
+        t1 = time_sync()
+        img = torch.from_numpy(img).to(device)
+        img = img.half() if half else img.float()  # uint8 to fp16/32
+        img /= 255.0  # 0 - 255 to 0.0 - 1.0
+        if img.ndimension() == 3:
+            img = img.unsqueeze(0)
+        t2 = time_sync()
+        dt[0] += t2 - t1
+        # Inference
+        visualize = increment_path(save_dir / Path(path).stem, mkdir=True) if opt.visualize else False
+        pred = model(img, augment=opt.augment, visualize=visualize)
+        t3 = time_sync()
+        dt[1] += t3 - t2
+        # Apply NMS
+        pred = non_max_suppression(pred, opt.conf_thres, opt.iou_thres, opt.classes, opt.agnostic_nms,
+                                   max_det=opt.max_det)
+        dt[2] += time_sync() - t3
+        # Process detections
+        for i, det in enumerate(pred):  # detections per image
+            seen += 1
+            if webcam:  # batch_size >= 1
+                p, im0, _ = path[i], im0s[i].copy(), dataset.count
+                s += f'{i}: '
+            else:
+                p, im0, _ = path, im0s.copy(), getattr(dataset, 'frame', 0)
+
+            p = Path(p)  # to Path
+            save_path = str(save_dir / p.name)  # im.jpg, vid.mp4, ...
+            s += '%gx%g ' % img.shape[2:]  # print string
+
+            annotator = Annotator(im0, line_width=2, pil=not ascii)
+
+            if det is not None and len(det):
+                # Rescale boxes from img_size to im0 size
+                det[:, :4] = scale_coords(
+                    img.shape[2:], det[:, :4], im0.shape).round()
+
+                # Print results
+                for c in det[:, -1].unique():
+                    n = (det[:, -1] == c).sum()  # detections per class
+                    s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
+
+                xywhs = xyxy2xywh(det[:, 0:4])
+                confs = det[:, 4]
+                clss = det[:, 5]
+
+                # pass detections to deepsort
+                t4 = time_sync()
+                outputs = deepsort.update(xywhs.cpu(), confs.cpu(), clss.cpu(), im0)
+                t5 = time_sync()
+                dt[3] += t5 - t4
+
+                # draw boxes for visualization
+                if len(outputs) > 0:
+                    for j, (output, conf) in enumerate(zip(outputs, confs)):
+
+                        bboxes = output[0:4]
+                        id = output[4]
+                        cls = output[5]
+
+                        c = int(cls)  # integer class
+                        label = f'{id} {names[c]} {conf:.2f}'
+                        annotator.box_label(bboxes, label, color=colors(c, True))
+
+                        if save_txt:
+                            # to MOT format
+                            bbox_left = output[0]
+                            bbox_top = output[1]
+                            bbox_w = output[2] - output[0]
+                            bbox_h = output[3] - output[1]
+                            # Write MOT compliant results to file
+                            with open(txt_path, 'a') as f:
+                                f.write(('%g ' * 10 + '\n') % (frame_idx + 1, id, bbox_left,  # MOT format
+                                                               bbox_top, bbox_w, bbox_h, -1, -1, -1, -1))
+
+                LOGGER.info(f'{s}Done. YOLO:({t3 - t2:.3f}s), DeepSort:({t5 - t4:.3f}s)')
+
+            else:
+                deepsort.increment_ages()
+                LOGGER.info('No detections')
+
+            # Stream results
+            im0 = annotator.result()
+            if show_vid:
+                cv2.imshow(str(p), im0)
+                if cv2.waitKey(1) == ord('q'):  # q to quit
+                    raise StopIteration
+
+            # Save results (image with detections)
+            if save_vid:
+                if vid_path != save_path:  # new video
+                    vid_path = save_path
+                    if isinstance(vid_writer, cv2.VideoWriter):
+                        vid_writer.release()  # release previous video writer
+                    if vid_cap:  # video
+                        fps = vid_cap.get(cv2.CAP_PROP_FPS)
+                        w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                        h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                    else:  # stream
+                        fps, w, h = 30, im0.shape[1], im0.shape[0]
+
+                    vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
+                vid_writer.write(im0)
+        return save_path, seen
 
 
 if __name__ == '__main__':
