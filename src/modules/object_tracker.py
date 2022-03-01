@@ -50,8 +50,6 @@ class ObjectTracker:
         out, source, yolo_model, deep_sort_model, show_vid, save_vid, save_txt, imgsz, evaluate, half, project, name, exist_ok = \
             opt.output, opt.source, opt.yolo_model, opt.deep_sort_model, opt.show_vid, opt.save_vid, \
             opt.save_txt, opt.imgsz, opt.evaluate, opt.half, opt.project, opt.name, opt.exist_ok
-        webcam = source == '0' or source.startswith(
-            'rtsp') or source.startswith('http') or source.endswith('.txt')
 
         device = select_device(opt.device)
         # initialize deepsort
@@ -68,18 +66,6 @@ class ObjectTracker:
 
         half &= device.type != 'cpu'  # half precision only supported on CUDA
 
-        # The MOT16 evaluation runs multiple inference streams in parallel, each one writing to
-        # its own .txt file. Hence, in that case, the output folder is not restored
-        if not evaluate:
-            if os.path.exists(out):
-                pass
-                shutil.rmtree(out)  # delete output folder
-            os.makedirs(out)  # make new output folder
-
-        # Directories
-        save_dir = increment_path(Path(project) / name, exist_ok=exist_ok)  # increment run
-        save_dir.mkdir(parents=True, exist_ok=True)  # make dir
-
         # Load model
         device = select_device(device)
         model = DetectMultiBackend(yolo_model, device=device, dnn=opt.dnn)
@@ -91,42 +77,23 @@ class ObjectTracker:
         if pt:
             model.model.half() if half else model.model.float()
 
-        # Set Dataloader
-        vid_path, vid_writer = None, None
         # Check if environment supports image displays
         if show_vid:
             show_vid = check_imshow()
 
         # Dataloader
-        if webcam:
-            show_vid = check_imshow()
-            cudnn.benchmark = True  # set True to speed up constant image size inference
-            dataset = LoadStreams(source, img_size=imgsz, stride=stride, auto=pt and not jit)
-            bs = len(dataset)  # batch_size
-        else:
-            dataset = LoadImages(source, img_size=imgsz, stride=stride, auto=pt and not jit)
-            bs = 1  # batch_size
-        vid_path, vid_writer = [None] * bs, [None] * bs
-
-        # Get names and colors
-        names = model.module.names if hasattr(model, 'module') else model.names
-
-        # extract what is in between the last '/' and last '.'
-        txt_file_name = source.split('/')[-1].split('.')[0]
-        txt_path = str(Path(save_dir)) + '/' + txt_file_name + '.txt'
+        cudnn.benchmark = True  # set True to speed up constant image size inference
+        dataset = LoadImages(source, img_size=imgsz, stride=stride, auto=pt and not jit)
 
         if pt and device.type != 'cpu':
             model(torch.zeros(1, 3, *imgsz).to(device).type_as(next(model.model.parameters())))  # warmup
 
         for frame_idx, (path, img, im0s, vid_cap, s) in enumerate(dataset):
-            save_path = self.inference_frame(dataset, deepsort, device, frame_idx, half, im0s, img, model,
-                                                   names, opt, path, s, save_dir, save_txt, save_vid, show_vid,
-                                                   txt_path, vid_cap, vid_path, vid_writer, webcam)
+            save_path = self.inference_frame(deepsort, device, half, im0s, img, model, opt, show_vid)
 
 
 
-    def inference_frame(self, dataset, deepsort, device, frame_idx, half, im0s, img, model, names, opt, path, s,
-                        save_dir, save_txt, save_vid, show_vid, txt_path, vid_cap, vid_path, vid_writer, webcam):
+    def inference_frame(self, deepsort, device, half, im0s, img, model, opt, show_vid):
         t1 = time_sync()
         img = torch.from_numpy(img).to(device)
         img = img.half() if half else img.float()  # uint8 to fp16/32
@@ -135,24 +102,15 @@ class ObjectTracker:
             img = img.unsqueeze(0)
         t2 = time_sync()
         # Inference
-        visualize = increment_path(save_dir / Path(path).stem, mkdir=True) if opt.visualize else False
-        pred = model(img, augment=opt.augment, visualize=visualize)
+        pred = model(img, augment=opt.augment, visualize=False)
         t3 = time_sync()
         # Apply NMS
         pred = non_max_suppression(pred, opt.conf_thres, opt.iou_thres, opt.classes, opt.agnostic_nms,
                                    max_det=opt.max_det)
         # Process detections
         for i, det in enumerate(pred):  # detections per image
-            if webcam:  # batch_size >= 1
-                p, im0, _ = path[i], im0s[i].copy(), dataset.count
-                s += f'{i}: '
-            else:
-                p, im0, _ = path, im0s.copy(), getattr(dataset, 'frame', 0)
 
-            p = Path(p)  # to Path
-            save_path = str(save_dir / p.name)  # im.jpg, vid.mp4, ...
-            s += '%gx%g ' % img.shape[2:]  # print string
-
+            im0 = im0s.copy()
             annotator = Annotator(im0, line_width=2, pil=not ascii)
 
             if det is not None and len(det):
@@ -163,7 +121,7 @@ class ObjectTracker:
                 # Print results
                 for c in det[:, -1].unique():
                     n = (det[:, -1] == c).sum()  # detections per class
-                    s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
+
 
                 xywhs = xyxy2xywh(det[:, 0:4])
                 confs = det[:, 4]
@@ -183,21 +141,11 @@ class ObjectTracker:
                         cls = output[5]
 
                         c = int(cls)  # integer class
-                        label = f'{id} {names[c]} {conf:.2f}'
+                        label = f'{id}  {conf:.2f}'
                         annotator.box_label(bboxes, label, color=colors(c, True))
 
-                        if save_txt:
-                            # to MOT format
-                            bbox_left = output[0]
-                            bbox_top = output[1]
-                            bbox_w = output[2] - output[0]
-                            bbox_h = output[3] - output[1]
-                            # Write MOT compliant results to file
-                            with open(txt_path, 'a') as f:
-                                f.write(('%g ' * 10 + '\n') % (frame_idx + 1, id, bbox_left,  # MOT format
-                                                               bbox_top, bbox_w, bbox_h, -1, -1, -1, -1))
 
-                LOGGER.info(f'{s}Done. YOLO:({t3 - t2:.3f}s), DeepSort:({t5 - t4:.3f}s)')
+                LOGGER.info(f'Done. YOLO:({t3 - t2:.3f}s), DeepSort:({t5 - t4:.3f}s)')
 
             else:
                 deepsort.increment_ages()
@@ -206,26 +154,10 @@ class ObjectTracker:
             # Stream results
             im0 = annotator.result()
             if show_vid:
-                cv2.imshow(str(p), im0)
+                cv2.imshow(str("video"), im0)
                 if cv2.waitKey(1) == ord('q'):  # q to quit
                     raise StopIteration
-
-            # Save results (image with detections)
-            if save_vid:
-                if vid_path != save_path:  # new video
-                    vid_path = save_path
-                    if isinstance(vid_writer, cv2.VideoWriter):
-                        vid_writer.release()  # release previous video writer
-                    if vid_cap:  # video
-                        fps = vid_cap.get(cv2.CAP_PROP_FPS)
-                        w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-                        h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                    else:  # stream
-                        fps, w, h = 30, im0.shape[1], im0.shape[0]
-
-                    vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
-                vid_writer.write(im0)
-        return save_path
+        return
 
 
 if __name__ == '__main__':
