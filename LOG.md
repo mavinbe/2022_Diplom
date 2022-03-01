@@ -16,11 +16,16 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 ### 15 -- Di 01. Maerz
 #### Objects
 1. create basic app structure with or real code
-   1. pseudo code
-   2. define interfaces for modules
+   1. reduce object detection to essence
+      1. clean up
+      2. make it OOP
+   2. pseudo code
+   3. define interfaces for modules
 
 #### DONE
-
+1. part
+   1. part
+      1. DONE
 
 ---
 
