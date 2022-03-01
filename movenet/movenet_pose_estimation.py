@@ -147,14 +147,13 @@ class MovenetEngine:
 
     @staticmethod
     def get_pose(interpreter, resized_img):
-        common.set_input(interpreter, resized_img)
         print('----INFERENCE TIME----')
-        for _ in range(1):
-            start = time.perf_counter()
-            interpreter.invoke()
-            inference_time = time.perf_counter() - start
-            pose = common.output_tensor(interpreter, 0).copy().reshape(NUM_KEYPOINTS, 3)
-            print('%.2f ms' % (inference_time * 1000))
+        common.set_input(interpreter, resized_img)
+        start = time.perf_counter()
+        interpreter.invoke()
+        pose = common.output_tensor(interpreter, 0).copy().reshape(NUM_KEYPOINTS, 3)
+        inference_time = time.perf_counter() - start
+        print('%.2f ms' % (inference_time * 1000))
 
         return pose
 
