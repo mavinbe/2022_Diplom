@@ -82,16 +82,17 @@ class ObjectTracker:
         if pt and device.type != 'cpu':
             model(torch.zeros(1, 3, *imgsz).to(device).type_as(next(model.model.parameters())))  # warmup
 
+
+        self.dataset = LoadImages(img_size=imgsz, stride=stride, auto=pt and not jit)
         self.device = device
         self.half = half
         self.model = model
         self.show_vid = show_vid
-        self.dataset_info = dict(img_size=imgsz, stride=stride, auto=pt and not jit)
 
-    def get_dataset_info(self):
-        return self.dataset_info
 
-    def inference_frame(self, im0s, img):
+    def inference_frame(self, im0s):
+
+        img = self.dataset.prepare_image_for_model(im0s)
         t1 = time_sync()
         img = torch.from_numpy(img).to(self.device)
         img = img.half() if self.half else img.float()  # uint8 to fp16/32
@@ -105,7 +106,7 @@ class ObjectTracker:
         # Apply NMS
         pred = non_max_suppression(pred, self.conf_thres, self.iou_thres, self.classes, self.agnostic_nms,
                                    max_det=self.max_det)
-        result_list = []
+        result_dict = {}
         # Process detections
         for i, det in enumerate(pred):  # detections per image
 
@@ -139,18 +140,18 @@ class ObjectTracker:
                         id = output[4]
                         cls = output[5]
 
-                        result_list.append({'bboxes': bboxes, 'detection_id': id})
+                        result_dict[id] = bboxes
 
                         c = int(cls)  # integer class
                         label = f'{id}  {conf:.2f}'
                         annotator.box_label(bboxes, label, color=colors(c, True))
                 t6 = time_sync()
 
-                LOGGER.info(f'inference_frame:({(t6 - t1)*1000:.3f}ms) prepare::({(t2 - t1)*1000:.3f}ms), YOLO::({(t3 - t2)*1000:.3f}ms), diverses::({(t4 - t3)*1000:.3f}ms), DeepSort::({(t5 - t4)*1000:.3f}ms), draw::({(t6 - t5)*1000:.3f}ms)')
+                #LOGGER.info(f'inference_frame:({(t6 - t1)*1000:.3f}ms) prepare::({(t2 - t1)*1000:.3f}ms), YOLO::({(t3 - t2)*1000:.3f}ms), diverses::({(t4 - t3)*1000:.3f}ms), DeepSort::({(t5 - t4)*1000:.3f}ms), draw::({(t6 - t5)*1000:.3f}ms)')
 
             else:
                 self.deepsort.increment_ages()
-                LOGGER.info('No detections')
+                #LOGGER.info('No detections')
 
             # Stream results
             im0 = annotator.result()
@@ -158,15 +159,13 @@ class ObjectTracker:
                 cv2.imshow(str("video"), im0)
                 if cv2.waitKey(1) == ord('q'):  # q to quit
                     raise StopIteration
-        return result_list
+        return result_dict
 
 
 if __name__ == '__main__':
 
     with torch.no_grad():
         object_tracker = ObjectTracker()
-        dataset_info = object_tracker.get_dataset_info()
-        dataset = LoadImages(**dataset_info)
 
         cap = cv2.VideoCapture("/home/mavinbe/2021_Diplom/2022_Diplom/data/05_20211102141647/output015.mp4")
         while cap.isOpened():
@@ -178,9 +177,9 @@ if __name__ == '__main__':
                 # If loading a video, use 'break' instead of 'continue'.
                 continue
 
-            img_for_model = dataset.prepare_image_for_model(im0)
+
             t3 = time_sync()
-            result_list = object_tracker.inference_frame(im0, img_for_model)
+            result_list = object_tracker.inference_frame(im0)
             t4 = time_sync()
             print(result_list)
             #LOGGER.info(f'DONE on prepare:({(t4 - t1)*1000:.3f}ms)    read:({(t2 - t1)*1000:.3f}ms), prepare:({(t3 - t2)*1000:.3f}ms), inference:({(t4 - t3)*1000:.3f}ms)')
