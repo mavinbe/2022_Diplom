@@ -13,6 +13,22 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Logs
 
+### 16 -- Mi 02. Maerz
+#### Objects
+1. create basic app structure with or real code
+   1. reduce object detection to essence
+      1. make it OOP
+   2. make object detection in memory double
+   3. make pose estimation class
+   4. make pose estimation in memory double
+   5. make camera position class
+   6. pseudo code
+   7. define interfaces for modules
+
+
+
+---
+
 ### 15 -- Di 01. Maerz
 #### Objects
 1. create basic app structure with or real code
