@@ -35,15 +35,15 @@ ROOT = FILE.parents[0]  # yolov5 deepsort root directory
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 class ObjectTracker:
-    def __init__(self, yolo_model="Yolov5_DeepSort_Pytorch/yolov5/weights/crowdhuman_yolov5m.pt", deep_sort_model = "osnet_x0_25", imgsz=[640, 640], half=True, show_vid=True):
-        device = 0
+    def __init__(self, yolo_model="Yolov5_DeepSort_Pytorch/yolov5/weights/crowdhuman_yolov5m.pt", deep_sort_model = "osnet_x0_25", imgsz=[640, 640], half=False, show_vid=True):
+        device = ""
         dnn = True
         config_deepsort = "Yolov5_DeepSort_Pytorch/deep_sort/configs/deep_sort.yaml"
-        self.augment = True
+        self.augment = False
         self.conf_thres = 0.3
         self.iou_thres = 0.5
         self.classes = [0]
-        self.agnostic_nms = True
+        self.agnostic_nms = False
         self.max_det = 1000
 
         device = select_device(device)
