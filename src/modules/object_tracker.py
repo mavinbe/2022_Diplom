@@ -135,9 +135,9 @@ class ObjectTracker:
                         c = int(cls)  # integer class
                         label = f'{id}  {conf:.2f}'
                         annotator.box_label(bboxes, label, color=colors(c, True))
+                t6 = time_sync()
 
-
-                LOGGER.info(f'Done. YOLO:({t3 - t2:.3f}s), DeepSort:({t5 - t4:.3f}s)')
+                LOGGER.info(f'inference_frame:({(t6 - t1)*1000:.3f}ms) prepare::({(t2 - t1)*1000:.3f}ms), YOLO::({(t3 - t2)*1000:.3f}ms), diverses::({(t4 - t3)*1000:.3f}ms), DeepSort::({(t5 - t4)*1000:.3f}ms), draw::({(t6 - t5)*1000:.3f}ms)')
 
             else:
                 self.deepsort.increment_ages()
@@ -188,7 +188,7 @@ if __name__ == '__main__':
         dataset_info = object_tracker.get_dataset_info()
         dataset = LoadImages(**dataset_info)
 
-        cap = cv2.VideoCapture("/home/mavinbe/2021_Diplom/2022_Diplom/data/05_20211102141647/output020.mp4")
+        cap = cv2.VideoCapture("/home/mavinbe/2021_Diplom/2022_Diplom/data/05_20211102141647/output015.mp4")
         while cap.isOpened():
             t1 = time_sync()
             success, im0 = cap.read()
