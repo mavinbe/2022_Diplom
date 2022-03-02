@@ -46,7 +46,7 @@ if str(ROOT) not in sys.path:
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 class ObjectTracker:
-    def detect(self, opt):
+    def __init__(self, opt):
         out, source, yolo_model, deep_sort_model, show_vid, save_vid, save_txt, imgsz, evaluate, half, project, name, exist_ok = \
             opt.output, opt.source, opt.yolo_model, opt.deep_sort_model, opt.show_vid, opt.save_vid, \
             opt.save_txt, opt.imgsz, opt.evaluate, opt.half, opt.project, opt.name, opt.exist_ok
@@ -55,7 +55,7 @@ class ObjectTracker:
         # initialize deepsort
         cfg = get_config()
         cfg.merge_from_file(opt.config_deepsort)
-        deepsort = DeepSort(deep_sort_model,
+        self.deepsort = DeepSort(deep_sort_model,
                             device,
                             max_dist=cfg.DEEPSORT.MAX_DIST,
                             max_iou_distance=cfg.DEEPSORT.MAX_IOU_DISTANCE,
@@ -83,26 +83,31 @@ class ObjectTracker:
 
         # Dataloader
         cudnn.benchmark = True  # set True to speed up constant image size inference
-        dataset = LoadImages(source, img_size=imgsz, stride=stride, auto=pt and not jit)
+        self.dataset = LoadImages(source, img_size=imgsz, stride=stride, auto=pt and not jit)
 
         if pt and device.type != 'cpu':
             model(torch.zeros(1, 3, *imgsz).to(device).type_as(next(model.model.parameters())))  # warmup
 
-        for frame_idx, (path, img, im0s, vid_cap, s) in enumerate(dataset):
-            save_path = self.inference_frame(deepsort, device, half, im0s, img, model, opt, show_vid)
+        self.device = device
+        self.half = half
+        self.model = model
+        self.show_vid = show_vid
 
 
 
-    def inference_frame(self, deepsort, device, half, im0s, img, model, opt, show_vid):
+    def get_dataset(self):
+        return self.dataset
+
+    def inference_frame(self, im0s, img, opt):
         t1 = time_sync()
-        img = torch.from_numpy(img).to(device)
-        img = img.half() if half else img.float()  # uint8 to fp16/32
+        img = torch.from_numpy(img).to(self.device)
+        img = img.half() if self.half else img.float()  # uint8 to fp16/32
         img /= 255.0  # 0 - 255 to 0.0 - 1.0
         if img.ndimension() == 3:
             img = img.unsqueeze(0)
         t2 = time_sync()
         # Inference
-        pred = model(img, augment=opt.augment, visualize=False)
+        pred = self.model(img, augment=opt.augment, visualize=False)
         t3 = time_sync()
         # Apply NMS
         pred = non_max_suppression(pred, opt.conf_thres, opt.iou_thres, opt.classes, opt.agnostic_nms,
@@ -129,7 +134,7 @@ class ObjectTracker:
 
                 # pass detections to deepsort
                 t4 = time_sync()
-                outputs = deepsort.update(xywhs.cpu(), confs.cpu(), clss.cpu(), im0)
+                outputs = self.deepsort.update(xywhs.cpu(), confs.cpu(), clss.cpu(), im0)
                 t5 = time_sync()
 
                 # draw boxes for visualization
@@ -148,12 +153,12 @@ class ObjectTracker:
                 LOGGER.info(f'Done. YOLO:({t3 - t2:.3f}s), DeepSort:({t5 - t4:.3f}s)')
 
             else:
-                deepsort.increment_ages()
+                self.deepsort.increment_ages()
                 LOGGER.info('No detections')
 
             # Stream results
             im0 = annotator.result()
-            if show_vid:
+            if self.show_vid:
                 cv2.imshow(str("video"), im0)
                 if cv2.waitKey(1) == ord('q'):  # q to quit
                     raise StopIteration
@@ -192,5 +197,7 @@ if __name__ == '__main__':
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
 
     with torch.no_grad():
-        object_tracker = ObjectTracker()
-        object_tracker.detect(opt)
+        object_tracker = ObjectTracker(opt)
+        for frame_idx, (path, img, im0s, vid_cap, s) in enumerate(object_tracker.get_dataset()):
+            save_path = object_tracker.inference_frame(im0s, img, opt)
+
