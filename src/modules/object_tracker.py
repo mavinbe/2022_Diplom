@@ -80,7 +80,7 @@ class ObjectTracker:
         self.half = half
         self.model = model
         self.show_vid = show_vid
-        self.dataset_info = {'img_size':imgsz, 'stride':stride, 'auto':pt and not jit}
+        self.dataset_info = dict(img_size=imgsz, stride=stride, auto=pt and not jit)
 
     def get_dataset_info(self):
         return self.dataset_info
