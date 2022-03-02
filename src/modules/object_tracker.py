@@ -8,15 +8,6 @@ os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 
 import sys
-from pathlib import Path
-
-FILE = Path(__file__).resolve()
-PATH = str(FILE.parents[0])
-ROOT = PATH+"/../../Yolov5_DeepSort_Pytorch" # yolov5 deepsort root directory
-if str(ROOT) not in sys.path:
-    sys.path.append(str(ROOT))  # add ROOT to PATH
-ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
-sys.path.insert(0, str(ROOT) + '/yolov5')
 
 import argparse
 import os
@@ -41,8 +32,6 @@ from deep_sort.deep_sort import DeepSort
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # yolov5 deepsort root directory
-if str(ROOT) not in sys.path:
-    sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 class ObjectTracker:
