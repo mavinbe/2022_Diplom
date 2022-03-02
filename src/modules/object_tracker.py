@@ -72,7 +72,6 @@ class ObjectTracker:
 
         # Dataloader
         cudnn.benchmark = True  # set True to speed up constant image size inference
-        self.dataset = LoadImages(source, img_size=imgsz, stride=stride, auto=pt and not jit)
 
         if pt and device.type != 'cpu':
             model(torch.zeros(1, 3, *imgsz).to(device).type_as(next(model.model.parameters())))  # warmup
@@ -81,11 +80,10 @@ class ObjectTracker:
         self.half = half
         self.model = model
         self.show_vid = show_vid
+        self.dataset_info = {'img_size':imgsz, 'stride':stride, 'auto':pt and not jit}
 
-
-
-    def get_dataset(self):
-        return self.dataset
+    def get_dataset_info(self):
+        return self.dataset_info
 
     def inference_frame(self, im0s, img, opt):
         t1 = time_sync()
@@ -187,9 +185,23 @@ if __name__ == '__main__':
 
     with torch.no_grad():
         object_tracker = ObjectTracker(opt)
-        dataset = object_tracker.get_dataset()
-        for frame_idx, (img, im0s) in enumerate(dataset):
-            img_for_model = dataset.prepare_image_for_model(im0s)
+        dataset_info = object_tracker.get_dataset_info()
+        dataset = LoadImages(**dataset_info)
 
-            save_path = object_tracker.inference_frame(im0s, img_for_model, opt)
+        cap = cv2.VideoCapture("/home/mavinbe/2021_Diplom/2022_Diplom/data/05_20211102141647/output020.mp4")
+        while cap.isOpened():
+            t1 = time_sync()
+            success, im0 = cap.read()
+            t2 = time_sync()
+            if not success:
+                print("Ignoring empty camera frame.")
+                # If loading a video, use 'break' instead of 'continue'.
+                continue
 
+            img_for_model = dataset.prepare_image_for_model(im0)
+            t3 = time_sync()
+            object_tracker.inference_frame(im0, img_for_model, opt)
+            t4 = time_sync()
+            #LOGGER.info(f'DONE on prepare:({(t4 - t1)*1000:.3f}ms)    read:({(t2 - t1)*1000:.3f}ms), prepare:({(t3 - t2)*1000:.3f}ms), inference:({(t4 - t3)*1000:.3f}ms)')
+
+    cap.release()
