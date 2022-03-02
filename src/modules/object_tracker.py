@@ -35,15 +35,21 @@ ROOT = FILE.parents[0]  # yolov5 deepsort root directory
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 class ObjectTracker:
-    def __init__(self, opt):
-        out, source, yolo_model, deep_sort_model, show_vid, save_vid, save_txt, imgsz, evaluate, half, project, name, exist_ok = \
-            opt.output, opt.source, opt.yolo_model, opt.deep_sort_model, opt.show_vid, opt.save_vid, \
-            opt.save_txt, opt.imgsz, opt.evaluate, opt.half, opt.project, opt.name, opt.exist_ok
+    def __init__(self, yolo_model="Yolov5_DeepSort_Pytorch/yolov5/weights/crowdhuman_yolov5m.pt", deep_sort_model = "osnet_x0_25", imgsz=[640, 640], half=True, show_vid=True):
+        device = 0
+        dnn = True
+        config_deepsort = "Yolov5_DeepSort_Pytorch/deep_sort/configs/deep_sort.yaml"
+        self.augment = True
+        self.conf_thres = 0.3
+        self.iou_thres = 0.5
+        self.classes = [0]
+        self.agnostic_nms = True
+        self.max_det = 1000
 
-        device = select_device(opt.device)
+        device = select_device(device)
         # initialize deepsort
         cfg = get_config()
-        cfg.merge_from_file(opt.config_deepsort)
+        cfg.merge_from_file(config_deepsort)
         self.deepsort = DeepSort(deep_sort_model,
                             device,
                             max_dist=cfg.DEEPSORT.MAX_DIST,
@@ -57,7 +63,7 @@ class ObjectTracker:
 
         # Load model
         device = select_device(device)
-        model = DetectMultiBackend(yolo_model, device=device, dnn=opt.dnn)
+        model = DetectMultiBackend(yolo_model, device=device, dnn=dnn)
         stride, names, pt, jit, _ = model.stride, model.names, model.pt, model.jit, model.onnx
         imgsz = check_img_size(imgsz, s=stride)  # check image size
 
@@ -85,7 +91,7 @@ class ObjectTracker:
     def get_dataset_info(self):
         return self.dataset_info
 
-    def inference_frame(self, im0s, img, opt):
+    def inference_frame(self, im0s, img):
         t1 = time_sync()
         img = torch.from_numpy(img).to(self.device)
         img = img.half() if self.half else img.float()  # uint8 to fp16/32
@@ -94,11 +100,11 @@ class ObjectTracker:
             img = img.unsqueeze(0)
         t2 = time_sync()
         # Inference
-        pred = self.model(img, augment=opt.augment, visualize=False)
+        pred = self.model(img, augment=self.augment, visualize=False)
         t3 = time_sync()
         # Apply NMS
-        pred = non_max_suppression(pred, opt.conf_thres, opt.iou_thres, opt.classes, opt.agnostic_nms,
-                                   max_det=opt.max_det)
+        pred = non_max_suppression(pred, self.conf_thres, self.iou_thres, self.classes, self.agnostic_nms,
+                                   max_det=self.max_det)
         result_list = []
         # Process detections
         for i, det in enumerate(pred):  # detections per image
@@ -156,38 +162,9 @@ class ObjectTracker:
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--yolo_model', nargs='+', type=str, default='yolov5m.pt', help='model.pt path(s)')
-    parser.add_argument('--deep_sort_model', type=str, default='osnet_x0_25')
-    parser.add_argument('--source', type=str, default='0', help='source')  # file/folder, 0 for webcam
-    parser.add_argument('--output', type=str, default='inference/output', help='output folder')  # output folder
-    parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=[640], help='inference size h,w')
-    parser.add_argument('--conf-thres', type=float, default=0.3, help='object confidence threshold')
-    parser.add_argument('--iou-thres', type=float, default=0.5, help='IOU threshold for NMS')
-    parser.add_argument('--fourcc', type=str, default='mp4v', help='output video codec (verify ffmpeg support)')
-    parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
-    parser.add_argument('--show-vid', action='store_true', help='display tracking video results')
-    parser.add_argument('--save-vid', action='store_true', help='save video tracking results')
-    parser.add_argument('--save-txt', action='store_true', help='save MOT compliant results to *.txt')
-    # class 0 is person, 1 is bycicle, 2 is car... 79 is oven
-    parser.add_argument('--classes', nargs='+', type=int, help='filter by class: --class 0, or --class 16 17')
-    parser.add_argument('--agnostic-nms', action='store_true', help='class-agnostic NMS')
-    parser.add_argument('--augment', action='store_true', help='augmented inference')
-    parser.add_argument('--evaluate', action='store_true', help='augmented inference')
-    parser.add_argument("--config_deepsort", type=str,
-                        default="Yolov5_DeepSort_Pytorch/deep_sort/configs/deep_sort.yaml")
-    parser.add_argument("--half", action="store_true", help="use FP16 half-precision inference")
-    parser.add_argument('--visualize', action='store_true', help='visualize features')
-    parser.add_argument('--max-det', type=int, default=1000, help='maximum detection per image')
-    parser.add_argument('--dnn', action='store_true', help='use OpenCV DNN for ONNX inference')
-    parser.add_argument('--project', default=ROOT / 'runs/track', help='save results to project/name')
-    parser.add_argument('--name', default='exp', help='save results to project/name')
-    parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
-    opt = parser.parse_args()
-    opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
 
     with torch.no_grad():
-        object_tracker = ObjectTracker(opt)
+        object_tracker = ObjectTracker()
         dataset_info = object_tracker.get_dataset_info()
         dataset = LoadImages(**dataset_info)
 
@@ -203,7 +180,7 @@ if __name__ == '__main__':
 
             img_for_model = dataset.prepare_image_for_model(im0)
             t3 = time_sync()
-            result_list = object_tracker.inference_frame(im0, img_for_model, opt)
+            result_list = object_tracker.inference_frame(im0, img_for_model)
             t4 = time_sync()
             print(result_list)
             #LOGGER.info(f'DONE on prepare:({(t4 - t1)*1000:.3f}ms)    read:({(t2 - t1)*1000:.3f}ms), prepare:({(t3 - t2)*1000:.3f}ms), inference:({(t4 - t3)*1000:.3f}ms)')
