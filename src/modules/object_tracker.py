@@ -187,6 +187,9 @@ if __name__ == '__main__':
 
     with torch.no_grad():
         object_tracker = ObjectTracker(opt)
-        for frame_idx, (path, img, im0s, vid_cap, s) in enumerate(object_tracker.get_dataset()):
-            save_path = object_tracker.inference_frame(im0s, img, opt)
+        dataset = object_tracker.get_dataset()
+        for frame_idx, (img, im0s) in enumerate(dataset):
+            img_for_model = dataset.prepare_image_for_model(im0s)
+
+            save_path = object_tracker.inference_frame(im0s, img_for_model, opt)
 
