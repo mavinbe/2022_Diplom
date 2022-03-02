@@ -99,6 +99,7 @@ class ObjectTracker:
         # Apply NMS
         pred = non_max_suppression(pred, opt.conf_thres, opt.iou_thres, opt.classes, opt.agnostic_nms,
                                    max_det=opt.max_det)
+        result_list = []
         # Process detections
         for i, det in enumerate(pred):  # detections per image
 
@@ -132,6 +133,8 @@ class ObjectTracker:
                         id = output[4]
                         cls = output[5]
 
+                        result_list.append({'bboxes': bboxes, 'detection_id': id})
+
                         c = int(cls)  # integer class
                         label = f'{id}  {conf:.2f}'
                         annotator.box_label(bboxes, label, color=colors(c, True))
@@ -149,7 +152,7 @@ class ObjectTracker:
                 cv2.imshow(str("video"), im0)
                 if cv2.waitKey(1) == ord('q'):  # q to quit
                     raise StopIteration
-        return
+        return result_list
 
 
 if __name__ == '__main__':
@@ -200,8 +203,9 @@ if __name__ == '__main__':
 
             img_for_model = dataset.prepare_image_for_model(im0)
             t3 = time_sync()
-            object_tracker.inference_frame(im0, img_for_model, opt)
+            result_list = object_tracker.inference_frame(im0, img_for_model, opt)
             t4 = time_sync()
+            print(result_list)
             #LOGGER.info(f'DONE on prepare:({(t4 - t1)*1000:.3f}ms)    read:({(t2 - t1)*1000:.3f}ms), prepare:({(t3 - t2)*1000:.3f}ms), inference:({(t4 - t3)*1000:.3f}ms)')
 
     cap.release()

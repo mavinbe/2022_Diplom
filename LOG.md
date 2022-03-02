@@ -25,8 +25,11 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
    6. pseudo code
    7. define interfaces for modules
 
-
-
+#### DONE 
+1. part
+   1. part
+      1. DONE
+   
 ---
 
 ### 15 -- Di 01. Maerz
