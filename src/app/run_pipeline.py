@@ -9,7 +9,7 @@ from yolov5.utils.torch_utils import time_sync
 
 PoseLandmark = mp.solutions.pose.PoseLandmark
 
-
+import imageio
 
 
 def calculate_newest_track_id():
@@ -24,8 +24,10 @@ def translate_local_to_global_coords(pose_dict, global_x, global_y):
 
     return pose_dict
 
-def zoom(img, zoom_factor, center):
+def zoom(img, zoom_factor, center=None):
     height, width, _ = image.shape
+    if center is None:
+        center = (width / 2 , height / 2)
     x_top = int(center[0] - width / zoom_factor / 2)
     x_bottom = int(center[0] + width / zoom_factor / 2)
     y_left = int(center[1] - height / zoom_factor / 2)
@@ -35,10 +37,10 @@ def zoom(img, zoom_factor, center):
 
 
 
-def run():
+def run(handle_image):
     global t1, success, image, t2, object_detection_dict
     img_stream = cv2.VideoCapture("/home/mavinbe/2021_Diplom/2022_Diplom/data/05_20211102141647/output014.mp4")
-    with PoseDetector(show_vid=True) as pose_detector:
+    with PoseDetector(show_vid=False) as pose_detector:
 
         object_tracker = ObjectTracker(show_vid=False)
 
@@ -85,11 +87,24 @@ def run():
                 else:
                     print("No Nose")
 
-                cv2.imshow("asd", image)
+                handle_image(image)
             t4 = time_sync()
 
             # LOGGER.info(f'DONE on hole :({(t4 - t1)*1000:.3f}ms)    read_image:({(t2 - t1)*1000:.3f}ms), object_track:({(t3 - t2)*1000:.3f}ms), pose_detect:({(t4 - t3)*1000:.3f}ms)')
     img_stream.release()
 
+
+def show_image(image):
+    cv2.imshow("asd", image)
+    cv2.waitKey(1)
+
+
 if __name__ == '__main__':
-    run()
+    images = []
+    try:
+        run(show_image)
+    finally:
+        rezied_images = []
+        for image in images:
+            rezied_images.append(cv2.resize(image, None, fx=0.2, fy=0.2, interpolation=cv2.INTER_NEAREST))
+        imageio.mimsave('./docu.gif', rezied_images)
