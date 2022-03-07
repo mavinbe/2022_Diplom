@@ -15,6 +15,9 @@ import imageio
 def calculate_newest_track_id():
     return max(object_detection_dict.keys())
 
+def calculate_oldest_track_id():
+    return min(object_detection_dict.keys())
+
 
 def translate_local_to_global_coords(pose_dict, global_x, global_y):
     pose_dict = pose_dict.copy()
@@ -28,13 +31,19 @@ def zoom(img, zoom_factor, center=None):
     height, width, _ = image.shape
     if center is None:
         center = (width / 2 , height / 2)
-    x_top = int(center[0] - width / zoom_factor / 2)
-    x_bottom = int(center[0] + width / zoom_factor / 2)
-    y_left = int(center[1] - height / zoom_factor / 2)
-    y_right = int(center[1] + height / zoom_factor / 2)
-    img = img[y_left:y_right, x_top:x_bottom]
-    return cv2.resize(img, None, fx=zoom_factor, fy=zoom_factor, interpolation=cv2.INTER_NEAREST)
+    x_left = int(center[0] - width / zoom_factor / 2)
+    x_right = int(center[0] + width / zoom_factor / 2)
+    y_top = int(center[1] - height / zoom_factor / 2)
+    y_bottom = int(center[1] + height / zoom_factor / 2)
+    img = img[y_top:y_bottom, x_left:x_right]
+    try:
 
+        img = cv2.resize(img, None, fx=zoom_factor, fy=zoom_factor, interpolation=cv2.INTER_NEAREST)
+    except:
+        print(f'[{x_left}:{x_right},{y_top}:{y_bottom}]')
+        print(img.shape)
+
+    return  img
 
 
 def run(handle_image):
@@ -58,8 +67,9 @@ def run(handle_image):
             t3 = time_sync()
 
             if len(object_detection_dict) > 0:
-                newest_track_id = calculate_newest_track_id()
-                detection_which_to_pose_detect = object_detection_dict[newest_track_id]
+                track_id_to_track = calculate_oldest_track_id()
+                detection_which_to_pose_detect = object_detection_dict[track_id_to_track]
+                print(detection_which_to_pose_detect)
                 cropped_image = image[detection_which_to_pose_detect[1]:detection_which_to_pose_detect[3],
                                 detection_which_to_pose_detect[0]:detection_which_to_pose_detect[2]]
                 pose_detect_dict = pose_detector.inference_frame(cropped_image)
@@ -100,11 +110,5 @@ def show_image(image):
 
 
 if __name__ == '__main__':
-    images = []
-    try:
-        run(show_image)
-    finally:
-        rezied_images = []
-        for image in images:
-            rezied_images.append(cv2.resize(image, None, fx=0.2, fy=0.2, interpolation=cv2.INTER_NEAREST))
-        imageio.mimsave('./docu.gif', rezied_images)
+
+    run(show_image)
