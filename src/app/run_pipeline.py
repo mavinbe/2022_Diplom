@@ -9,7 +9,7 @@ from yolov5.utils.torch_utils import time_sync
 
 PoseLandmark = mp.solutions.pose.PoseLandmark
 
-img_stream = cv2.VideoCapture("/home/mavinbe/2021_Diplom/2022_Diplom/data/05_20211102141647/output014.mp4")
+
 
 
 def calculate_newest_track_id():
@@ -34,51 +34,62 @@ def zoom(img, zoom_factor, center):
     return cv2.resize(img, None, fx=zoom_factor, fy=zoom_factor, interpolation=cv2.INTER_NEAREST)
 
 
-with PoseDetector(show_vid=True) as pose_detector:
 
-    object_tracker = ObjectTracker(show_vid=False)
+def run():
+    global t1, success, image, t2, object_detection_dict
+    img_stream = cv2.VideoCapture("/home/mavinbe/2021_Diplom/2022_Diplom/data/05_20211102141647/output014.mp4")
+    with PoseDetector(show_vid=True) as pose_detector:
 
-    while img_stream.isOpened():
-        t1 = time_sync()
+        object_tracker = ObjectTracker(show_vid=False)
 
-        success, image = img_stream.read()
-        t2 = time_sync()
+        while img_stream.isOpened():
+            t1 = time_sync()
 
-        if not success:
-            print("Ignoring empty camera frame.")
-            # If loading a video, use 'break' instead of 'continue'.
-            continue
-        object_detection_dict = object_tracker.inference_frame(image)
-        t3 = time_sync()
+            success, image = img_stream.read()
+            t2 = time_sync()
 
-        if len(object_detection_dict) > 0:
-            newest_track_id = calculate_newest_track_id()
-            detection_which_to_pose_detect = object_detection_dict[newest_track_id]
-            cropped_image = image[detection_which_to_pose_detect[1]:detection_which_to_pose_detect[3], detection_which_to_pose_detect[0]:detection_which_to_pose_detect[2]]
-            pose_detect_dict = pose_detector.inference_frame(cropped_image)
-            pose_detect_dict = translate_local_to_global_coords(pose_detect_dict, detection_which_to_pose_detect[0], detection_which_to_pose_detect[1])
-            if PoseLandmark.NOSE in pose_detect_dict and PoseLandmark.LEFT_EYE in pose_detect_dict and PoseLandmark.RIGHT_EYE in pose_detect_dict:
-                print("LEFT " + str(pose_detect_dict[PoseLandmark.NOSE]['z'] - pose_detect_dict[PoseLandmark.LEFT_EYE]['z']) + "\t\t" + str(pose_detect_dict[PoseLandmark.NOSE]['z'] - pose_detect_dict[PoseLandmark.RIGHT_EYE]['z']))
-                # cv2.circle(image, (pose_detect_dict[PoseLandmark.NOSE]['x'], pose_detect_dict[PoseLandmark.NOSE]['y']),
-                #            5,
-                #            (0, 0, 255), 2)
-                # cv2.circle(image,
-                #            (pose_detect_dict[PoseLandmark.LEFT_EYE]['x'], pose_detect_dict[PoseLandmark.LEFT_EYE]['y']),
-                #            4,
-                #            (0, 255, 0), 2)
-                # cv2.circle(image,
-                #            (pose_detect_dict[PoseLandmark.RIGHT_EYE]['x'], pose_detect_dict[PoseLandmark.RIGHT_EYE]['y']),
-                #            4,
-                #            (0, 255, 0), 2)
-                image = zoom(image,40 , (pose_detect_dict[PoseLandmark.NOSE]['x'],pose_detect_dict[PoseLandmark.NOSE]['y']))
+            if not success:
+                print("Ignoring empty camera frame.")
+                # If loading a video, use 'break' instead of 'continue'.
+                continue
+            object_detection_dict = object_tracker.inference_frame(image)
+            t3 = time_sync()
 
-            else:
-                print("No Nose")
+            if len(object_detection_dict) > 0:
+                newest_track_id = calculate_newest_track_id()
+                detection_which_to_pose_detect = object_detection_dict[newest_track_id]
+                cropped_image = image[detection_which_to_pose_detect[1]:detection_which_to_pose_detect[3],
+                                detection_which_to_pose_detect[0]:detection_which_to_pose_detect[2]]
+                pose_detect_dict = pose_detector.inference_frame(cropped_image)
+                pose_detect_dict = translate_local_to_global_coords(pose_detect_dict, detection_which_to_pose_detect[0],
+                                                                    detection_which_to_pose_detect[1])
+                if PoseLandmark.NOSE in pose_detect_dict and PoseLandmark.LEFT_EYE in pose_detect_dict and PoseLandmark.RIGHT_EYE in pose_detect_dict:
+                    print("LEFT " + str(
+                        pose_detect_dict[PoseLandmark.NOSE]['z'] - pose_detect_dict[PoseLandmark.LEFT_EYE][
+                            'z']) + "\t\t" + str(
+                        pose_detect_dict[PoseLandmark.NOSE]['z'] - pose_detect_dict[PoseLandmark.RIGHT_EYE]['z']))
+                    # cv2.circle(image, (pose_detect_dict[PoseLandmark.NOSE]['x'], pose_detect_dict[PoseLandmark.NOSE]['y']),
+                    #            5,
+                    #            (0, 0, 255), 2)
+                    # cv2.circle(image,
+                    #            (pose_detect_dict[PoseLandmark.LEFT_EYE]['x'], pose_detect_dict[PoseLandmark.LEFT_EYE]['y']),
+                    #            4,
+                    #            (0, 255, 0), 2)
+                    # cv2.circle(image,
+                    #            (pose_detect_dict[PoseLandmark.RIGHT_EYE]['x'], pose_detect_dict[PoseLandmark.RIGHT_EYE]['y']),
+                    #            4,
+                    #            (0, 255, 0), 2)
+                    image = zoom(image, 40,
+                                 (pose_detect_dict[PoseLandmark.NOSE]['x'], pose_detect_dict[PoseLandmark.NOSE]['y']))
 
+                else:
+                    print("No Nose")
 
-            cv2.imshow("asd", image)
-        t4 = time_sync()
+                cv2.imshow("asd", image)
+            t4 = time_sync()
 
-        #LOGGER.info(f'DONE on hole :({(t4 - t1)*1000:.3f}ms)    read_image:({(t2 - t1)*1000:.3f}ms), object_track:({(t3 - t2)*1000:.3f}ms), pose_detect:({(t4 - t3)*1000:.3f}ms)')
+            # LOGGER.info(f'DONE on hole :({(t4 - t1)*1000:.3f}ms)    read_image:({(t2 - t1)*1000:.3f}ms), object_track:({(t3 - t2)*1000:.3f}ms), pose_detect:({(t4 - t3)*1000:.3f}ms)')
+    img_stream.release()
 
-img_stream.release()
+if __name__ == '__main__':
+    run()
