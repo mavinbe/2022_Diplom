@@ -33,7 +33,7 @@ class PoseDetector:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.pose.__exit__()
+        self.pose.__exit__(exc_type, exc_val, exc_tb)
 
     def inference_frame(self, image):
         start = time.perf_counter()
