@@ -8,6 +8,7 @@ from mediapipe.framework.formats import detection_pb2
 from mediapipe.framework.formats import location_data_pb2
 from mediapipe.framework.formats import landmark_pb2
 
+from utils.general import check_imshow
 from yolov5.utils.torch_utils import time_sync
 
 mp_drawing = mp.solutions.drawing_utils
@@ -16,7 +17,12 @@ mp_pose = mp.solutions.pose
 
 
 class PoseDetector:
-    def __init__(self):
+    def __init__(self, show_vid=False):
+        # Check if environment supports image displays
+        if show_vid:
+            show_vid = check_imshow()
+        self.show_vid = show_vid
+
         self.pose = mp_pose.Pose(
             model_complexity=1,
             min_detection_confidence=0.5,
@@ -56,10 +62,13 @@ class PoseDetector:
               result_dict[idx] = {'x': landmark.x * width, 'y': landmark.y * height, 'visibility': landmark.visibility}
               #print(type(landmark))
 
-        # Flip the image horizontally for a selfie-view display.
-        #cv2.imshow('MediaPipe Pose', cv2.flip(image, 1))
-        cv2.imshow('MediaPipe Pose', image)
-        inference_time = time.perf_counter() - start
+
+        if self.show_vid:
+            cv2.imshow('MediaPipe Pose', image)
+            if cv2.waitKey(1) == ord('q'):  # q to quit
+                exit()
+
+        #inference_time = time.perf_counter() - start
         #print('%.2f ms' % (inference_time * 1000))
 
         return result_dict
@@ -84,7 +93,7 @@ if __name__ == '__main__':
             result_list = pose_detector.inference_frame(im0)
             t4 = time_sync()
             print(result_list)
-            if cv2.waitKey(5) & 0xFF == 27:
+            if cv2.waitKey(1) == ord('q'):  # q to quit
                 break
             # LOGGER.info(f'DONE on prepare:({(t4 - t1)*1000:.3f}ms)    read:({(t2 - t1)*1000:.3f}ms), prepare:({(t3 - t2)*1000:.3f}ms), inference:({(t4 - t3)*1000:.3f}ms)')
 

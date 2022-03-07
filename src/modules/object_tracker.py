@@ -35,7 +35,7 @@ ROOT = FILE.parents[0]  # yolov5 deepsort root directory
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 class ObjectTracker:
-    def __init__(self, yolo_model="Yolov5_DeepSort_Pytorch/yolov5/weights/crowdhuman_yolov5m.pt", deep_sort_model = "osnet_x0_25", imgsz=[640, 640], half=False, show_vid=True):
+    def __init__(self, yolo_model="Yolov5_DeepSort_Pytorch/yolov5/weights/crowdhuman_yolov5m.pt", deep_sort_model = "osnet_x0_25", imgsz=[640, 640], half=False, show_vid=False):
         with torch.no_grad():
             device = ""
             dnn = True
@@ -108,6 +108,7 @@ class ObjectTracker:
             pred = non_max_suppression(pred, self.conf_thres, self.iou_thres, self.classes, self.agnostic_nms,
                                        max_det=self.max_det)
             result_dict = {}
+            t4, t5, t6 = t3, t3, t3
             # Process detections
             for i, det in enumerate(pred):  # detections per image
 
@@ -148,7 +149,6 @@ class ObjectTracker:
                             annotator.box_label(bboxes, label, color=colors(c, True))
                     t6 = time_sync()
 
-                    #LOGGER.info(f'inference_frame:({(t6 - t1)*1000:.3f}ms) prepare::({(t2 - t1)*1000:.3f}ms), YOLO::({(t3 - t2)*1000:.3f}ms), diverses::({(t4 - t3)*1000:.3f}ms), DeepSort::({(t5 - t4)*1000:.3f}ms), draw::({(t6 - t5)*1000:.3f}ms)')
 
                 else:
                     self.deepsort.increment_ages()
@@ -160,6 +160,11 @@ class ObjectTracker:
                     cv2.imshow(str("video"), im0)
                     if cv2.waitKey(1) == ord('q'):  # q to quit
                         raise StopIteration
+
+            t7 = time_sync()
+
+            #LOGGER.info(f'inference_frame:({(t7 - t1) * 1000:.3f}ms) prepare::({(t2 - t1) * 1000:.3f}ms), YOLO::({(t3 - t2) * 1000:.3f}ms), diverses::({(t4 - t3) * 1000:.3f}ms), DeepSort::({(t5 - t4) * 1000:.3f}ms), draw::({(t6 - t5) * 1000:.3f}ms), display::({(t7 - t6) * 1000:.3f}ms)')
+
             return result_dict
 
 
