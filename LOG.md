@@ -13,6 +13,28 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Logs
 
+### 18 -- Mo 07. Maerz
+1. make docu script that creates gif of current state
+
+#### DONE
+1. done
+
+---
+
+### 17 -- So 06. Maerz
+#### Objects
+1. refactor Track, to more modal design
+   1. make pose estimation class
+   2. make camera position class
+
+
+#### DONE 
+1. done
+   1. done
+   2. done
+
+---
+
 ### 16 -- Mi 02. Maerz
 #### Objects
 1. create basic app structure with or real code
