@@ -19,6 +19,8 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 #### DONE
 1. done
 
+![2022-03-08T12:42:30_32c5f77.gif](version_control_meta/2022-03-08T12:42:30_32c5f77.gif)
+
 ---
 
 ### 17 -- So 06. Maerz
