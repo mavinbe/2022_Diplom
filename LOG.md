@@ -16,7 +16,8 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 
 ### 19 -- Di 08. Maerz
-1. make physical model cam control class
+1. fix error on out if image zoom position
+2. make physical model cam control class
 
 #### DONE
 
