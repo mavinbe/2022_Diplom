@@ -45,6 +45,20 @@ def zoom(img, zoom_factor, center=None):
 
     return  img
 
+def calculate_face_direction(pose_detect_dict):
+    ## Sample code
+    # if PoseLandmark.NOSE in pose_detect_dict and PoseLandmark.LEFT_EYE in pose_detect_dict and PoseLandmark.RIGHT_EYE in pose_detect_dict:
+    #     print("LEFT " + str(
+    #         pose_detect_dict[PoseLandmark.NOSE]['z'] - pose_detect_dict[PoseLandmark.LEFT_EYE][
+    #             'z']) + "\t\t" + str(
+    #         pose_detect_dict[PoseLandmark.NOSE]['z'] - pose_detect_dict[PoseLandmark.RIGHT_EYE]['z']))
+    #     # cv2.circle(image, (pose_detect_dict[PoseLandmark.NOSE]['x'], pose_detect_dict[PoseLandmark.NOSE]['y']),
+    #     #            5,
+    #     #            (0, 0, 255), 2)
+    #     image = zoom(image, 20,
+    #                  (pose_detect_dict[PoseLandmark.NOSE]['x'], pose_detect_dict[PoseLandmark.NOSE]['y']))
+    pass
+
 
 def run(handle_image):
     global t1, success, image, t2, object_detection_dict

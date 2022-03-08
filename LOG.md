@@ -9,6 +9,7 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
    1. add kalman smoother for every trackId
    2. apply world coordinates to kalman filter
 - write expressions
+- research node and eyes position to determinate face direction
 
 
 ## Logs
