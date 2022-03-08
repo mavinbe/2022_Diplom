@@ -20,6 +20,8 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 2. make physical model cam control class
 
 #### DONE
+1. done
+![2022-03-08T15:51:43_40bffbe.gif](version_control_meta/2022-03-08T15:51:43_40bffbe.gif)
 
 ---
 
