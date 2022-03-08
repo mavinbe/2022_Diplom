@@ -21,7 +21,12 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 #### DONE
 1. done
+
+![2022-03-08T16:14:58_0539b54.gif](version_control_meta/2022-03-08T16:14:58_0539b54.gif)
+calculate_newest_track_id
+
 ![2022-03-08T15:51:43_40bffbe.gif](version_control_meta/2022-03-08T15:51:43_40bffbe.gif)
+calculate_oldest_track_id
 
 ---
 
@@ -31,7 +36,8 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 #### DONE
 1. done
 
-![2022-03-08T12:42:30_32c5f77.gif](version_control_meta/2022-03-08T12:42:30_32c5f77.gif)
+![2022-03-08T12:42:30_32c5f77.gif](version_control_meta/2022-03-08T12:42:30_32c5f77.gif)\
+calculate_oldest_track_id
 
 ---
 
