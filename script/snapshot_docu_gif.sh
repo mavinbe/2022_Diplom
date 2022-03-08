@@ -2,8 +2,8 @@
 
 
 GIT_HASH=$(git rev-parse --short HEAD)
-DATE_TIME=$(date '+%Y-%m-%d_%H:%M:%S');
-OUTPUT_FILE="version_control_meta/${DATE_TIME}T${GIT_HASH}.gif"
+DATE_TIME=$(date '+%Y-%m-%dT%H:%M:%S');
+OUTPUT_FILE="version_control_meta/${DATE_TIME}_${GIT_HASH}.gif"
 echo $OUTPUT_FILE
 
 eval "$(conda shell.bash hook)"
