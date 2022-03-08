@@ -22,6 +22,10 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 #### DONE
 1. done
 
+
+![2022-03-08T16:38:08_1f5485c.gif](version_control_meta/2022-03-08T16:38:08_1f5485c.gif)
+increased length, so we have more people jumps
+
 ![2022-03-08T16:14:58_0539b54.gif](version_control_meta/2022-03-08T16:14:58_0539b54.gif)
 calculate_newest_track_id
 
