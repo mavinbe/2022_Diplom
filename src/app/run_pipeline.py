@@ -91,7 +91,7 @@ def run(handle_image):
                     #            (pose_detect_dict[PoseLandmark.RIGHT_EYE]['x'], pose_detect_dict[PoseLandmark.RIGHT_EYE]['y']),
                     #            4,
                     #            (0, 255, 0), 2)
-                    image = zoom(image, 40,
+                    image = zoom(image, 20,
                                  (pose_detect_dict[PoseLandmark.NOSE]['x'], pose_detect_dict[PoseLandmark.NOSE]['y']))
 
                 else:
@@ -106,7 +106,8 @@ def run(handle_image):
 
 def show_image(image):
     cv2.imshow("asd", image)
-    cv2.waitKey(1)
+    if cv2.waitKey(1) == ord('q'):  # q to quit
+        exit(0)
 
 
 if __name__ == '__main__':
