@@ -119,7 +119,7 @@ def run(handle_image):
             t3 = time_sync()
 
             if len(object_detection_dict) > 0:
-                track_id_to_track = calculate_oldest_track_id()
+                track_id_to_track = calculate_newest_track_id()
                 detection_which_to_pose_detect = object_detection_dict[track_id_to_track]
                 # print(detection_which_to_pose_detect)
                 cropped_image = image[detection_which_to_pose_detect[1]:detection_which_to_pose_detect[3],
