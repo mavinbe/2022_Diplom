@@ -104,7 +104,7 @@ def run(handle_image):
         frame_count = 0
         last_target_box = None
         while img_stream.isOpened():
-            if frame_count > 616:
+            if frame_count > 1600:
                 exit()
             t1 = time_sync()
 
