@@ -1,10 +1,5 @@
-import cv2
 import numpy as np
 from utils.general import check_imshow
-import unittest
-from parameterized import parameterized
-
-from yolov5.utils.torch_utils import time_sync
 
 
 class NewPositionMaxSpeedConstrained:
@@ -38,14 +33,14 @@ class NewPositionMaxSpeedConstrained:
         for idx, dimension in enumerate(target):
             print(idx)
             print(dimension)
-            new_position[idx] = self.position[idx] + self.calculate_real_position_delta(self.position[idx], self.max_velocity, target[idx], time_delta)
+            new_position[idx] = self.position[idx] + self.calculate_real_position_delta_1D(self.position[idx], self.max_velocity, target[idx], time_delta)
         return new_position
 
     def _calculate_time_delta(self, new_time):
         return new_time - self.current_time
 
     @staticmethod
-    def calculate_real_position_delta(position, max_velocity, target, time_delta):
+    def calculate_real_position_delta_1D(position, max_velocity, target, time_delta):
         total_position_delta = target - position
         direction_norm = abs(total_position_delta) / total_position_delta
         calculated_position_delta = NewPositionMaxSpeedConstrained.calculate_position_delta(max_velocity * direction_norm, time_delta)
@@ -63,69 +58,3 @@ class NewPositionMaxSpeedConstrained:
     def calculate_position_delta(velocity, time_delta):
         return velocity * time_delta
 
-
-class NewPositionMaxSpeedConstrainedTest(unittest.TestCase):
-
-    def testInit(self):
-        start_time = 0
-        sut = NewPositionMaxSpeedConstrained(start_time, 100, 120)
-        self.assertEqual(sut.get_position(), 100)
-
-    @parameterized.expand([
-        [0,     120,    100,    100],
-        [0,     80,     100,    80],
-        [200,   120,    100,    -100],
-        [200,   80,     100,    -80],
-    ])
-    def test_calculate_real_position_delta(self, start_position, max_velocity, target_position, must_position_delta):
-        start_position = np.array(start_position)
-        target_position = np.array(target_position)
-        must_position_delta = np.array(must_position_delta)
-        time_delta = 1
-
-        real_position_delta = NewPositionMaxSpeedConstrained.calculate_real_position_delta(start_position, max_velocity, target_position,
-                                                                          time_delta)
-
-        self.assertEqual(real_position_delta, must_position_delta)
-
-    @parameterized.expand([
-        [[0],     120,    [100],    [100]],
-        [[0],     80,     [100],    [80]],
-        [[200],   120,    [100],    [100]],
-        [[200],   80,     [100],    [120]],
-    ])
-    def test_calculate_real_position(self, start_position, max_velocity, target_position, must_position):
-        start_position = np.array(start_position)
-        target_position = np.array(target_position)
-        must_position = np.array(must_position)
-        start_time = 0
-        time_delta = 1
-        sut = NewPositionMaxSpeedConstrained(start_time, start_position, max_velocity)
-        real_position = sut.calculate_new_position(target_position, time_delta)
-
-        self.assertEqual(real_position, must_position)
-
-    @parameterized.expand([
-        [(0, 0),        120,        (100, 100),         (100, 100)],
-        [(0, 0),        80,         (100, 100),         (80, 80)],
-        [(200, 400),    120,        (100, 100),         (100, 280)],
-        [(200, 400),    80,         (100, 100),         (120, 320)],
-    ])
-    def test_calculate_real_position_2D(self, start_position, max_velocity, target_position, must_position):
-        start_position = np.array(start_position)
-        target_position = np.array(target_position)
-        must_position = np.array(must_position)
-
-        start_time = 0
-        time_delta = 1
-        sut = NewPositionMaxSpeedConstrained(start_time, start_position, max_velocity)
-
-        real_position = sut.calculate_new_position(target_position, time_delta)
-        print(real_position)
-
-        print(must_position)
-        np.testing.assert_array_equal(real_position, must_position)
-
-
-if __name__ == '__main__':
-    unittest.main()
