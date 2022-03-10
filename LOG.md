@@ -14,10 +14,18 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Logs
 
+### 21 -- Do 10. Maerz
+1. integrate it into run_pipeline
+2. 
+
+#### DONE
+1. done
+
+---
 
 ### 20 -- Mi 09. Maerz
 1. make physical model cam control class
-2. intigrate it into run_pipeline
+2. integrate it into run_pipeline
 
 #### DONE
 1. done
