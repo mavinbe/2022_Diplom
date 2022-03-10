@@ -59,7 +59,7 @@ class PoseDetector:
         #print(image.shape)
         if type(landmark_list) is landmark_pb2.NormalizedLandmarkList:
             for idx, landmark in enumerate(landmark_list.landmark):
-              result_dict[idx] = {'x': landmark.x * width, 'y': landmark.y * height, 'z': landmark.z, 'visibility': landmark.visibility}
+              result_dict[idx] = {'x': landmark.x * width, 'y': landmark.y * height, 'z': landmark.z * width, 'visibility': landmark.visibility}
               #print(type(landmark))
 
 
