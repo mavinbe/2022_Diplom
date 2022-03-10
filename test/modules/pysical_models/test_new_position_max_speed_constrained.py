@@ -76,7 +76,7 @@ class TestNewPositionMaxSpeedConstrainedTest(unittest.TestCase):
 
         result = NewPositionMaxSpeedConstrained.calculate_velocity_for_dimensions(start, max_velocity, target)
 
-        np.testing.assert_array_equal(result, [10, 20])
+        np.testing.assert_array_equal(result, [1, 2])
 
 if __name__ == '__main__':
     unittest.main()
