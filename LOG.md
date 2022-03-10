@@ -16,7 +16,7 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ### 21 -- Do 10. Maerz
 1. integrate it into run_pipeline
-2. 
+2. set zoom appropriated to face distance
 
 #### DONE
 1. done
