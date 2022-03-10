@@ -78,7 +78,7 @@ if __name__ == '__main__':
     cap = cv2.VideoCapture("/home/mavinbe/2021_Diplom/2022_Diplom/data/05_20211102141647/output015.mp4")
     with PoseDetector() as pose_detector:
 
-        print("sdf")
+        #print("sdf")
 
         while cap.isOpened():
             t1 = time_sync()
