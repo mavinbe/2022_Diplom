@@ -132,9 +132,11 @@ def run(handle_image):
                 cropped_image = image[detection_which_to_pose_detect[1]:detection_which_to_pose_detect[3],
                                 detection_which_to_pose_detect[0]:detection_which_to_pose_detect[2]]
                 pose_detect_dict = pose_detector.inference_frame(cropped_image)
-                pose_detect_dict = translate_local_to_global_coords(pose_detect_dict, detection_which_to_pose_detect[0],
+                pose_detect_dict_in_global = translate_local_to_global_coords(pose_detect_dict, detection_which_to_pose_detect[0],
                                                                     detection_which_to_pose_detect[1])
-                target_position = determ_position_by_landmark_from_pose_detection(pose_detect_dict, PoseLandmark.NOSE)
+                if 9 in pose_detect_dict_in_global and 10 in pose_detect_dict_in_global:
+                    print([pose_detect_dict_in_global[9], pose_detect_dict_in_global[10]])
+                target_position = determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global, PoseLandmark.NOSE)
                 #print(target_position)
                 if target_position:
                     position_model.move_to_target(target_position, time_sync())
