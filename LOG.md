@@ -24,6 +24,9 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 #### DONE
 1. done
+2. part
+   1. done
+   2. done
 
 ![2022-03-10T09:52:11_43f0183.gif](version_control_meta/2022-03-10T09:52:11_43f0183.gif)
 movement limited by static velocity 
