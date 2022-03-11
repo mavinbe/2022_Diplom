@@ -65,8 +65,10 @@ class PoseDetector:
 
         if self.show_vid:
             cv2.imshow('MediaPipe Pose', image)
-            if cv2.waitKey(1) == ord('q'):  # q to quit
-                exit()
+            self.last_image = image
+            #if cv2.waitKey(1) == ord('q'):  # q to quit
+             #   pass
+                #exit()
 
         #inference_time = time.perf_counter() - start
         #print('%.2f ms' % (inference_time * 1000))
@@ -93,8 +95,8 @@ if __name__ == '__main__':
             result_list = pose_detector.inference_frame(im0)
             t4 = time_sync()
             print(result_list)
-            if cv2.waitKey(1) == ord('q'):  # q to quit
-                break
+            #if cv2.waitKey(1) == ord('q'):  # q to quit
+            #    break
             # LOGGER.info(f'DONE on prepare:({(t4 - t1)*1000:.3f}ms)    read:({(t2 - t1)*1000:.3f}ms), prepare:({(t3 - t2)*1000:.3f}ms), inference:({(t4 - t3)*1000:.3f}ms)')
 
     cap.release()

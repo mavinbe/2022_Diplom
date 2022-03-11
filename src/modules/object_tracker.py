@@ -159,8 +159,9 @@ class ObjectTracker:
                 im0 = annotator.result()
                 if self.show_vid:
                     cv2.imshow(str("video"), im0)
-                    if cv2.waitKey(1) == ord('q'):  # q to quit
-                        raise StopIteration
+                    #if cv2.waitKey(1) == ord('q'):  # q to quit
+                    #    pass
+                        #raise StopIteration
 
             t7 = time_sync()
 
