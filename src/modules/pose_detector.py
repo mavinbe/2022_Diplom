@@ -28,6 +28,8 @@ class PoseDetector:
             min_detection_confidence=0.5,
             min_tracking_confidence=0.5)
 
+        self.last_image = None
+
     def __enter__(self):
         self.pose.__enter__()
         return self
