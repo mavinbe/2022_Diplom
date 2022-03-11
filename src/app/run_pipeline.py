@@ -17,11 +17,11 @@ PoseLandmark = mp.solutions.pose.PoseLandmark
 import imageio
 
 
-def calculate_newest_track_id():
+def calculate_newest_track_id(object_detection_dict):
     return max(object_detection_dict.keys())
 
 
-def calculate_oldest_track_id():
+def calculate_oldest_track_id(object_detection_dict):
     return min(object_detection_dict.keys())
 
 
@@ -95,7 +95,7 @@ def calculate_face_direction(pose_detect_dict):
 
 
 def run(handle_image):
-    global t1, success, image, t2, object_detection_dict
+    
     img_stream = cv2.VideoCapture("/home/mavinbe/2021_Diplom/2022_Diplom/data/05_20211102141647/output014.mp4")
     #img_stream.set(cv2.CAP_PROP_POS_FRAMES, 290)
     with PoseDetector(show_vid=False) as pose_detector:
@@ -126,7 +126,7 @@ def run(handle_image):
             t3 = time_sync()
 
             if len(object_detection_dict) > 0:
-                track_id_to_track = calculate_newest_track_id()
+                track_id_to_track = calculate_newest_track_id(object_detection_dict)
                 detection_which_to_pose_detect = object_detection_dict[track_id_to_track]
                 # print(detection_which_to_pose_detect)
                 cropped_image = image[detection_which_to_pose_detect[1]:detection_which_to_pose_detect[3],
@@ -134,8 +134,8 @@ def run(handle_image):
                 pose_detect_dict = pose_detector.inference_frame(cropped_image)
                 pose_detect_dict_in_global = translate_local_to_global_coords(pose_detect_dict, detection_which_to_pose_detect[0],
                                                                     detection_which_to_pose_detect[1])
-                if 9 in pose_detect_dict_in_global and 10 in pose_detect_dict_in_global:
-                    print([pose_detect_dict_in_global[9], pose_detect_dict_in_global[10]])
+                #if 9 in pose_detect_dict_in_global and 10 in pose_detect_dict_in_global:
+                    #print([pose_detect_dict_in_global[9], pose_detect_dict_in_global[10]])
                 target_position = determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global, PoseLandmark.NOSE)
                 #print(target_position)
                 if target_position:
@@ -144,7 +144,7 @@ def run(handle_image):
                 else:
                     print("No Landmark")
                 target_box = static_zoom_target_box(image.shape, 20, position_model.get_position())
-                print(f' #################   {(int(position_model.get_position()[0]), int(position_model.get_position()[1]))}')
+                #print(f' #################   {(int(position_model.get_position()[0]), int(position_model.get_position()[1]))}')
                 # cv2.circle(image, (int(position_model.get_position()[0]), int(position_model.get_position()[1])),
                 #                           3,
                 #                           (0, 0, 255), 5)
@@ -156,8 +156,8 @@ def run(handle_image):
                 handle_image(image)
             t4 = time_sync()
 
-            # LOGGER.info(
-            #     f'frame_count {frame_count} DONE on hole :({(t4 - t1) * 1000:.3f}ms)    read_image:({(t2 - t1) * 1000:.3f}ms), object_track:({(t3 - t2) * 1000:.3f}ms), pose_detect:({(t4 - t3) * 1000:.3f}ms)')
+            LOGGER.info(
+                f'frame_count {frame_count} DONE on hole :({(t4 - t1) * 1000:.3f}ms)    read_image:({(t2 - t1) * 1000:.3f}ms), object_track:({(t3 - t2) * 1000:.3f}ms), pose_detect:({(t4 - t3) * 1000:.3f}ms)')
     img_stream.release()
 
 
