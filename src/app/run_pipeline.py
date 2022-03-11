@@ -87,26 +87,27 @@ def run(handle_image):
         object_tracker = ObjectTracker(show_vid=False)
         frame_count = 0
         position_model = None
+        success, image = img_stream.read()
+        img_stream.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        height, width, _ = image.shape
+        position_model = NewPositionMaxSpeedConstrained(time_sync(), np.asarray((int(width / 2), int(height / 2))), 20)
         while img_stream.isOpened():
             if frame_count > 1600:
                 exit()
             t1 = time_sync()
-
             success, image = img_stream.read()
-            height, width, _ = image.shape
-
             t2 = time_sync()
 
             if not success:
                 print("Ignoring empty camera frame.")
                 # If loading a video, use 'break' instead of 'continue'.
                 continue
-            if position_model is None:
 
-                position_model = NewPositionMaxSpeedConstrained(time_sync(), np.asarray((int(width/2), int(height/2))), 20)
             frame_count += 1
             object_detection_dict = object_tracker.inference_frame(image)
             t3 = time_sync()
+
+
 
             if len(object_detection_dict) > 0:
                 track_id_to_track = calculate_newest_track_id(object_detection_dict)
