@@ -16,7 +16,11 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ### 21 -- Do 10. Maerz
 1. integrate it into run_pipeline
-2. set zoom appropriated to face distance
+2. set zoom appropriated to face direction and size
+   1. extract example images for different head directions
+   2. analyse pose data
+   3. create model
+   4. quess zoom
 
 #### DONE
 1. done
