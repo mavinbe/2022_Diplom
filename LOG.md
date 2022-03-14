@@ -14,7 +14,20 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Logs
 
-### 23 -- Fr 14. Maerz
+### 24 -- Di 15. Maerz
+1. verschiedene Befehle orchestrieren
+   1. totale
+   2. muster fuß bis kopf
+   3. einzelne körperteile verfolgen   
+      2. hände
+	1. zoom auf augen
+	
+#### DONE
+
+
+---
+
+### 23 -- Mo 14. Maerz
 1. fasten up, make one detection run and save results for later load
    1. serialize results
    2. create doubles that load results
