@@ -97,7 +97,7 @@ def run(handle_image, serialize=True):
                 image = handle_read_image(frame_count, img_stream, t)
 
                 # t_object_track
-                object_detection_dict = handle_object_track(image, object_tracker, t)
+                object_detection_dict, confirmed_id_list = handle_object_track(image, object_tracker, t)
                 serialize_store[frame_count]["object_track"] = object_detection_dict
 
                 # t_pose_detect
@@ -142,11 +142,10 @@ def handle_read_image(frame_count, img_stream, t):
 
 def handle_object_track(image, object_tracker, t):
     object_detection_dict, confirmed_id_list = object_tracker.inference_frame(image)
-    print(confirmed_id_list)
     t["object_track"] = time_sync()
     if len(object_detection_dict) == 0:
         raise Warning("No Objects Detected")
-    return object_detection_dict
+    return object_detection_dict, confirmed_id_list
 
 
 def handle_pose_detect(image, object_detection_dict, pose_detector, t):
