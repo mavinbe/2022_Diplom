@@ -14,6 +14,16 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Logs
 
+### 23 -- Fr 14. Maerz
+1. fasten up, make one detection run and save results for later load
+   1. serialize results
+   2. create doubles that load results
+2. set zoom appropriated to face size (bounds of landmarks * 2)
+   1. create model
+   2. quess zoom
+   
+---
+
 ### 22 -- Fr 11. Maerz
 1. fasten up, make one detection run and save results for later load
    1. serialize results
