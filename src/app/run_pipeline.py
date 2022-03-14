@@ -80,49 +80,62 @@ def run(handle_image):
         height, width = determ_dimensions_of_video(img_stream)
         position_model = NewPositionMaxSpeedConstrained(time_sync(), np.asarray((int(width / 2), int(height / 2))), 20)
 
+
         while img_stream.isOpened():
+            current_time = time_sync()
+            t = {"start": current_time, "read_image": None, "object_track": None, "pose_detect": None, "post": None, "handle_image": None}
+            try:
+                # t_read_image
+                image, success = read_frame_till_x(img_stream, frame_count, 1600)
+                frame_count += 1
+                t["read_image"] = time_sync()
+                if not success:
+                    raise Warning("No Frame")
 
-            t_start = time_sync()
+                # t_object_track
+                object_detection_dict = object_tracker.inference_frame(image)
+                t["object_track"] = time_sync()
+                if len(object_detection_dict) == 0:
+                    raise Warning("No Objects Detected")
 
-            # t_read_image
-            image, success = read_frame_till_x(img_stream, frame_count, 1600)
-            frame_count += 1
-            if not success:
+                # t_pose_detect
+                pose_detect_dict, pose_detect_dict_in_global = inference_pose(pose_detector, image, object_detection_dict,
+                                                                              calculate_newest_track_id)
+                t["pose_detect"] = time_sync()
+
+                # t_post
+                target_position = determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
+                                                                                  PoseLandmark.NOSE)
+                if target_position is None:
+                    t["post"] = time_sync()
+                    raise Warning("No Landmark found " + str(PoseLandmark.NOSE))
+
+                position_model.move_to_target(target_position, time_sync())
+                target_box = static_zoom_target_box(image.shape, 20, position_model.get_position())
+                image = zoom(image, target_box)
+                t["post"] = time_sync()
+
+                # t_handle_image
+                handle_image(image)
+                t["handle_image"] = time_sync()
+                LOGGER.info(
+                    f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect:({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms)\tpost:({(t["post"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["post"]) * 1000:.2f}ms)')
+
+
+            except Warning as warn:
+                #print(str(warn))
+                for key in t.keys():
+                    if t[key] is None:
+                        t[key] = time_sync()
+                LOGGER.info(
+                    f'frame_count {frame_count} DONE on hole: \t({(time_sync() - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect:({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms)\tpost:({(t["post"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["post"]) * 1000:.2f}ms)\t--- {warn}')
+
                 continue
-            t_read_image = time_sync()
+            #finally:
+                #print(t)
 
-            # t_object_track
-            object_detection_dict = object_tracker.inference_frame(image)
-            if len(object_detection_dict) == 0:
-                print("No Objects Detected")
-                continue
-            t_object_track = time_sync()
 
-            # t_pose_detect
-            pose_detect_dict, pose_detect_dict_in_global = inference_pose(pose_detector, image, object_detection_dict,
-                                                                          calculate_newest_track_id)
-            t_pose_detect = time_sync()
-
-            # t_post
-            target_position = determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
-                                                                              PoseLandmark.NOSE)
-            if target_position is None:
-                print("No Landmark found " + str(PoseLandmark.NOSE))
-                continue
-
-            position_model.move_to_target(target_position, time_sync())
-            target_box = static_zoom_target_box(image.shape, 20, position_model.get_position())
-            image = zoom(image, target_box)
-            t_post = time_sync()
-
-            # t_handle_image
-            handle_image(image)
-
-            t_handle_image = time_sync()
-
-            LOGGER.info(
-                f'frame_count {frame_count} DONE on hole :({(t_handle_image - t_start) * 1000:.3f}ms)    read_image:({(t_read_image - t_start) * 1000:.3f}ms), object_track:({(t_object_track - t_read_image) * 1000:.3f}ms), pose_detect:({(t_pose_detect - t_object_track) * 1000:.3f}ms), post:({(t_post - t_pose_detect) * 1000:.3f}ms), handle_image:({(t_handle_image - t_post) * 1000:.3f}ms)')
-    img_stream.release()
+        img_stream.release()
 
 
 def determ_dimensions_of_video(img_stream):
