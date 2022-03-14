@@ -9,7 +9,7 @@ from datetime import datetime
 from app.run_pipeline import run, show_image
 
 
-def display_and_append(image):
+def display_and_append(image, t):
     show_image(image)
     images.append(image)
 

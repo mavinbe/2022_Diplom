@@ -2,6 +2,7 @@ import os
 import cv2
 import mediapipe as mp
 import numpy as np
+import pickle
 
 from modules.object_tracker import ObjectTracker
 from modules.pose_detector import PoseDetector
@@ -74,7 +75,7 @@ def static_zoom_target_box(image_shape, zoom_factor, center):
     return y_top, y_bottom, x_left, x_right
 
 
-def run(handle_image):
+def run(handle_image, serialize=True):
     with PoseDetector(show_vid=False) as pose_detector:
 
         object_tracker = ObjectTracker(show_vid=False)
@@ -83,44 +84,34 @@ def run(handle_image):
         height, width = determ_dimensions_of_video(img_stream)
         position_model = NewPositionMaxSpeedConstrained(time_sync(), np.asarray((int(width / 2), int(height / 2))), 20)
 
+        serialize_path = create_serialize_path() if serialize else None
+        serialize_store = {} if serialize_path else None
 
         while img_stream.isOpened():
             current_time = time_sync()
             t = {"start": current_time, "read_image": None, "object_track": None, "pose_detect": None, "post": None, "handle_image": None}
+            frame_count += 1
+            serialize_store[frame_count] = {}
             try:
                 # t_read_image
-                image, success = read_frame_till_x(img_stream, frame_count, 1600)
-                frame_count += 1
-                t["read_image"] = time_sync()
-                if not success:
-                    raise Warning("No Frame")
+                image = handle_read_image(frame_count, img_stream, t)
 
                 # t_object_track
-                object_detection_dict = object_tracker.inference_frame(image)
-                t["object_track"] = time_sync()
-                if len(object_detection_dict) == 0:
-                    raise Warning("No Objects Detected")
+                object_detection_dict = handle_object_track(image, object_tracker, t)
+                serialize_store[frame_count]["object_track"] = object_detection_dict
 
                 # t_pose_detect
-                pose_detect_dict, pose_detect_dict_in_global = inference_pose(pose_detector, image, object_detection_dict,
-                                                                              calculate_newest_track_id)
-                t["pose_detect"] = time_sync()
+                pose_detect_dict_in_global = handle_pose_detect(image, object_detection_dict, pose_detector, t)
+                #for detection in object_detection_dict:
+
+                # serialize_store[frame_count]["pose_detect"] = pose_detect_dict_in_global
 
                 # t_post
-                target_position = determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
-                                                                                  PoseLandmark.NOSE)
-                if target_position is None:
-                    t["post"] = time_sync()
-                    raise Warning("No Landmark found " + str(PoseLandmark.NOSE))
-
-                position_model.move_to_target(target_position, time_sync())
-                target_box = static_zoom_target_box(image.shape, 20, position_model.get_position())
-                image = zoom(image, target_box)
-                t["post"] = time_sync()
+                image = handle_post(image, pose_detect_dict_in_global, position_model, t)
 
                 # t_handle_image
-                handle_image(image)
-                t["handle_image"] = time_sync()
+                handle_image(image, t)
+
                 LOGGER.info(
                     f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect:({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms)\tpost:({(t["post"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["post"]) * 1000:.2f}ms)')
 
@@ -137,8 +128,62 @@ def run(handle_image):
             #finally:
                 #print(t)
 
-
+        write_detection(frame_count, object_detection_dict, serialize_path)
         img_stream.release()
+
+
+def handle_read_image(frame_count, img_stream, t):
+    image, success = read_frame_till_x(img_stream, frame_count, 1600)
+    t["read_image"] = time_sync()
+    if not success:
+        raise Warning("No Frame")
+    return image
+
+
+def handle_object_track(image, object_tracker, t):
+    object_detection_dict = object_tracker.inference_frame(image)
+    t["object_track"] = time_sync()
+    if len(object_detection_dict) == 0:
+        raise Warning("No Objects Detected")
+    return object_detection_dict
+
+
+def handle_pose_detect(image, object_detection_dict, pose_detector, t):
+    pose_detect_dict, pose_detect_dict_in_global = inference_pose(pose_detector, image,
+                                                                  object_detection_dict,
+                                                                  calculate_newest_track_id(
+                                                                      object_detection_dict))
+    t["pose_detect"] = time_sync()
+    return pose_detect_dict_in_global
+
+
+def handle_post(image, pose_detect_dict_in_global, position_model, t):
+    target_position = determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
+                                                                      PoseLandmark.NOSE)
+    if target_position is None:
+        t["post"] = time_sync()
+        raise Warning("No Landmark found " + str(PoseLandmark.NOSE))
+    position_model.move_to_target(target_position, time_sync())
+    target_box = static_zoom_target_box(image.shape, 20, position_model.get_position())
+    image = zoom(image, target_box)
+    t["post"] = time_sync()
+    return image
+
+
+def write_detection(frame_count, object_detection_dict, serialize_path):
+    if serialize_path:
+        serialize_filename = str(frame_count) + '.p'
+        serialize_filepath = os.path.join(serialize_path, serialize_filename)
+        with open(serialize_filepath, 'wb') as file:
+            pickle.dump(object_detection_dict, file)
+
+
+def create_serialize_path():
+    serialize_path = os.path.join(ROOT_DIR, "data/05_20211102141647/output014.serial/")
+    print(serialize_path)
+    if not os.path.exists(serialize_path):
+        os.makedirs(serialize_path)
+    return serialize_path
 
 
 def determ_dimensions_of_video(img_stream):
@@ -149,8 +194,7 @@ def determ_dimensions_of_video(img_stream):
     return height, width
 
 
-def inference_pose(pose_detector, image, object_detection_dict, calculate_track_id_strategy):
-    track_id_to_track = calculate_track_id_strategy(object_detection_dict)
+def inference_pose(pose_detector, image, object_detection_dict, track_id_to_track):
     detection_which_to_pose_detect = object_detection_dict[track_id_to_track]
 
     cropped_image = image[detection_which_to_pose_detect[1]:detection_which_to_pose_detect[3],
@@ -171,10 +215,11 @@ def read_frame_till_x(img_stream, frame_count, x):
     return image, success
 
 
-def show_image(image):
+def show_image(image, t):
     cv2.imshow("asd", image)
     if cv2.waitKey(1) == ord('q'):  # q to quit
         exit(0)
+    t["handle_image"] = time_sync()
 
 
 if __name__ == '__main__':
