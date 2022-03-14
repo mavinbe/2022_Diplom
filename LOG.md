@@ -17,10 +17,9 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 ### 24 -- Di 15. Maerz
 1. verschiedene Befehle orchestrieren
    1. totale
-   2. muster fuß bis kopf
-   3. einzelne körperteile verfolgen   
-      2. hände
-	1. zoom auf augen
+   2. muster fuß bis kopf oder körper scan
+   3. einzelne körperteile verfolgen: hände
+   5. zoom auf augen, nase
 	
 #### DONE
 
