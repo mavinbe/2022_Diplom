@@ -22,6 +22,8 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
    1. create model
    2. quess zoom
 
+DONE 
+refactoring and video_stepper.py creation
 
 ---
 
