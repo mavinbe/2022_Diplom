@@ -21,7 +21,10 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 2. set zoom appropriated to face size (bounds of landmarks * 2)
    1. create model
    2. quess zoom
-   
+
+#### DONE
+?
+
 ---
 
 ### 22 -- Fr 11. Maerz
