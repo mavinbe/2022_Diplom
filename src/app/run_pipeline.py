@@ -141,7 +141,8 @@ def handle_read_image(frame_count, img_stream, t):
 
 
 def handle_object_track(image, object_tracker, t):
-    object_detection_dict = object_tracker.inference_frame(image)
+    object_detection_dict, confirmed_id_list = object_tracker.inference_frame(image)
+    print(confirmed_id_list)
     t["object_track"] = time_sync()
     if len(object_detection_dict) == 0:
         raise Warning("No Objects Detected")

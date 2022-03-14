@@ -110,6 +110,7 @@ class ObjectTracker:
                                        max_det=self.max_det)
             result_dict = {}
             t4, t5, t6 = t3, t3, t3
+            confirmed_id_list = None
             # Process detections
             for i, det in enumerate(pred):  # detections per image
 
@@ -132,7 +133,7 @@ class ObjectTracker:
 
                     # pass detections to deepsort
                     t4 = time_sync()
-                    outputs = self.deepsort.update(xywhs.cpu(), confs.cpu(), clss.cpu(), im0)
+                    outputs, confirmed_id_list = self.deepsort.update(xywhs.cpu(), confs.cpu(), clss.cpu(), im0)
                     t5 = time_sync()
 
                     # draw boxes for visualization
@@ -167,7 +168,7 @@ class ObjectTracker:
 
             #LOGGER.info(f'inference_frame:({(t7 - t1) * 1000:.3f}ms) prepare::({(t2 - t1) * 1000:.3f}ms), YOLO::({(t3 - t2) * 1000:.3f}ms), diverses::({(t4 - t3) * 1000:.3f}ms), DeepSort::({(t5 - t4) * 1000:.3f}ms), draw::({(t6 - t5) * 1000:.3f}ms), display::({(t7 - t6) * 1000:.3f}ms)')
 
-            return result_dict
+            return result_dict, confirmed_id_list
 
 
 if __name__ == '__main__':
