@@ -75,8 +75,50 @@ def static_zoom_target_box(image_shape, zoom_factor, center):
     return y_top, y_bottom, x_left, x_right
 
 
+class PoseDetectorPool:
+    def __init__(self):
+        self.pool = []
+        self.pool_map = {}
+
+        for i in range(10):
+            self.pool.append(PoseDetector(show_vid=False))
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        for detector in self.pool:
+            detector.__exit__(exc_type, exc_val, exc_tb)
+
+    def get(self, key):
+        if key not in self.pool_map.keys():
+            self.pool_map[key] = self._get_first_free_detector()
+
+        return self.pool_map[key]
+
+    def _get_first_free_detector(self):
+        for detector in self.pool:
+            if detector not in self.pool_map:
+                return detector
+        raise RuntimeError("PoseDetectorPool is exhausted")
+
+def handle_pose_detect_list(image, object_detection_dict, pose_detector_pool, t):
+    pose_detect_dict_in_global_dict = {}
+    #print(object_detection_dict)
+    for key in object_detection_dict:
+        # print(key)
+        # print(pose_detector_pool.get(key))
+        pose_detect_dict, pose_detect_dict_in_global = inference_pose(pose_detector_pool.get(key), image,
+                                                                      object_detection_dict,
+                                                                      key)
+        pose_detect_dict_in_global_dict[key] = pose_detect_dict_in_global
+    t["pose_detect"] = time_sync()
+    t["pose_detect_count"] = len(object_detection_dict)
+    return pose_detect_dict_in_global_dict
+
+
 def run(handle_image, serialize=True):
-    with PoseDetector(show_vid=False) as pose_detector:
+    with PoseDetectorPool() as pose_detector_pool:
 
         object_tracker = ObjectTracker(show_vid=False)
         frame_count = 0
@@ -89,7 +131,7 @@ def run(handle_image, serialize=True):
 
         while img_stream.isOpened():
             current_time = time_sync()
-            t = {"start": current_time, "read_image": None, "object_track": None, "pose_detect": None, "post": None, "handle_image": None}
+            t = {"start": current_time, "read_image": None, "object_track": None, "pose_detect": None, "pose_detect_count": 0, "post": None, "handle_image": None}
             frame_count += 1
             serialize_store[frame_count] = {}
             try:
@@ -101,10 +143,12 @@ def run(handle_image, serialize=True):
                 serialize_store[frame_count]["object_track"] = object_detection_dict
 
                 # t_pose_detect
-                pose_detect_dict_in_global = handle_pose_detect(image, object_detection_dict, pose_detector, t)
-                #for detection in object_detection_dict:
+                pose_detect_dict_in_global = None
+                #pose_detect_dict_in_global = handle_pose_detect(image, object_detection_dict, pose_detector, t)
 
-                # serialize_store[frame_count]["pose_detect"] = pose_detect_dict_in_global
+                pose_detect_dict_in_global_dict = handle_pose_detect_list(image, object_detection_dict, pose_detector_pool, t)
+                pose_detect_dict_in_global = pose_detect_dict_in_global_dict[calculate_newest_track_id(
+                                                                      object_detection_dict)]
 
                 # t_post
                 image = handle_post(image, pose_detect_dict_in_global, position_model, t)
@@ -113,7 +157,7 @@ def run(handle_image, serialize=True):
                 handle_image(image, t)
 
                 LOGGER.info(
-                    f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect:({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms)\tpost:({(t["post"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["post"]) * 1000:.2f}ms)')
+                    f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms)\tpost:({(t["post"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["post"]) * 1000:.2f}ms)')
 
 
             except Warning as warn:
@@ -122,7 +166,7 @@ def run(handle_image, serialize=True):
                     if t[key] is None:
                         t[key] = time_sync()
                 LOGGER.info(
-                    f'frame_count {frame_count} DONE on hole: \t({(time_sync() - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect:({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms)\tpost:({(t["post"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["post"]) * 1000:.2f}ms)\t--- {warn}')
+                    f'frame_count {frame_count} DONE on hole: \t({(time_sync() - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms)\tpost:({(t["post"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["post"]) * 1000:.2f}ms)\t--- {warn}')
 
                 continue
             #finally:
