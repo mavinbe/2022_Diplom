@@ -1,3 +1,4 @@
+import os
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -7,6 +8,8 @@ from modules.pose_detector import PoseDetector
 from utils.general import LOGGER
 from modules.pysical_models.new_position_max_speed_constrained import NewPositionMaxSpeedConstrained
 from yolov5.utils.torch_utils import time_sync
+# Root directory of the project
+ROOT_DIR = os.path.abspath(os.path.join(__file__, "../../.."))
 
 PoseLandmark = mp.solutions.pose.PoseLandmark
 
@@ -76,7 +79,7 @@ def run(handle_image):
 
         object_tracker = ObjectTracker(show_vid=False)
         frame_count = 0
-        img_stream = cv2.VideoCapture("/home/mavinbe/2021_Diplom/2022_Diplom/data/05_20211102141647/output014.mp4")
+        img_stream = cv2.VideoCapture(ROOT_DIR+"/data/05_20211102141647/output014.mp4")
         height, width = determ_dimensions_of_video(img_stream)
         position_model = NewPositionMaxSpeedConstrained(time_sync(), np.asarray((int(width / 2), int(height / 2))), 20)
 
