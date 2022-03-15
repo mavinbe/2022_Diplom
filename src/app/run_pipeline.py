@@ -33,7 +33,7 @@ def translate_local_to_global_coords(pose_dict, global_x, global_y):
 
 
 def zoom(img, target_box):
-    image_original_shape = img.shape
+    #image_original_shape = img.shape
     height, width, _ = img.shape
     img = img[target_box[0]:target_box[1], target_box[2]:target_box[3]]
     try:

@@ -3,7 +3,7 @@ import numpy as np
 class NewPositionMaxSpeedConstrained:
     def __init__(self, time, position, max_velocity):
         self.current_time = time
-        self.position_bounds = (0, 1920, 0, 1080)
+        #self.position_bounds = (0, 1920, 0, 1080)
         self.max_velocity = max_velocity * 1.
         self.position = position * 1.
 
@@ -20,6 +20,10 @@ class NewPositionMaxSpeedConstrained:
 
     # immutable
     def _calculate_new_position(self, target, time_delta):
+        # print(self.position.shape)
+        # print(self.position)
+        # print(target.shape)
+        # print(target)
         if self.position.shape != target.shape:
             raise RuntimeError("self.position.shape != target.shape")
         max_velocity_for_time_delta = self.max_velocity * time_delta
