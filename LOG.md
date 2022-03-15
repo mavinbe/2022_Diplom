@@ -26,6 +26,9 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 ![2022-03-15T10:11:19_ddae732.gif](version_control_meta/2022-03-15T10:11:19_ddae732.gif)
 fixed movement bind to time_delta not frames
 
+![2022-03-15T16:16:21_b429a6d.gif](version_control_meta/2022-03-15T16:16:21_b429a6d.gif)
+zoom movement
+
 ---
 
 ### 23 -- Mo 14. Maerz
