@@ -105,15 +105,19 @@ class PoseDetectorPool:
 def handle_pose_detect_list(image, object_detection_dict, pose_detector_pool, t):
     pose_detect_dict_in_global_dict = {}
     #print(object_detection_dict)
-    for key in object_detection_dict:
-        # print(key)
-        # print(pose_detector_pool.get(key))
-        pose_detect_dict, pose_detect_dict_in_global = inference_pose(pose_detector_pool.get(key), image,
-                                                                      object_detection_dict,
-                                                                      key)
-        pose_detect_dict_in_global_dict[key] = pose_detect_dict_in_global
+    # for key in object_detection_dict:
+    #     # print(key)
+    #     # print(pose_detector_pool.get(key))
+    #     pose_detect_dict, pose_detect_dict_in_global = inference_pose(pose_detector_pool.get(key), image,
+    #                                                                   object_detection_dict,
+    #                                                                   key)
+    #     pose_detect_dict_in_global_dict[key] = pose_detect_dict_in_global
+    key = calculate_newest_track_id(object_detection_dict)
+    _, pose_detect_dict_in_global_dict[key] = inference_pose(pose_detector_pool.get(key), image,
+                                                             object_detection_dict,
+                                                             key)
     t["pose_detect"] = time_sync()
-    t["pose_detect_count"] = len(object_detection_dict)
+    t["pose_detect_count"] = len(pose_detect_dict_in_global_dict)
     return pose_detect_dict_in_global_dict
 
 
