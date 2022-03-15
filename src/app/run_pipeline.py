@@ -159,10 +159,10 @@ def run(handle_image, serialize=True):
                 if frame_count > 20:
                     movement_constrains_model = movement_constrains_model if movement_constrains_model else NewPositionMaxSpeedConstrained(
                         time_sync(),
-                        np.asarray((int(width / 2), int(height / 2))), 100)
+                        np.asarray((int(width / 2), int(height / 2))), 130)
                     zoom_constrains_model = zoom_constrains_model if zoom_constrains_model else NewPositionMaxSpeedConstrained(
                         time_sync(),
-                                                                           np.asarray([1]), 5)
+                                                                           np.asarray([1]), 1)
                     image = handle_camera_movement(image, pose_detect_dict_in_global, movement_constrains_model, zoom_constrains_model,  t)
                 else:
                     t["camera_movement"] = time_sync()
