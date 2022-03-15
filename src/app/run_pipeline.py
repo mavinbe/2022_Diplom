@@ -135,7 +135,7 @@ def run(handle_image, serialize=True):
 
         while img_stream.isOpened():
             current_time = time_sync()
-            t = {"start": current_time, "read_image": None, "object_track": None, "pose_detect": None, "pose_detect_count": 0, "post": None, "handle_image": None}
+            t = {"start": current_time, "read_image": None, "object_track": None, "pose_detect": None, "pose_detect_count": 0, "camera_movement": None, "handle_image": None}
             frame_count += 1
             serialize_store[frame_count] = {}
             try:
@@ -155,13 +155,13 @@ def run(handle_image, serialize=True):
                                                                       object_detection_dict)]
 
                 # t_post
-                image = handle_post(image, pose_detect_dict_in_global, position_model, t)
+                image = handle_camera_movement(image, pose_detect_dict_in_global, position_model, t)
 
                 # t_handle_image
                 handle_image(image, t)
 
                 LOGGER.info(
-                    f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms)\tpost:({(t["post"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["post"]) * 1000:.2f}ms)')
+                    f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)')
 
 
             except Warning as warn:
@@ -170,7 +170,7 @@ def run(handle_image, serialize=True):
                     if t[key] is None:
                         t[key] = time_sync()
                 LOGGER.info(
-                    f'frame_count {frame_count} DONE on hole: \t({(time_sync() - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms)\tpost:({(t["post"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["post"]) * 1000:.2f}ms)\t--- {warn}')
+                    f'frame_count {frame_count} DONE on hole: \t({(time_sync() - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)\t--- {warn}')
 
                 continue
             #finally:
@@ -205,16 +205,16 @@ def handle_pose_detect(image, object_detection_dict, pose_detector, t):
     return pose_detect_dict_in_global
 
 
-def handle_post(image, pose_detect_dict_in_global, position_model, t):
+def handle_camera_movement(image, pose_detect_dict_in_global, position_model, t):
     target_position = determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
                                                                       PoseLandmark.NOSE)
     if target_position is None:
-        t["post"] = time_sync()
+        t["camera_movement"] = time_sync()
         raise Warning("No Landmark found " + str(PoseLandmark.NOSE))
     position_model.move_to_target(target_position, time_sync())
     target_box = static_zoom_target_box(image.shape, 20, position_model.get_position())
     image = zoom(image, target_box)
-    t["post"] = time_sync()
+    t["camera_movement"] = time_sync()
     return image
 
 
