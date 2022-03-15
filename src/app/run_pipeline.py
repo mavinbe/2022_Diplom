@@ -128,7 +128,8 @@ def run(handle_image, serialize=True):
         frame_count = 0
         img_stream = cv2.VideoCapture(ROOT_DIR+"/data/05_20211102141647/output014.mp4")
         height, width = determ_dimensions_of_video(img_stream)
-        position_model = NewPositionMaxSpeedConstrained(time_sync(), np.asarray((int(width / 2), int(height / 2))), 20)
+        movement_constrains_model = None
+        zoom_constrains_model = None
 
         serialize_path = create_serialize_path() if serialize else None
         serialize_store = {} if serialize_path else None
@@ -155,8 +156,16 @@ def run(handle_image, serialize=True):
                                                                       object_detection_dict)]
 
                 # t_post
-                image = handle_camera_movement(image, pose_detect_dict_in_global, position_model, t)
-
+                if frame_count > 20:
+                    movement_constrains_model = movement_constrains_model if movement_constrains_model else NewPositionMaxSpeedConstrained(
+                        time_sync(),
+                        np.asarray((int(width / 2), int(height / 2))), 100)
+                    zoom_constrains_model = zoom_constrains_model if zoom_constrains_model else NewPositionMaxSpeedConstrained(
+                        time_sync(),
+                                                                           np.asarray([1]), 5)
+                    image = handle_camera_movement(image, pose_detect_dict_in_global, movement_constrains_model, zoom_constrains_model,  t)
+                else:
+                    t["camera_movement"] = time_sync()
                 # t_handle_image
                 handle_image(image, t)
 
@@ -205,14 +214,15 @@ def handle_pose_detect(image, object_detection_dict, pose_detector, t):
     return pose_detect_dict_in_global
 
 
-def handle_camera_movement(image, pose_detect_dict_in_global, position_model, t):
+def handle_camera_movement(image, pose_detect_dict_in_global, position_model, zoom_constrains_model, t):
     target_position = determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
                                                                       PoseLandmark.NOSE)
     if target_position is None:
         t["camera_movement"] = time_sync()
         raise Warning("No Landmark found " + str(PoseLandmark.NOSE))
     position_model.move_to_target(target_position, time_sync())
-    target_box = static_zoom_target_box(image.shape, 20, position_model.get_position())
+    zoom_constrains_model.move_to_target(np.asarray([20]), time_sync())
+    target_box = static_zoom_target_box(image.shape, zoom_constrains_model.get_position()[0], position_model.get_position())
     image = zoom(image, target_box)
     t["camera_movement"] = time_sync()
     return image
