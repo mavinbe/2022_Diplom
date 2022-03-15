@@ -10,23 +10,29 @@ class NewPositionMaxSpeedConstrained:
     def get_position(self):
         return tuple(self.position)
 
+    # mutable
     def move_to_target(self, target, new_time):
         target = np.asarray(target)
         time_delta = self._calculate_time_delta(new_time)
-        new_position = self.calculate_new_position(target, time_delta)
+        new_position = self._calculate_new_position(target, time_delta)
+        self.current_time = new_time
         self.position = new_position
 
-    def calculate_new_position(self, target, time_delta):
+    # immutable
+    def _calculate_new_position(self, target, time_delta):
         if self.position.shape != target.shape:
             raise RuntimeError("self.position.shape != target.shape")
-
-        velocity = NewPositionMaxSpeedConstrained.calculate_velocity_for_dimensions(self.position, self.max_velocity, target)
+        max_velocity_for_time_delta = self.max_velocity * time_delta
+        velocity = NewPositionMaxSpeedConstrained.calculate_velocity_for_dimensions(self.position, max_velocity_for_time_delta, target)
 
         return self.position + velocity
 
+    # immutable
     def _calculate_time_delta(self, new_time):
-        return new_time - self.current_time
+        time_delta = new_time - self.current_time
+        return time_delta
 
+    # pure
     @staticmethod
     def calculate_velocity_for_dimensions(start_vector, max_velocity, target_vector):
         delta_vector = target_vector - start_vector

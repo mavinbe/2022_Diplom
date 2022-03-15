@@ -41,7 +41,7 @@ class TestNewPositionMaxSpeedConstrainedTest(unittest.TestCase):
     #     start_time = 0
     #     time_delta = 1
     #     sut = NewPositionMaxSpeedConstrained(start_time, start_position, max_velocity)
-    #     real_position = sut.calculate_new_position(target_position, time_delta)
+    #     real_position = sut._calculate_new_position(target_position, time_delta)
     #
     #     self.assertEqual(real_position, must_position)
     #
@@ -62,7 +62,7 @@ class TestNewPositionMaxSpeedConstrainedTest(unittest.TestCase):
     #     time_delta = 1
     #     sut = NewPositionMaxSpeedConstrained(start_time, start_position, max_velocity)
     #
-    #     real_position = sut.calculate_new_position(target_position, time_delta)
+    #     real_position = sut._calculate_new_position(target_position, time_delta)
     #     print(real_position)
     #
     #     print(must_position)
