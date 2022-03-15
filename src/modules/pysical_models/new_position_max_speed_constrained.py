@@ -1,22 +1,11 @@
 import numpy as np
-from utils.general import check_imshow
-
 
 class NewPositionMaxSpeedConstrained:
-    def __init__(self, time, position, max_velocity, show_vid=False):
-        # Check if environment supports image displays
-        if show_vid:
-            show_vid = check_imshow()
-        self.show_vid = show_vid
-
+    def __init__(self, time, position, max_velocity):
         self.current_time = time
-
         self.position_bounds = (0, 1920, 0, 1080)
         self.max_velocity = max_velocity * 1.
-        #self.max_acceleration = 300
-
         self.position = position * 1.
-        ##self.acceleration = (0, 0)
 
     def get_position(self):
         return tuple(self.position)
