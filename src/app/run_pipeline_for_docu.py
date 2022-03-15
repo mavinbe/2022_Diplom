@@ -10,7 +10,7 @@ from app.run_pipeline import run, show_image
 
 
 def display_and_append(image, t):
-    show_image(image)
+    show_image(image, t)
     images.append(image)
 
 
