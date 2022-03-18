@@ -68,10 +68,69 @@ class TestNewPositionMaxAcceleartionBased(unittest.TestCase):
         v_target = paras["v_target"]
         s_target = paras["s_target"]
 
-        sut = NewPositionMaxAcceleartionBased(s_target=paras["s_target"], v_target=paras["v_target"], v_max=120, a_max=1)
-        plot_movement(AccelerationMovementModel, a_0, s_0, v_0, v_target, None, s_target, None, paras["title"])
-        self.assertEqual(sut.to_change_a(a_0=a_0, v_0=v_0, s_0=s_0, v_target=v_target, s_target=s_target), paras["change_a"])
+        sut = NewPositionMaxAcceleartionBased(s_target=paras["s_target"], v_target=paras["v_target"], v_max=5, a_max=1)
 
+        a_list, s_list, t, v_list = self.generate_plot_data(a_0, s_0, v_0, 10)
+
+        plot_movement(t, a_list, s_list, v_list, v_target, None, s_target, None, paras["title"])
+
+        self.assertEqual(sut.v_direction(v_0=v_0, v_target=v_target), paras["v_direction"])
+        self.assertEqual(sut.to_change_a(a_0=a_0, v_0=v_0, s_0=s_0, v_target=v_target, s_target=s_target), paras["to_change_a"])
+        self.assertEqual(sut.determ_a_without_v_constrains(v_0=v_0, s_0=s_0, v_target=v_target, s_target=s_target),
+                         paras["determ_a_without_v_constrains"])
+        a = sut.calculate_a(1, v_0, s_0)
+        self.assertEqual(a,
+                         paras["calculate_a"])
+
+
+
+        # a_list, s_list, t, v_list = self.generate_plot_data(a, s_0, v_0, 10)
+        #
+        # plot_movement(t, a_list, s_list, v_list, v_target, None, s_target, None, paras["title"])
+
+        res = 100
+        a, v, s = a_0, v_0, s_0
+        for t_offset in np.linspace(0, 0, 1):
+        #for t_offset in np.linspace(0, 10, 11 * res):
+
+            a_list, s_list, v_list = [],[],[]
+
+
+            t = np.linspace(0, 10, 11 * res)
+            #a_last = sut.calculate_a(t_offset, v, s)
+            a_last, v_last, s_last = AccelerationMovementModel.state(t_offset, 1, v, s)
+            # print(a)
+            # print(v)
+            # print(s)
+            t_last = 0
+            for _t in t:
+
+                t_delta = _t - t_last
+                t_last = _t
+                a_last = sut.calculate_a(time_delta=t_delta, v_0=v_last, s_0=s_last)
+
+                #a_last = sut.calculate_a(time_delta=t_delta, v_0=v_last, s_0=s_last)
+
+                a_last, v_last, s_last = AccelerationMovementModel.state(t_delta, a_last, v_last, s_last)
+                if abs(s_target - s_last) < 0.01 and abs(v_target - v_last) < 0.05:
+                    a_last, v_last, s_last = AccelerationMovementModel.state(t_delta, 0, v_target, s_target)
+
+
+
+                a_list.append(a_last)
+                v_list.append(v_last)
+                s_list.append(s_last)
+                # print("--")
+                # print(t_delta)
+                # print(f't_delta {t_delta}')
+                # print(f'a {a}')
+                # print(f'v {v}')
+                # print(f's {s}')
+
+            plot_movement(t, a_list, s_list, v_list, v_target, None, s_target, None, "guessed")
+
+        #calculate_a_list = [sut.calculate_a(t, v_0, s_0) for t in range(10)]
+        #self.assertEqual(True, False)
 
     def generate_plot_data(self, a_0, s_0, v_0, res):
         movement = AccelerationMovementModel
