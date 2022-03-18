@@ -35,7 +35,7 @@ class AccelerationMovementModel:
         t = AccelerationMovementModel.calculate_t_given_s(s, a, v_0, s_0)
         if t is None:
             return None
-        if 3 > t[0] and 3 > t[1]:
+        if 0 > t[0] and 0 > t[1]:
             return None
         elif 0 <= t[0] and 0 <= t[1]:
             return t[0]
