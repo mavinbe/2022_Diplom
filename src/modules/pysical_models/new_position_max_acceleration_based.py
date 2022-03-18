@@ -55,7 +55,7 @@ class NewPositionMaxAcceleartionBased:
 
         if t_next_where_s_is_target == t_where_v_is_target:
             return False
-q        elif t_next_where_s_is_target is None:
+        elif t_next_where_s_is_target is None:
             return True
         elif t_next_where_s_is_target < t_where_v_is_target:
             return False

@@ -10,6 +10,19 @@ from visualization.plot_movement import plot_movement
 class TestNewPositionMaxAcceleartionBased(unittest.TestCase):
 
     @parameterized.expand([
+
+        [{
+            "title": "to slow",
+            "a_0": -1,
+            "v_0": 2,
+            "s_0": 0,
+            "v_target": 0,
+            "s_target": 4.5,
+            "v_direction": -1,
+            "to_change_a": True,
+            "determ_a_without_v_constrains": 1,
+            "calculate_a": 1,
+        }],
         [{
             "title": "perfekt match",
             "a_0": -1,
@@ -17,16 +30,10 @@ class TestNewPositionMaxAcceleartionBased(unittest.TestCase):
             "s_0": 0,
             "v_target": 0,
             "s_target": 4.5,
-            "change_a": False
-        }],
-        [{
-            "title": "to slow",
-            "a_0": -1,
-            "v_0": 2,
-            "s_0": 0,
-            "v_target": 0,
-            "s_target": 4,
-            "change_a": True
+            "v_direction": -1,
+            "to_change_a": False,
+            "determ_a_without_v_constrains": -1,
+            "calculate_a": -1,
         }],
         [{
             "title": "to fast",
@@ -35,7 +42,10 @@ class TestNewPositionMaxAcceleartionBased(unittest.TestCase):
             "s_0": 0,
             "v_target": 0,
             "s_target": 4,
-            "change_a": False
+            "v_direction": -1,
+            "to_change_a": False,
+            "determ_a_without_v_constrains": -1,
+            "calculate_a": -1,
         }],
         [{
             "title": "to fast 2",
@@ -44,7 +54,10 @@ class TestNewPositionMaxAcceleartionBased(unittest.TestCase):
             "s_0": 0,
             "v_target": 0,
             "s_target": 4,
-            "change_a": False
+            "v_direction": -1,
+            "to_change_a": False,
+            "determ_a_without_v_constrains": -1,
+            "calculate_a": -1,
         }],
     ])
 
