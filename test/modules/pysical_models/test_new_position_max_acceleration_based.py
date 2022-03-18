@@ -60,6 +60,14 @@ class TestNewPositionMaxAcceleartionBased(unittest.TestCase):
         self.assertEqual(sut.to_change_a(a_0=a_0, v_0=v_0, s_0=s_0, v_target=v_target, s_target=s_target), paras["change_a"])
 
 
+    def generate_plot_data(self, a_0, s_0, v_0, res):
+        movement = AccelerationMovementModel
+        t = np.linspace(0, 10, 11 * res)
+        # make data
+        a_list = [a_0 for i in t]
+        v_list = [movement.v(t=i, a=a_0, v_0=v_0) for i in t]
+        s_list = [movement.s(t=i, a=a_0, v_0=v_0, s_0=s_0) for i in t]
+        return a_list, s_list, t, v_list
 
 
 if __name__ == '__main__':

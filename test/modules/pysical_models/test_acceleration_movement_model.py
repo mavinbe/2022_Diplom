@@ -1,4 +1,6 @@
 import unittest
+
+import numpy as np
 from parameterized import parameterized
 
 from modules.pysical_models.acceleration_movement_model import AccelerationMovementModel
@@ -73,7 +75,9 @@ class TestAccelerationMovementModel(unittest.TestCase):
         t_next_where_s_is_target = sut.calculate_t_given_s_nearest_ahead(s=s_target, a=a_0, v_0=v_0, s_0=s_0)
         self.assertEqual(t_next_where_s_is_target, sdf["t_next_where_s_is_target"])
 
-        plot_movement(sut, a_0, s_0, v_0, v_target, t_where_v_is_target, s_target, t_next_where_s_is_target,
+        a_list, s_list, t, v_list = self.generate_plot_data(a_0, s_0, v_0, 10)
+
+        plot_movement(t, a_list, s_list, v_list, v_target, t_where_v_is_target, s_target, t_next_where_s_is_target,
                       sdf["title"])
         a_is = None
         if t_next_where_s_is_target == t_where_v_is_target:
@@ -84,6 +88,15 @@ class TestAccelerationMovementModel(unittest.TestCase):
             a_is = "to high"
         self.assertIsNotNone(a_is)
         self.assertEqual(a_is, sdf["a_is"])
+
+    def generate_plot_data(self, a_0, s_0, v_0, res):
+        movement = AccelerationMovementModel
+        t = np.linspace(0, 10, 11 * res)
+        # make data
+        a_list = [a_0 for i in t]
+        v_list = [movement.v(t=i, a=a_0, v_0=v_0) for i in t]
+        s_list = [movement.s(t=i, a=a_0, v_0=v_0, s_0=s_0) for i in t]
+        return a_list, s_list, t, v_list
 
     def test_v(self):
         sut = AccelerationMovementModel
