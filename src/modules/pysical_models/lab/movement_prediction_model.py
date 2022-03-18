@@ -79,10 +79,10 @@ if __name__ == '__main__':
 
     res = 100
 
-    # movement = MovementModel(1, 0, 0, ([0, 2], [2, 4], [4, 6]))
+    # movement = MovementPredictionModel(1, 0, 0, ([0, 2], [2, 4], [4, 6]))
     # t = np.linspace(0, 2, 3*res), np.linspace(2, 4, 3*res), np.linspace(4, 6, 3*res)
 
-    # movement = MovementModel(1, 1, 0, ([0, 1], [1, 3], [3, 5]))
+    # movement = MovementPredictionModel(1, 1, 0, ([0, 1], [1, 3], [3, 5]))
     # t = np.linspace(0, 1, 2*100), np.linspace(1, 3, 3*res), np.linspace(3, 5, 3*res)
 
     movement = MovementPredictionModel(1, 3, 0, ([0, 0], [0, 0], [0, 5]))
