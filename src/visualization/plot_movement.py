@@ -24,5 +24,6 @@ def plot_movement(sut, a_0, s_0, v_0, v_target, t_where_v_is_target, s_target, t
     if t_target:
         ax.axvline(x=t_target, color='b', linestyle=':')
     ax.axhline(y=v_target, color='g', linestyle=':')
-    ax.axvline(x=t_where_v_is_target, color='g', linestyle=':')
+    if t_where_v_is_target:
+        ax.axvline(x=t_where_v_is_target, color='g', linestyle=':')
     plt.show()
