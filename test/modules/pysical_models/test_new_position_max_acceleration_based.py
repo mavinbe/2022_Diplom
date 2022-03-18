@@ -117,8 +117,21 @@ class TestCalculateSpeed(unittest.TestCase):
         t_next_where_s_is_target = sut.calculate_t_given_s_nearest_ahead(s=s_target, a=a_0, v_0=v_0, s_0=s_0)
         self.assertEqual(t_next_where_s_is_target, sdf["t_next_where_s_is_target"])
 
+        plot_movement(sut, a_0, s_0, v_0, v_target, t_where_v_is_target, s_target, t_next_where_s_is_target,
+                      sdf["title"])
+        a_is = None
+        if t_next_where_s_is_target == t_where_v_is_target:
+            a_is = "perfekt"
+        elif t_next_where_s_is_target is None:
+            a_is = "to low"
+        elif t_next_where_s_is_target < t_where_v_is_target:
+            a_is = "to high"
+        self.assertIsNotNone(a_is)
+        self.assertEqual(a_is, sdf["a_is"])
 
-        plot_movement(sut, a_0, s_0, v_0, v_target, t_where_v_is_target, s_target, t_next_where_s_is_target, sdf["title"])
+
+
+
 
 
 
