@@ -2,15 +2,49 @@ import math
 
 import numpy as np
 
-class NewPositionMaxAcceleartionBased:
-    def __init__(self, time, position, v_max, a_max):
-        self.current_time = time
-        # #self.position_bounds = (0, 1920, 0, 1080)
-        # self.acceleration_max = acceleration_max * 1.
-        self.position = position * 1.
+from modules.pysical_models.acceleration_movement_model import AccelerationMovementModel as Model
 
-    def get_position(self):
-        return tuple(self.position)
+
+class NewPositionMaxAcceleartionBased:
+    def __init__(self, s_target, v_target, v_max, a_max):
+        self.s_target = s_target * 1.
+        self.v_target = v_target * 1.
+        self.v_max = v_max * 1.
+        self.a_max = a_max * 1.
+
+        # #self.position_bounds = (0, 1920, 0, 1080)
+
+    # immutable
+    def calculate_model_state(self, time_delta, s_0, v_0, a_0):
+        s_0 = np.asarray(s_0)
+        v_0 = np.asarray(v_0)
+        a_0 = np.asarray(a_0)
+        a = self.determ_a()
+
+        return s, v, a
+
+    def to_change_a(self, a_0, v_0, s_0, v_target, s_target):
+
+        t_where_v_is_target = Model.calculate_t_given_v(v=v_target, a=a_0, v_0=v_0)
+
+
+        t_next_where_s_is_target = Model.calculate_t_given_s_nearest_ahead(s=s_target, a=a_0, v_0=v_0, s_0=s_0)
+
+
+
+        a_is = None
+        if t_next_where_s_is_target == t_where_v_is_target:
+            return False
+        elif t_next_where_s_is_target is None:
+            return True
+        elif t_next_where_s_is_target < t_where_v_is_target:
+            return False
+
+
+
+    def determ_a(self):
+        pass
+
 
     # mutable
     def move_to_target(self, velocity_target, position_target, new_time):
@@ -28,7 +62,7 @@ class NewPositionMaxAcceleartionBased:
         # print(target)
         if self.position.shape != target.shape:
             raise RuntimeError("self.position.shape != target.shape")
-        max_velocity_for_time_delta = self.acceleration_max * time_delta
+        max_velocity_for_time_delta = self.a_max * time_delta
         velocity = NewPositionMaxAcceleartionBased.calculate_velocity_for_dimensions(self.position, max_velocity_for_time_delta, target)
 
         return self.position + velocity
@@ -52,13 +86,5 @@ class NewPositionMaxAcceleartionBased:
 
         return velocity
 
-
-if __name__ == '__main__':
-    a = -1
-    v_0 = 3
-    s_0 = 0
-
-    v_t = 0
-    s_t = 4.5
 
 
