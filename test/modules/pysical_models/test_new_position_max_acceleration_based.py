@@ -30,8 +30,8 @@ def plot_movement(sut, a_0, s_0, v_0, v_target, t_where_v_is_target, s_target, t
     t = np.linspace(0, 10, 11 * res)
     # make data
     a = [a_0 for i in t]
-    v = [movement.static_v(t=i, a=a_0, v_0=v_0) for i in t]
-    s = [movement.static_s(t=i, a=a_0, v_0=v_0, s_0=s_0) for i in t]
+    v = [movement.v(t=i, a=a_0, v_0=v_0) for i in t]
+    s = [movement.s(t=i, a=a_0, v_0=v_0, s_0=s_0) for i in t]
     # plot
     fig, ax = plt.subplots(figsize=(25, 25))
     fig.suptitle(title, fontsize=64)
@@ -61,11 +61,11 @@ class TestCalculateSpeed(unittest.TestCase):
         v_target = 0
         s_target = 4.5
 
-        t_where_v_is_0 = sut.static_t_from_v(v=v_target, a=a_0, v_0=v_0)
-        #t_where_s_is_target = sut.static_t_from_s(v=v_target, a=a_0, v_0=v_0)
+        t_where_v_is_0 = sut.calculate_t_given_v(v=v_target, a=a_0, v_0=v_0)
+        #t_where_s_is_target = sut.calculate_t_given_s(v=v_target, a=a_0, v_0=v_0)
         #plot_movement(sut, a_0, s_0, v_0, v_target, s_target)
         self.assertEqual(t_where_v_is_0, 3)
-        self.assertEqual(sut.static_s(t=t_where_v_is_0, a=a_0, v_0=v_0, s_0=s_0), 4.5)
+        self.assertEqual(sut.s(t=t_where_v_is_0, a=a_0, v_0=v_0, s_0=s_0), 4.5)
 
     @parameterized.expand([
         [{"a_0": -1,
@@ -118,11 +118,11 @@ class TestCalculateSpeed(unittest.TestCase):
 
         sut = AccelerationMovementModel
 
-        t_where_v_is_target = sut.static_t_from_v(v=v_target, a=a_0, v_0=v_0)
+        t_where_v_is_target = sut.calculate_t_given_v(v=v_target, a=a_0, v_0=v_0)
         self.assertEqual(t_where_v_is_target, sdf["t_where_v_is_target"])
-        self.assertEqual(sut.static_s(t=t_where_v_is_target, a=a_0, v_0=v_0, s_0=s_0), sdf["s_on_t_where_v_is_target"])
+        self.assertEqual(sut.s(t=t_where_v_is_target, a=a_0, v_0=v_0, s_0=s_0), sdf["s_on_t_where_v_is_target"])
 
-        t_next_where_s_is_target = sut.static_nearest_t_from_s(s=s_target, a=a_0, v_0=v_0, s_0=s_0)
+        t_next_where_s_is_target = sut.calculate_t_given_s_nearest_ahead(s=s_target, a=a_0, v_0=v_0, s_0=s_0)
         self.assertEqual(t_next_where_s_is_target, sdf["t_next_where_s_is_target"])
 
 
@@ -135,48 +135,48 @@ class TestAccelerationMovementModel(unittest.TestCase):
     def test_v(self):
         sut = AccelerationMovementModel
 
-        self.assertEqual(sut.static_v(t=0, a=1, v_0=0), 0)
-        self.assertEqual(sut.static_v(t=1, a=1, v_0=0), 1)
-        self.assertEqual(sut.static_v(t=2, a=1, v_0=0), 2)
-        self.assertEqual(sut.static_v(t=3, a=1, v_0=0), 3)
+        self.assertEqual(sut.v(t=0, a=1, v_0=0), 0)
+        self.assertEqual(sut.v(t=1, a=1, v_0=0), 1)
+        self.assertEqual(sut.v(t=2, a=1, v_0=0), 2)
+        self.assertEqual(sut.v(t=3, a=1, v_0=0), 3)
 
-        self.assertEqual(sut.static_v(t=0, a=1, v_0=100), 100)
-        self.assertEqual(sut.static_v(t=1, a=1, v_0=100), 101)
-        self.assertEqual(sut.static_v(t=2, a=1, v_0=100), 102)
+        self.assertEqual(sut.v(t=0, a=1, v_0=100), 100)
+        self.assertEqual(sut.v(t=1, a=1, v_0=100), 101)
+        self.assertEqual(sut.v(t=2, a=1, v_0=100), 102)
 
-        self.assertEqual(sut.static_v(t=0, a=-1, v_0=0), 0)
-        self.assertEqual(sut.static_v(t=1, a=-1, v_0=0), -1)
+        self.assertEqual(sut.v(t=0, a=-1, v_0=0), 0)
+        self.assertEqual(sut.v(t=1, a=-1, v_0=0), -1)
 
-        self.assertEqual(sut.static_v(t=0, a=2, v_0=0), 0)
-        self.assertEqual(sut.static_v(t=1, a=2, v_0=0), 2)
-        self.assertEqual(sut.static_v(t=2, a=2, v_0=0), 4)
+        self.assertEqual(sut.v(t=0, a=2, v_0=0), 0)
+        self.assertEqual(sut.v(t=1, a=2, v_0=0), 2)
+        self.assertEqual(sut.v(t=2, a=2, v_0=0), 4)
 
     def test_t_from_v(self):
         sut = AccelerationMovementModel
 
-        self.assertEqual(sut.static_t_from_v(v=0, a=-1, v_0=3), 3 )
-        self.assertEqual(sut.static_s(t=3, a=-1, v_0=3, s_0=0), 4.5 )
+        self.assertEqual(sut.calculate_t_given_v(v=0, a=-1, v_0=3), 3)
+        self.assertEqual(sut.s(t=3, a=-1, v_0=3, s_0=0), 4.5)
 
-        self.assertEqual(sut.static_t_from_v(v=1, a=-1, v_0=3), 2)
-        self.assertEqual(sut.static_s(t=2, a=-1, v_0=3, s_0=0), 4)
+        self.assertEqual(sut.calculate_t_given_v(v=1, a=-1, v_0=3), 2)
+        self.assertEqual(sut.s(t=2, a=-1, v_0=3, s_0=0), 4)
 
 
 
     def test_s(self):
         sut = AccelerationMovementModel
 
-        self.assertEqual(sut.static_s(t=0, a=1, v_0=0, s_0=0), 0)
-        self.assertEqual(sut.static_s(t=1, a=1, v_0=0, s_0=0), 0.5)
-        self.assertEqual(sut.static_s(t=2, a=1, v_0=0, s_0=0), 2)
-        self.assertEqual(sut.static_s(t=3, a=1, v_0=0, s_0=0), 4.5)
-        self.assertEqual(sut.static_s(t=4, a=1, v_0=0, s_0=0), 8)
+        self.assertEqual(sut.s(t=0, a=1, v_0=0, s_0=0), 0)
+        self.assertEqual(sut.s(t=1, a=1, v_0=0, s_0=0), 0.5)
+        self.assertEqual(sut.s(t=2, a=1, v_0=0, s_0=0), 2)
+        self.assertEqual(sut.s(t=3, a=1, v_0=0, s_0=0), 4.5)
+        self.assertEqual(sut.s(t=4, a=1, v_0=0, s_0=0), 8)
 
-        self.assertEqual(sut.static_s(t=0, a=1, v_0=0, s_0=10), 10)
-        self.assertEqual(sut.static_s(t=4, a=1, v_0=0, s_0=10), 18)
+        self.assertEqual(sut.s(t=0, a=1, v_0=0, s_0=10), 10)
+        self.assertEqual(sut.s(t=4, a=1, v_0=0, s_0=10), 18)
 
-        self.assertEqual(sut.static_s(t=0, a=1, v_0=10, s_0=0), 0)
-        self.assertEqual(sut.static_s(t=1, a=1, v_0=10, s_0=0), 10.5)
-        self.assertEqual(sut.static_s(t=2, a=1, v_0=10, s_0=0), 22)
+        self.assertEqual(sut.s(t=0, a=1, v_0=10, s_0=0), 0)
+        self.assertEqual(sut.s(t=1, a=1, v_0=10, s_0=0), 10.5)
+        self.assertEqual(sut.s(t=2, a=1, v_0=10, s_0=0), 22)
 
 
 
@@ -185,40 +185,40 @@ class TestAccelerationMovementModel(unittest.TestCase):
 #     def test_a(self):
 #         sut = AccelerationMovementModelConstrained(10, 240)
 #
-#         self.assertEqual(sut.static_v(t=240, a=1, v_0=0), 240)
-#         self.assertEqual(sut.static_v(t=241, a=1, v_0=0), 240)
+#         self.assertEqual(sut.v(t=240, a=1, v_0=0), 240)
+#         self.assertEqual(sut.v(t=241, a=1, v_0=0), 240)
 #
-#         self.assertEqual(sut.static_v(t=140, a=1, v_0=100), 240)
-#         self.assertEqual(sut.static_v(t=141, a=1, v_0=100), 240)
+#         self.assertEqual(sut.v(t=140, a=1, v_0=100), 240)
+#         self.assertEqual(sut.v(t=141, a=1, v_0=100), 240)
 #
-#         self.assertEqual(sut.static_v(t=240, a=-1, v_0=0), -240)
-#         self.assertEqual(sut.static_v(t=241, a=-1, v_0=0), -240)
+#         self.assertEqual(sut.v(t=240, a=-1, v_0=0), -240)
+#         self.assertEqual(sut.v(t=241, a=-1, v_0=0), -240)
 #
-#         self.assertEqual(sut.static_v(t=120, a=2, v_0=0), 240)
-#         self.assertEqual(sut.static_v(t=121, a=2, v_0=0), 240)
+#         self.assertEqual(sut.v(t=120, a=2, v_0=0), 240)
+#         self.assertEqual(sut.v(t=121, a=2, v_0=0), 240)
 #
 #     # def test_v(self):
 #     #     start_time = 0
 #     #     sut = AccelerationMovementModel(10, 240)
 #     #
-#     #     self.assertEqual(sut.static_v(t=0, a=1, v_0=0), 0)
-#     #     self.assertEqual(sut.static_v(t=1, a=1, v_0=0), 1)
-#     #     self.assertEqual(sut.static_v(t=2, a=1, v_0=0), 2)
-#     #     self.assertEqual(sut.static_v(t=3, a=1, v_0=0), 3)
-#     #     self.assertEqual(sut.static_v(t=240, a=1, v_0=0), 240)
-#     #     self.assertEqual(sut.static_v(t=241, a=1, v_0=0), 240)
+#     #     self.assertEqual(sut.v(t=0, a=1, v_0=0), 0)
+#     #     self.assertEqual(sut.v(t=1, a=1, v_0=0), 1)
+#     #     self.assertEqual(sut.v(t=2, a=1, v_0=0), 2)
+#     #     self.assertEqual(sut.v(t=3, a=1, v_0=0), 3)
+#     #     self.assertEqual(sut.v(t=240, a=1, v_0=0), 240)
+#     #     self.assertEqual(sut.v(t=241, a=1, v_0=0), 240)
 #     #
-#     #     self.assertEqual(sut.static_v(t=0, a=-1, v_0=0), 0)
-#     #     self.assertEqual(sut.static_v(t=1, a=-1, v_0=0), -1)
-#     #     self.assertEqual(sut.static_v(t=100, a=-1, v_0=0), -100)
-#     #     self.assertEqual(sut.static_v(t=240, a=-1, v_0=0), -240)
-#     #     self.assertEqual(sut.static_v(t=240, a=-1, v_0=0), -240)
+#     #     self.assertEqual(sut.v(t=0, a=-1, v_0=0), 0)
+#     #     self.assertEqual(sut.v(t=1, a=-1, v_0=0), -1)
+#     #     self.assertEqual(sut.v(t=100, a=-1, v_0=0), -100)
+#     #     self.assertEqual(sut.v(t=240, a=-1, v_0=0), -240)
+#     #     self.assertEqual(sut.v(t=240, a=-1, v_0=0), -240)
 #     #
-#     #     self.assertEqual(sut.static_v(t=0, a=2, v_0=0), 0)
-#     #     self.assertEqual(sut.static_v(t=1, a=2, v_0=0), 2)
-#     #     self.assertEqual(sut.static_v(t=2, a=2, v_0=0), 4)
-#     #     self.assertEqual(sut.static_v(t=120, a=2, v_0=0), 240)
-#     #     self.assertEqual(sut.static_v(t=121, a=2, v_0=0), 240)
+#     #     self.assertEqual(sut.v(t=0, a=2, v_0=0), 0)
+#     #     self.assertEqual(sut.v(t=1, a=2, v_0=0), 2)
+#     #     self.assertEqual(sut.v(t=2, a=2, v_0=0), 4)
+#     #     self.assertEqual(sut.v(t=120, a=2, v_0=0), 240)
+#     #     self.assertEqual(sut.v(t=121, a=2, v_0=0), 240)
 #
 #     # @parameterized.expand([
 #     #     [(0, 0),        120,        (100, 100),         (84, 84)],

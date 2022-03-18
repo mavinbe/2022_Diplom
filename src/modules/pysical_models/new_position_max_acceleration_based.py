@@ -8,25 +8,21 @@ def v(t, a, v_0):
 
 
 class AccelerationMovementModel:
-    def __init__(self, a_0, v_0, s_0):
-        self.a_0 = a_0
-        self.v_0 = v_0
-        self.s_0 = s_0
 
     @staticmethod
-    def static_v(t, a, v_0):
+    def v(t, a, v_0):
         return a * t + v_0
 
     @staticmethod
-    def static_s(t, a, v_0, s_0):
+    def s(t, a, v_0, s_0):
         return a / 2 * t ** 2 + v_0 * t + s_0
 
     @staticmethod
-    def static_t_from_v(v, a, v_0):
+    def calculate_t_given_v(v, a, v_0):
         return (v - v_0) / a
 
     @staticmethod
-    def static_t_from_s(s, a, v_0, s_0):
+    def calculate_t_given_s(s, a, v_0, s_0):
         front = - (v_0/a)
         in_sqrt =  (v_0/a)**2 - 2*s_0/a + 2*s/a
         back = None
@@ -39,8 +35,8 @@ class AccelerationMovementModel:
         return (front - back, front + back)
 
     @staticmethod
-    def static_nearest_t_from_s(s, a, v_0, s_0):
-        t = AccelerationMovementModel.static_t_from_s(s, a, v_0, s_0)
+    def calculate_t_given_s_nearest_ahead(s, a, v_0, s_0):
+        t = AccelerationMovementModel.calculate_t_given_s(s, a, v_0, s_0)
         if t is None:
             return None
         if 3 > t[0] and 3 > t[1]:
@@ -50,11 +46,6 @@ class AccelerationMovementModel:
         else:
             return t[1]
 
-    def v(self, t):
-        return AccelerationMovementModel.static_v(t, self.a_0, self.v_0)
-
-    def t_from_v(self, v):
-        return AccelerationMovementModel.static_t_from_v(v, self.a_0, self.v_0)
 
 
 
