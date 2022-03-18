@@ -85,7 +85,10 @@ if __name__ == '__main__':
     # movement = MovementPredictionModel(1, 1, 0, ([0, 1], [1, 3], [3, 5]))
     # t = np.linspace(0, 1, 2*100), np.linspace(1, 3, 3*res), np.linspace(3, 5, 3*res)
 
-    movement = MovementPredictionModel(1, 3, 0, ([0, 0], [0, 0], [0, 5]))
+    # movement = MovementPredictionModel(1, 3, 0, ([0, 0], [0, 0], [0, 5]))
+    # t = np.linspace(0, 1, 2 * 100), np.linspace(1, 3, 3 * res), np.linspace(3, 5, 3 * res)
+
+    movement = MovementPredictionModel(1, 2, 0, ([0, 0.55], [0, 0], [0.55, 5]))
     t = np.linspace(0, 1, 2 * 100), np.linspace(1, 3, 3 * res), np.linspace(3, 5, 3 * res)
 
     # make data
@@ -105,9 +108,11 @@ if __name__ == '__main__':
     #ax.plot(t, s, linewidth=2.0)
 
     ax.set(xlim=(0, 8), xticks=np.arange(0, 8),
-           ylim=(-2, 8), yticks=np.arange(-2, 8))
+           ylim=(-8, 8), yticks=np.arange(-8, 8))
     ax.axhline(y=0, color='k', linestyle=':')
     ax.axvline(x=0, color='k')
+    ax.axhline(y=0, color='g', linestyle=':')
+    ax.axhline(y=4.5, color='b', linestyle=':')
     print(f'v {v[-1][-1]}')
     print(f's {s[-1][-1]}')
 
