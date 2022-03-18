@@ -10,7 +10,7 @@ def plot_movement(t_list, a_list, s_list, v_list, v_target, t_where_v_is_target,
     #ax.plot(t, a_list, 'm', linewidth=2.0)
     ax.plot(t_list, v_list, 'g', linewidth=2.0)
     ax.plot(t_list, s_list, 'b', linewidth=2.0)
-    ax.set(xlim=(0, 8), xticks=np.arange(0, 8),
+    ax.set(xlim=(0, 12), xticks=np.arange(0, 12),
            ylim=(-8, 8), yticks=np.arange(-8, 8))
     ax.axhline(y=0, color='k')
     ax.axvline(x=0, color='k')
