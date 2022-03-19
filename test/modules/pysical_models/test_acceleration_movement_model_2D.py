@@ -12,14 +12,14 @@ class TestAccelerationMovementModel2D(unittest.TestCase):
     @parameterized.expand([
         [{
             "title": "perfekt match",
-            "a_0": -1,
-            "v_0": 3,
-            "s_0": 0,
-            "v_target": 0,
-            "s_target": 4.5,
-            "t_where_v_is_target": 3,
-            "s_on_t_where_v_is_target": 4.5,
-            "t_next_where_s_is_target": 3,
+            "a_0": [-1,0],
+            "v_0": [3,0],
+            "s_0": [0,0],
+            "v_target": [0,0],
+            "s_target": [4.5,0],
+            "t_where_v_is_target": [3,None],
+            "s_on_t_where_v_is_target": [4.5,None],
+            "t_next_where_s_is_target": [3,0],
             "a_is": "perfekt"
         }],
         [{
@@ -120,28 +120,28 @@ class TestAccelerationMovementModel2D(unittest.TestCase):
     def test_calculate_t_given_v(self):
         sut = AccelerationMovementModel2D
 
-        self.assertEqual(sut.calculate_t_given_v(v=0, a=-1, v_0=3), 3)
-        self.assertEqual(sut.s(t=3, a=-1, v_0=3, s_0=0), 4.5)
+        self.assertEqual(sut.calculate_t_given_v(v=[0,0], a=[-1,0], v_0=[3,0]), [3,None])
+        self.assertEqual(sut.s(t=3, a=[-1,0], v_0=[3,0], s_0=[0,0]), [4.5,0])
 
-        self.assertEqual(sut.calculate_t_given_v(v=1, a=-1, v_0=3), 2)
-        self.assertEqual(sut.s(t=2, a=-1, v_0=3, s_0=0), 4)
+        self.assertEqual(sut.calculate_t_given_v(v=[1,0], a=[-1,0], v_0=[3,0]), [2,None])
+        self.assertEqual(sut.s(t=2, a=[-1,0], v_0=[3,0], s_0=[0,0]), [4,0])
 
 
     def test_s(self):
         sut = AccelerationMovementModel2D
 
-        self.assertEqual(sut.s(t=0, a=1, v_0=0, s_0=0), 0)
-        self.assertEqual(sut.s(t=1, a=1, v_0=0, s_0=0), 0.5)
-        self.assertEqual(sut.s(t=2, a=1, v_0=0, s_0=0), 2)
-        self.assertEqual(sut.s(t=3, a=1, v_0=0, s_0=0), 4.5)
-        self.assertEqual(sut.s(t=4, a=1, v_0=0, s_0=0), 8)
+        self.assertEqual(sut.s(t=0, a=[1,0], v_0=[0,0], s_0=[0,0]), [0,0])
+        self.assertEqual(sut.s(t=1, a=[1,0], v_0=[0,0], s_0=[0,0]), [0.5,0])
+        self.assertEqual(sut.s(t=2, a=[1,0], v_0=[0,0], s_0=[0,0]), [2,0])
+        self.assertEqual(sut.s(t=3, a=[1,0], v_0=[0,0], s_0=[0,0]), [4.5,0])
+        self.assertEqual(sut.s(t=4, a=[1,0], v_0=[0,0], s_0=[0,0]), [8,0])
 
-        self.assertEqual(sut.s(t=0, a=1, v_0=0, s_0=10), 10)
-        self.assertEqual(sut.s(t=4, a=1, v_0=0, s_0=10), 18)
+        self.assertEqual(sut.s(t=0, a=[1,0], v_0=[0,0], s_0=[10,0]), [10,0])
+        self.assertEqual(sut.s(t=4, a=[1,0], v_0=[0,0], s_0=[10,0]), [18,0])
 
-        self.assertEqual(sut.s(t=0, a=1, v_0=10, s_0=0), 0)
-        self.assertEqual(sut.s(t=1, a=1, v_0=10, s_0=0), 10.5)
-        self.assertEqual(sut.s(t=2, a=1, v_0=10, s_0=0), 22)
+        self.assertEqual(sut.s(t=0, a=[1,0], v_0=[10,0], s_0=[0,0]), [0,0])
+        self.assertEqual(sut.s(t=1, a=[1,0], v_0=[10,0], s_0=[0,0]), [10.5,0])
+        self.assertEqual(sut.s(t=2, a=[1,0], v_0=[10,0], s_0=[0,0]), [22,0])
 
 
 if __name__ == '__main__':

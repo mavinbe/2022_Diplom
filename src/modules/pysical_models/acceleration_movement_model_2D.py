@@ -15,8 +15,19 @@ class AccelerationMovementModel2D:
         return a * t + v_0
 
     @classmethod
-    def s(cls, t, a, v_0, s_0):
+    def s_1D(cls, t, a, v_0, s_0):
+        if t is None:
+            return None
         return a / 2 * t ** 2 + v_0 * t + s_0
+
+    @classmethod
+    def s(cls, t, a, v_0, s_0):
+        if not hasattr(t, "__getitem__"):
+            t = [t] * 2
+        s_list = []
+        for i in range(len(a)):
+            s_list.append(cls.s_1D(t[i], a[i], v_0[i], s_0[i]))
+        return s_list
 
     @classmethod
     def calculate_t_given_v_1D(cls, v, a, v_0):
