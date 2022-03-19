@@ -82,11 +82,70 @@ class TestNewPositionMaxAcceleartionBased(unittest.TestCase):
                          paras["calculate_a"])
 
 
+    @parameterized.expand([
+
+        [{
+            "title": "to slow",
+            "a_0": -1,
+            "v_0": 2,
+            "s_0": 0,
+            "v_target": 0,
+            "s_target": 4.5,
+            "v_direction": -1,
+            "to_change_a": True,
+            "determ_a_without_v_constrains": 1,
+            "calculate_a": 1,
+        }],
+        [{
+            "title": "perfekt match",
+            "a_0": -1,
+            "v_0": 3,
+            "s_0": 0,
+            "v_target": 0,
+            "s_target": 4.5,
+            "v_direction": -1,
+            "to_change_a": False,
+            "determ_a_without_v_constrains": -1,
+            "calculate_a": -1,
+        }],
+        [{
+            "title": "to fast",
+            "a_0": -1,
+            "v_0": 3,
+            "s_0": 0,
+            "v_target": 0,
+            "s_target": 4,
+            "v_direction": -1,
+            "to_change_a": False,
+            "determ_a_without_v_constrains": -1,
+            "calculate_a": -1,
+        }],
+        [{
+            "title": "to fast 2",
+            "a_0": -1,
+            "v_0": 4,
+            "s_0": 0,
+            "v_target": 0,
+            "s_target": 4,
+            "v_direction": -1,
+            "to_change_a": False,
+            "determ_a_without_v_constrains": -1,
+            "calculate_a": -1,
+        }],
+    ])
+    def test_visualize_optimal_solution(self, paras):
+        a_0 = paras["a_0"]
+        v_0 = paras["v_0"]
+        s_0 = paras["s_0"]
+        v_target = paras["v_target"]
+        s_target = paras["s_target"]
+
+        sut = NewPositionMaxAcceleartionBased(s_target=paras["s_target"], v_target=paras["v_target"], v_max=5, a_max=1)
 
         res = 10
         a, v, s = a_0, v_0, s_0
 
-        a_list, s_list, v_list = [],[],[]
+        a_list, s_list, v_list = [], [], []
         t = np.linspace(0, 10, 11 * res)
         a_last, v_last, s_last = AccelerationMovementModel.state(0, 1, v, s)
 
@@ -97,7 +156,7 @@ class TestNewPositionMaxAcceleartionBased(unittest.TestCase):
             t_last = _t
             a_last = sut.calculate_a(time_delta=t_delta, v_0=v_last, s_0=s_last)
 
-            #a_last = sut.calculate_a(time_delta=t_delta, v_0=v_last, s_0=s_last)
+            # a_last = sut.calculate_a(time_delta=t_delta, v_0=v_last, s_0=s_last)
 
             a_last, v_last, s_last = AccelerationMovementModel.state(t_delta, a_last, v_last, s_last)
             if abs(s_target - s_last) < 0.01 and abs(v_target - v_last) < 0.05:
@@ -107,11 +166,10 @@ class TestNewPositionMaxAcceleartionBased(unittest.TestCase):
             v_list.append(v_last)
             s_list.append(s_last)
 
+        plot_movement(t, a_list, s_list, v_list, v_target, None, s_target, None, f'optimal_solution - {paras["title"]}')
 
-        plot_movement(t, a_list, s_list, v_list, v_target, None, s_target, None, "guessed")
-
-        #calculate_a_list = [sut.calculate_a(t, v_0, s_0) for t in range(10)]
-        #self.assertEqual(True, False)
+        # calculate_a_list = [sut.calculate_a(t, v_0, s_0) for t in range(10)]
+        # self.assertEqual(True, False)
 
     def generate_plot_data(self, a_0, s_0, v_0, res):
         movement = AccelerationMovementModel
