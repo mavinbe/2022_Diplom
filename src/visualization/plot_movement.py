@@ -34,6 +34,7 @@ def plot_movement_2D(t_list, a_list_2D, s_list_2D, v_list_2D, v_target_2D, t_whe
         # plot
         ax = ax_2D[i]
         #ax.plot(t, a_list, 'm', linewidth=2.0)
+        ax.plot(t_list, v_list, 'g', linewidth=2.0)
         ax.plot(t_list, s_list, 'b', linewidth=2.0)
         ax.set(xlim=(0, 12), xticks=np.arange(0, 12),
                ylim=(-8, 9), yticks=np.arange(-8, 9))
