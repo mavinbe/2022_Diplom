@@ -4,7 +4,7 @@ import numpy as np
 from parameterized import parameterized
 
 from modules.pysical_models.acceleration_movement_model import AccelerationMovementModel
-from visualization.plot_movement import plot_movement
+from visualization.plot_movement import plot_movement, plot_movement_2D
 
 
 class TestAccelerationMovementModel(unittest.TestCase):
@@ -77,8 +77,11 @@ class TestAccelerationMovementModel(unittest.TestCase):
 
         a_list, s_list, t, v_list = self.generate_plot_data(a_0, s_0, v_0, 10)
 
-        plot_movement(t, a_list, s_list, v_list, v_target, t_where_v_is_target, s_target, t_next_where_s_is_target,
-                      sdf["title"])
+        # plot_movement(t, a_list, s_list, v_list, v_target, t_where_v_is_target, s_target, t_next_where_s_is_target,
+        #               sdf["title"])
+
+        # plot_movement_2D(t, [a_list,a_list], [s_list,s_list], [v_list,v_list], [v_target,v_target], [t_where_v_is_target,t_where_v_is_target], [s_target,s_target], [t_next_where_s_is_target,t_next_where_s_is_target],
+        #               sdf["title"])
         a_is = None
         if t_next_where_s_is_target == t_where_v_is_target:
             a_is = "perfekt"
