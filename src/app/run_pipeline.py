@@ -4,6 +4,7 @@ import mediapipe as mp
 import numpy as np
 import pickle
 
+from media.VideoStreamProvider import VideoStreamProvider
 from modules.object_tracker import ObjectTracker
 from modules.pose_detector import PoseDetector
 from utils.general import LOGGER
@@ -126,15 +127,17 @@ def run(handle_image, serialize=True):
 
         object_tracker = ObjectTracker(show_vid=False)
         frame_count = 0
-        img_stream = cv2.VideoCapture(ROOT_DIR+"/data/05_20211102141647/output014.mp4")
-        height, width = determ_dimensions_of_video(img_stream)
+        #img_stream = cv2.VideoCapture(ROOT_DIR+"/data/05_20211102141647/output014.mp4")
+        #height, width = determ_dimensions_of_video(img_stream)
+        img_stream = VideoStreamProvider(ROOT_DIR + "/data/05_20211102141647/output014.mp4", play_back_speed=0.4)
+        height, width = (1920, 2560)
         movement_constrains_model = None
         zoom_constrains_model = None
 
         serialize_path = create_serialize_path() if serialize else None
         serialize_store = {} if serialize_path else None
 
-        while img_stream.isOpened():
+        while True:
             current_time = time_sync()
             t = {"start": current_time, "read_image": None, "object_track": None, "pose_detect": None, "pose_detect_count": 0, "camera_movement": None, "handle_image": None}
             frame_count += 1
