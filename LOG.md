@@ -21,6 +21,10 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
    3. einzelne körperteile verfolgen: hände
    4. zoom auf augen, nase
 
+
+![2022-03-21T10:57:04_22b6fe3.gif](version_control_meta/2022-03-21T10:57:04_22b6fe3.gif)
+version 0.2
+
 ![2022-03-21T09:34:33_f1673ef.gif](version_control_meta/2022-03-21T09:34:33_f1673ef.gif)
 
 
