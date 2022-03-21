@@ -4,6 +4,7 @@ import mediapipe as mp
 import numpy as np
 import pickle
 
+from expression.run_list import run_list, Pause, CuePoint, LandmarkTarget
 from media.VideoStreamProvider import VideoStreamProvider
 from modules.object_tracker import ObjectTracker
 from modules.pose_detector import PoseDetector
@@ -126,14 +127,18 @@ def run(handle_image, serialize=True):
         frame_count = 0
         #img_stream = cv2.VideoCapture(ROOT_DIR+"/data/05_20211102141647/output014.mp4")
         #height, width = determ_dimensions_of_video(img_stream)
-        img_stream = VideoStreamProvider(ROOT_DIR + "/data/05_20211102141647/output014.mp4", play_back_speed=0.4)
+        img_stream = VideoStreamProvider(ROOT_DIR + "/data/05_20211102141647/output017.mp4", play_back_speed=0.4)
         height, width = (1920, 2560)
         movement_constrains_model = None
         zoom_constrains_model = None
 
         serialize_path = create_serialize_path() if serialize else None
         serialize_store = {} if serialize_path else None
-
+        run_item = None
+        _run_list = run_list()
+        current_box = None
+        current_position = np.asarray((int(width / 2), int(height / 2)))
+        current_zoom = 1
         while True:
             current_time = time_sync()
             t = {"start": current_time, "read_image": None, "object_track": None, "pose_detect": None, "pose_detect_count": 0, "camera_movement": None, "handle_image": None}
@@ -141,7 +146,8 @@ def run(handle_image, serialize=True):
             serialize_store[frame_count] = {}
             try:
                 # t_read_image
-                image = handle_read_image(frame_count, img_stream, t)
+                original_image = handle_read_image(frame_count, img_stream, t)
+                image = original_image
 
                 # t_object_track
                 object_detection_dict, confirmed_id_list = handle_object_track(image, object_tracker, t)
@@ -157,23 +163,52 @@ def run(handle_image, serialize=True):
 
                 pose_detect_dict_in_global = handle_pose_detect_list(image, object_detection_dict_filtered, pose_detector_pool, t)
                 pose_to_follow = pose_detect_dict_in_global[pose_id_to_follow]
-
+                # print(pose_id_to_follow)
+                # print(pose_detect_dict_in_global)
                 # t_post
-                if frame_count > 20:
+                if frame_count > 65:
+
+                    #print(run_item)
+                    if run_item is None:
+                        run_item = _run_list.pop(0)
+                        if isinstance(run_item, Pause):
+                            run_item.start(time_sync())
+                        if isinstance(run_item, LandmarkTarget):
+                            run_item.start(time_sync(), current_position)
+                    if isinstance(run_item, Pause):
+                        if run_item.is_finished(time_sync()):
+                            run_item = None
+                    if isinstance(run_item, LandmarkTarget):
+                        if run_item.is_finished(pose_to_follow):
+                            run_item = None
+                    if isinstance(run_item, LandmarkTarget):
+                        image, current_box, current_position, current_zoom = handle_camera_movement_with_LandmarkTarget(image, pose_to_follow,
+                                                                           run_item, t)
+                        print("landmark: "+str(current_zoom))
+                    else:
+                        if current_box:
+                            image = zoom(image, current_box)
+                        t["camera_movement"] = time_sync()
+
+
+                elif frame_count > 15:
                     movement_constrains_model = movement_constrains_model if movement_constrains_model else NewPositionMaxSpeedConstrained(
                         time_sync(),
-                        np.asarray((int(width / 2), int(height / 2))), 130)
+                        np.asarray((int(width / 2), int(height / 2))), 360)
                     zoom_constrains_model = zoom_constrains_model if zoom_constrains_model else NewPositionMaxSpeedConstrained(
-                        time_sync(),
-                                                                           np.asarray([1]), 1)
-                    image = handle_camera_movement(image, pose_to_follow, movement_constrains_model, zoom_constrains_model,  t)
+                        time_sync(), np.asarray([1]), 2)
+                    image, current_box, current_position, current_zoom = handle_camera_movement(image, pose_to_follow,
+                                                                                movement_constrains_model,
+                                                                                zoom_constrains_model, t)
+                    print("intro: " + str(current_zoom))
+
                 else:
                     t["camera_movement"] = time_sync()
                 # t_handle_image
                 handle_image(image, t)
 
-                LOGGER.info(
-                    f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)')
+                # LOGGER.info(
+                #     f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)')
 
 
             except Warning as warn:
@@ -216,19 +251,35 @@ def handle_pose_detect(image, object_detection_dict, pose_detector, t):
     t["pose_detect"] = time_sync()
     return pose_detect_dict_in_global
 
+def handle_camera_movement_with_LandmarkTarget(image, pose_detect_dict_in_global, landmark_target, t):
+    target_position = determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
+                                                                      landmark_target.target)
+    if target_position is None:
+        t["camera_movement"] = time_sync()
+        raise Warning("No Landmark found " + str(PoseLandmark.NOSE))
+    landmark_target.position_model.move_to_target(target_position, time_sync())
+    #zoom_constrains_model.move_to_target(np.asarray([20]), time_sync())
+    current_position = landmark_target.position_model.get_position()
+    current_zoom = 10
+    current_box = static_zoom_target_box(image.shape, current_zoom, current_position)
+    image = zoom(image, current_box)
+    t["camera_movement"] = time_sync()
+    return image, current_box, np.array(current_position), current_zoom
 
 def handle_camera_movement(image, pose_detect_dict_in_global, position_model, zoom_constrains_model, t):
-    target_position = determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
-                                                                      PoseLandmark.NOSE)
+    target_position = np.array(determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
+                                                                      PoseLandmark.NOSE))
     if target_position is None:
         t["camera_movement"] = time_sync()
         raise Warning("No Landmark found " + str(PoseLandmark.NOSE))
     position_model.move_to_target(target_position, time_sync())
     zoom_constrains_model.move_to_target(np.asarray([20]), time_sync())
-    target_box = static_zoom_target_box(image.shape, zoom_constrains_model.get_position()[0], position_model.get_position())
-    image = zoom(image, target_box)
+    current_position = position_model.get_position()
+    current_zoom = zoom_constrains_model.get_position()[0]
+    current_box = static_zoom_target_box(image.shape, current_zoom, current_position)
+    image = zoom(image, current_box)
     t["camera_movement"] = time_sync()
-    return image
+    return image, current_box, np.array(current_position), current_zoom
 
 
 def write_detection(frame_count, object_detection_dict, serialize_path):

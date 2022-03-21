@@ -25,7 +25,7 @@ class NewPositionMaxSpeedConstrained:
         # print(target.shape)
         # print(target)
         if self.position.shape != target.shape:
-            raise RuntimeError("self.position.shape != target.shape")
+            raise RuntimeError("self.position.shape != target.shape "+ str(self.position.shape)+" "+str(target.shape))
         max_velocity_for_time_delta = self.max_velocity * time_delta
         velocity = NewPositionMaxSpeedConstrained.calculate_velocity_for_dimensions(self.position, max_velocity_for_time_delta, target)
 
