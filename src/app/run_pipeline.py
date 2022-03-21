@@ -171,18 +171,22 @@ def run(handle_image, serialize=True):
                 if frame_count > 1:
 
                     #print(run_item)
+                    # start run_items
                     if run_item is None:
                         run_item = _run_list.pop(0)
                         if isinstance(run_item, Pause):
                             run_item.start(time_sync())
                         if isinstance(run_item, LandmarkTarget):
                             run_item.start(time_sync(), current_position, current_zoom)
+
+                    # clean up run_items
                     if isinstance(run_item, Pause):
                         if run_item.is_finished(time_sync()):
                             run_item = None
                     if isinstance(run_item, LandmarkTarget):
                         if run_item.is_finished(pose_to_follow):
                             run_item = None
+                    # process run_item
                     if isinstance(run_item, Pause):
                         print("Pause: ")
                     if isinstance(run_item, LandmarkTarget):
