@@ -137,8 +137,8 @@ def run(handle_image, serialize=True):
         run_item = None
         _run_list = run_list()
         current_box = None
-        current_position = np.asarray((int(width / 2), int(height / 2)))
-        current_zoom = 1
+        current_position = np.array((int(width / 2), int(height / 2)))
+        current_zoom = np.array([1])
         while True:
             current_time = time_sync()
             t = {"start": current_time, "read_image": None, "object_track": None, "pose_detect": None, "pose_detect_count": 0, "camera_movement": None, "handle_image": None}
@@ -174,13 +174,15 @@ def run(handle_image, serialize=True):
                         if isinstance(run_item, Pause):
                             run_item.start(time_sync())
                         if isinstance(run_item, LandmarkTarget):
-                            run_item.start(time_sync(), current_position)
+                            run_item.start(time_sync(), current_position, current_zoom)
                     if isinstance(run_item, Pause):
                         if run_item.is_finished(time_sync()):
                             run_item = None
                     if isinstance(run_item, LandmarkTarget):
                         if run_item.is_finished(pose_to_follow):
                             run_item = None
+                    if isinstance(run_item, Pause):
+                        print("Pause: ")
                     if isinstance(run_item, LandmarkTarget):
                         image, current_box, current_position, current_zoom = handle_camera_movement_with_LandmarkTarget(image, pose_to_follow,
                                                                            run_item, t)
@@ -258,13 +260,13 @@ def handle_camera_movement_with_LandmarkTarget(image, pose_detect_dict_in_global
         t["camera_movement"] = time_sync()
         raise Warning("No Landmark found " + str(PoseLandmark.NOSE))
     landmark_target.position_model.move_to_target(target_position, time_sync())
-    #zoom_constrains_model.move_to_target(np.asarray([20]), time_sync())
+    landmark_target.zoom_model.move_to_target(landmark_target.target_zoom, time_sync())
     current_position = landmark_target.position_model.get_position()
-    current_zoom = 10
+    current_zoom = landmark_target.zoom_model.get_position()[0]
     current_box = static_zoom_target_box(image.shape, current_zoom, current_position)
     image = zoom(image, current_box)
     t["camera_movement"] = time_sync()
-    return image, current_box, np.array(current_position), current_zoom
+    return image, current_box, np.array(current_position), np.array([current_zoom])
 
 def handle_camera_movement(image, pose_detect_dict_in_global, position_model, zoom_constrains_model, t):
     target_position = np.array(determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
@@ -279,7 +281,7 @@ def handle_camera_movement(image, pose_detect_dict_in_global, position_model, zo
     current_box = static_zoom_target_box(image.shape, current_zoom, current_position)
     image = zoom(image, current_box)
     t["camera_movement"] = time_sync()
-    return image, current_box, np.array(current_position), current_zoom
+    return image, current_box, np.array(current_position), np.array([current_zoom])
 
 
 def write_detection(frame_count, object_detection_dict, serialize_path):

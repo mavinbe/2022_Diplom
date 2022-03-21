@@ -15,6 +15,7 @@ class NewPositionMaxSpeedConstrained:
         target = np.asarray(target)
         time_delta = self._calculate_time_delta(new_time)
         new_position = self._calculate_new_position(target, time_delta)
+
         self.current_time = new_time
         self.position = new_position
 

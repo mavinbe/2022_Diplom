@@ -24,23 +24,28 @@ class Pause(CuePoint):
         self.start_time = start_time
 
     def is_finished(self, time):
-        print(time - self.start_time)
         return time - self.start_time >= self.seconds
 
 
 class LandmarkTarget(CuePoint):
-    def __init__(self, target):
+    def __init__(self, target, target_zoom=8):
         self.target = target
+        self.target_zoom = np.array([target_zoom])
         self.position_model = None
+        self.zoom_model = None
 
-    def start(self, start_time, start_position):
+    def start(self, start_time, start_position, start_zoom):
         self.position_model = NewPositionMaxSpeedConstrained(start_time, start_position, 240)
+        self.zoom_model = NewPositionMaxSpeedConstrained(
+                        time_sync(), start_zoom, 3)
 
     def is_finished(self, pose_detect_dict_in_global):
+        return self._is_position_finished(pose_detect_dict_in_global) and self._is_zoom_finished(pose_detect_dict_in_global)
+
+    def _is_position_finished(self, pose_detect_dict_in_global):
         target_position = determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
                                                                   self.target)
         current_position = self.position_model.get_position()
-        print((target_position, current_position))
         if target_position is None or current_position is None:
             return False
         target_position = np.array(target_position)
@@ -50,12 +55,19 @@ class LandmarkTarget(CuePoint):
 
         return magnitude < 5
 
+    def _is_zoom_finished(self, pose_detect_dict_in_global):
+        diff = self.target_zoom - np.array([self.zoom_model.get_position()])
+
+        magnitude = np.linalg.norm(diff)
+        print(magnitude)
+        return magnitude < 0.1
+
 
 def run_list():
     return [
         Pause(1.5),
         LandmarkTarget(PoseLandmark.NOSE),
-        Pause(0.3),
+        Pause(1.5),
         LandmarkTarget(PoseLandmark.RIGHT_SHOULDER),
         Pause(0.3),
         LandmarkTarget(PoseLandmark.RIGHT_HIP),
