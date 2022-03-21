@@ -29,4 +29,4 @@ if __name__ == '__main__':
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                 rezied_images.append(cv2.resize(image, None, fx=0.1, fy=0.1, interpolation=cv2.INTER_NEAREST))
 
-        imageio.mimsave(opt.output_file, rezied_images)
+        imageio.mimsave(opt.output_file, rezied_images, fps=2.5)
