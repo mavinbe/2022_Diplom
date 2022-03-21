@@ -189,11 +189,12 @@ def run(handle_image, serialize=True):
                         run_item = None
                 # process run_item
                 if isinstance(run_item, Pause):
-                    print("Pause: ")
+                    pass
+                    #print("Pause: ")
                 if isinstance(run_item, LandmarkTarget):
                     image, current_box, current_position, current_zoom = handle_camera_movement_with_LandmarkTarget(image, pose_to_follow,
                                                                        run_item, t)
-                    print("landmark: "+str(current_zoom))
+                    #print("landmark: "+str(current_zoom))
                 else:
                     if current_box:
                         image = zoom(image, current_box)
@@ -206,8 +207,8 @@ def run(handle_image, serialize=True):
                 # t_handle_image
                 handle_image(image, t)
 
-                # LOGGER.info(
-                #     f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)')
+                LOGGER.info(
+                    f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)')
 
 
             except Warning as warn:
