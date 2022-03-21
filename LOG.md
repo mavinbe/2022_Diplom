@@ -14,6 +14,27 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Logs
 
+### 29 -- Mo 21. Maerz
+1. verschiedene Befehle orchestrieren
+   1. totale
+   2. muster fuß bis kopf oder körper scan
+   3. einzelne körperteile verfolgen: hände
+   4. zoom auf augen, nase
+
+![2022-03-21T09:17:04_fcd2e19.gif](version_control_meta/2022-03-21T09:17:04_fcd2e19.gif)
+
+
+---
+
+### 28 -- Sa 19. Maerz
+### 27 -- Fr 18. Maerz
+### 26 -- Do 17. Maerz
+### 25 -- Mi 16. Maerz
+
+#### Reflection 
+I totaly sucked, I lost focus from the imported stuff, to be prepared for the probeaufbau week and get lost in details, about pysical movement models
+
+
 ### 24 -- Di 15. Maerz
 1. verschiedene Befehle orchestrieren
    1. totale
