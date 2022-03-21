@@ -28,6 +28,9 @@ version 0.2
 ![2022-03-21T09:34:33_f1673ef.gif](version_control_meta/2022-03-21T09:34:33_f1673ef.gif)
 
 
+#### DONE
+1. DONE
+
 ---
 
 ### 28 -- Sa 19. Maerz
