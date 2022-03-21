@@ -106,17 +106,14 @@ class PoseDetectorPool:
 def handle_pose_detect_list(image, object_detection_dict, pose_detector_pool, t):
     pose_detect_dict_in_global_dict = {}
     #print(object_detection_dict)
-    # for key in object_detection_dict:
-    #     # print(key)
-    #     # print(pose_detector_pool.get(key))
-    #     pose_detect_dict, pose_detect_dict_in_global = inference_pose(pose_detector_pool.get(key), image,
-    #                                                                   object_detection_dict,
-    #                                                                   key)
-    #     pose_detect_dict_in_global_dict[key] = pose_detect_dict_in_global
-    key = calculate_newest_track_id(object_detection_dict)
-    _, pose_detect_dict_in_global_dict[key] = inference_pose(pose_detector_pool.get(key), image,
-                                                             object_detection_dict,
-                                                             key)
+    for key in object_detection_dict:
+        # print(key)
+        # print(pose_detector_pool.get(key))
+        pose_detect_dict, pose_detect_dict_in_global = inference_pose(pose_detector_pool.get(key), image,
+                                                                      object_detection_dict,
+                                                                      key)
+        pose_detect_dict_in_global_dict[key] = pose_detect_dict_in_global
+
     t["pose_detect"] = time_sync()
     t["pose_detect_count"] = len(pose_detect_dict_in_global_dict)
     return pose_detect_dict_in_global_dict
@@ -153,10 +150,13 @@ def run(handle_image, serialize=True):
                 # t_pose_detect
                 pose_detect_dict_in_global = None
                 #pose_detect_dict_in_global = handle_pose_detect(image, object_detection_dict, pose_detector, t)
+                pose_id_to_follow = calculate_oldest_track_id(
+                    object_detection_dict)
+                poses_to_detect = [pose_id_to_follow]
+                object_detection_dict_filtered = {your_key: object_detection_dict[your_key] for your_key in poses_to_detect}
 
-                pose_detect_dict_in_global_dict = handle_pose_detect_list(image, object_detection_dict, pose_detector_pool, t)
-                pose_detect_dict_in_global = pose_detect_dict_in_global_dict[calculate_newest_track_id(
-                                                                      object_detection_dict)]
+                pose_detect_dict_in_global = handle_pose_detect_list(image, object_detection_dict_filtered, pose_detector_pool, t)
+                pose_to_follow = pose_detect_dict_in_global[pose_id_to_follow]
 
                 # t_post
                 if frame_count > 20:
@@ -166,7 +166,7 @@ def run(handle_image, serialize=True):
                     zoom_constrains_model = zoom_constrains_model if zoom_constrains_model else NewPositionMaxSpeedConstrained(
                         time_sync(),
                                                                            np.asarray([1]), 1)
-                    image = handle_camera_movement(image, pose_detect_dict_in_global, movement_constrains_model, zoom_constrains_model,  t)
+                    image = handle_camera_movement(image, pose_to_follow, movement_constrains_model, zoom_constrains_model,  t)
                 else:
                     t["camera_movement"] = time_sync()
                 # t_handle_image
