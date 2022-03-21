@@ -166,7 +166,7 @@ def run(handle_image, serialize=True):
                 # print(pose_id_to_follow)
                 # print(pose_detect_dict_in_global)
                 # t_post
-                if frame_count > 65:
+                if frame_count > 1:
 
                     #print(run_item)
                     if run_item is None:
