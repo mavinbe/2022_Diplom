@@ -58,8 +58,6 @@ class VideoStreamProvider:
         self.started = True
         self.thread = threading.Thread(target=self.update, args=())
         self.thread.start()
-        self.thread_screenshot = threading.Thread(target=self.takescreenshot, args=())
-        self.thread_screenshot.start()
         return self
 
     def update(self):
@@ -100,23 +98,3 @@ class VideoStreamProvider:
     def __exit__(self, exec_type, exc_value, traceback):
         self.cap.release()
 
-    def takescreenshot(self, type="minutely" ):
-        while True:
-            time.sleep(60)
-            frame = self.read()
-            if frame is None:
-                print("cant save minutly frame")
-                return
-
-
-            if self.endshottaken:
-                return
-
-            pathForProcessed = 'doku/'+str(type)
-            if not os.path.exists(pathForProcessed):
-                os.makedirs(pathForProcessed)
-            now = datetime.now()
-            dt_string = now.strftime("%Y-%m-%d %H:%M:%S")
-            cv2.imwrite(pathForProcessed + '/'+ dt_string + '.png', frame)
-            print("writed endshot to "+pathForProcessed + '/'+ dt_string + '.png')
-            self.endshottaken = True
