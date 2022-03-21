@@ -21,27 +21,52 @@ class Pause(CuePoint):
         self.start_time = None
 
     def start(self, start_time):
+        if self.is_started():
+            raise RuntimeError("Is already started.")
         self.start_time = start_time
 
+    def is_started(self):
+        return self.start_time is not None
+
     def is_finished(self, time):
+        if not self.is_started():
+            print("if not self.is_started():")
+            return False
         return time - self.start_time >= self.seconds
 
 
 class LandmarkTarget(CuePoint):
-    def __init__(self, target, target_zoom=None):
+    def __init__(self, target, target_zoom=None, after_finished=None):
         self.target = target
         self.target_zoom = target_zoom
         if target_zoom is not None:
             self.target_zoom = np.array([target_zoom])
+        self.after_finished = after_finished
+
         self.position_model = None
         self.zoom_model = None
 
     def start(self, start_time, start_position, start_zoom):
         self.position_model = NewPositionMaxSpeedConstrained(start_time, start_position, 240)
         self.zoom_model = NewPositionMaxSpeedConstrained(
-                        time_sync(), start_zoom, 3)
+                        time_sync(), start_zoom, 5)
 
     def is_finished(self, pose_detect_dict_in_global):
+        if not self.self_is_finished(pose_detect_dict_in_global):
+            return False
+
+        if self.after_finished is None:
+           return True
+        else:
+            return self.after_finished_is_finished()
+
+    def after_finished_is_finished(self):
+        if not self.after_finished.is_started():
+            self.after_finished.start(time_sync())
+
+        return self.after_finished.is_finished(time_sync())
+
+    def self_is_finished(self, pose_detect_dict_in_global):
         return self._is_position_finished(pose_detect_dict_in_global) and self._is_zoom_finished(pose_detect_dict_in_global)
 
     def _is_position_finished(self, pose_detect_dict_in_global):
@@ -70,35 +95,18 @@ class LandmarkTarget(CuePoint):
 def run_list():
     return [
         Pause(1.5),
-        LandmarkTarget(PoseLandmark.NOSE, 8),
-        Pause(3),
-        LandmarkTarget(PoseLandmark.NOSE, 12),
-        Pause(1.5),
-        LandmarkTarget(PoseLandmark.RIGHT_SHOULDER),
-        Pause(0.3),
-        LandmarkTarget(PoseLandmark.RIGHT_HIP),
-        Pause(0.3),
-        LandmarkTarget(PoseLandmark.RIGHT_KNEE),
-        Pause(0.3),
-        LandmarkTarget(PoseLandmark.RIGHT_ANKLE),
-        Pause(0.3),
-        LandmarkTarget(PoseLandmark.LEFT_ANKLE),
-        Pause(0.3),
-        LandmarkTarget(PoseLandmark.LEFT_KNEE),
-        Pause(0.3),
-        LandmarkTarget(PoseLandmark.LEFT_HIP),
-        Pause(0.3),
-        LandmarkTarget(PoseLandmark.LEFT_SHOULDER),
-        Pause(0.3),
-        LandmarkTarget(PoseLandmark.NOSE),
-        Pause(0.1),
-        LandmarkTarget(PoseLandmark.NOSE, 8),
-        Pause(3),
-        LandmarkTarget(PoseLandmark.LEFT_THUMB, 20),
-        Pause(2),
-        LandmarkTarget(PoseLandmark.RIGHT_THUMB),
-        Pause(2),
-        LandmarkTarget(PoseLandmark.NOSE, 4),
-        Pause(10),
+        LandmarkTarget(PoseLandmark.NOSE, 20, after_finished=Pause(3)),
+        LandmarkTarget(PoseLandmark.NOSE, 8, after_finished=Pause(1.5)),
+        LandmarkTarget(PoseLandmark.RIGHT_ANKLE,
+                       after_finished=Pause(0.01)),
+        LandmarkTarget(PoseLandmark.LEFT_ANKLE,
+                       after_finished=Pause(0.3)),
+        LandmarkTarget(PoseLandmark.NOSE,
+                       after_finished=Pause(0.1)),
+        LandmarkTarget(PoseLandmark.NOSE, after_finished=Pause(3)),
+        LandmarkTarget(PoseLandmark.RIGHT_THUMB, 25, after_finished=Pause(6)),
+        LandmarkTarget(PoseLandmark.LEFT_THUMB, after_finished=Pause(6)),
+        LandmarkTarget(PoseLandmark.RIGHT_THUMB, after_finished=Pause(6)),
+        LandmarkTarget(PoseLandmark.NOSE, 4,after_finished=Pause(1000)),
 
     ]
