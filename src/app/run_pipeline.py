@@ -157,7 +157,10 @@ def run(handle_image, serialize=True):
                 pose_detect_dict_in_global = None
                 #pose_detect_dict_in_global = handle_pose_detect(image, object_detection_dict, pose_detector, t)
                 pose_id_to_follow = min(confirmed_id_list)
+                if pose_id_to_follow not in object_detection_dict:
+                    continue
                 poses_to_detect = [pose_id_to_follow]
+
                 object_detection_dict_filtered = {your_key: object_detection_dict[your_key] for your_key in poses_to_detect}
 
                 pose_detect_dict_in_global = handle_pose_detect_list(image, object_detection_dict_filtered, pose_detector_pool, t)
