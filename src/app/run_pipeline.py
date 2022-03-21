@@ -260,9 +260,12 @@ def handle_camera_movement_with_LandmarkTarget(image, pose_detect_dict_in_global
         t["camera_movement"] = time_sync()
         raise Warning("No Landmark found " + str(PoseLandmark.NOSE))
     landmark_target.position_model.move_to_target(target_position, time_sync())
-    landmark_target.zoom_model.move_to_target(landmark_target.target_zoom, time_sync())
-    current_position = landmark_target.position_model.get_position()
+    current_zoom = None
+    if landmark_target.target_zoom is not None:
+        landmark_target.zoom_model.move_to_target(landmark_target.target_zoom, time_sync())
     current_zoom = landmark_target.zoom_model.get_position()[0]
+    current_position = landmark_target.position_model.get_position()
+
     current_box = static_zoom_target_box(image.shape, current_zoom, current_position)
     image = zoom(image, current_box)
     t["camera_movement"] = time_sync()

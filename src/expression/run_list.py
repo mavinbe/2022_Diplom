@@ -28,9 +28,11 @@ class Pause(CuePoint):
 
 
 class LandmarkTarget(CuePoint):
-    def __init__(self, target, target_zoom=8):
+    def __init__(self, target, target_zoom=None):
         self.target = target
-        self.target_zoom = np.array([target_zoom])
+        self.target_zoom = target_zoom
+        if target_zoom is not None:
+            self.target_zoom = np.array([target_zoom])
         self.position_model = None
         self.zoom_model = None
 
@@ -56,8 +58,10 @@ class LandmarkTarget(CuePoint):
         return magnitude < 5
 
     def _is_zoom_finished(self, pose_detect_dict_in_global):
-        diff = self.target_zoom - np.array([self.zoom_model.get_position()])
+        if self.target_zoom is None:
+            return True
 
+        diff = self.target_zoom - np.array([self.zoom_model.get_position()])
         magnitude = np.linalg.norm(diff)
         print(magnitude)
         return magnitude < 0.1
