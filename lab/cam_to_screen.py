@@ -1,6 +1,12 @@
 import cv2
+import screeninfo
 
 cap = cv2.VideoCapture("rtsp://malte:diplom@192.168.0.105:554//h264Preview_06_main")
+screen = screeninfo.get_monitors()[0]
+cv2.namedWindow("frame", cv2.WND_PROP_FULLSCREEN)
+cv2.moveWindow("frame", int(screen.x - 1), int(screen.y - 1))
+cv2.setWindowProperty('frame', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
 
 while(True):
     # Capture frame-by-frame
