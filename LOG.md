@@ -20,6 +20,7 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
    2. muster fuß bis kopf oder körper scan
    3. einzelne körperteile verfolgen: hände
    4. zoom auf augen, nase
+2. Beamer abholen. minimnal aufbau
 
 
 ![2022-03-21T10:57:04_22b6fe3.gif](version_control_meta/2022-03-21T10:57:04_22b6fe3.gif)
@@ -30,6 +31,7 @@ version 0.2
 
 #### DONE
 1. DONE
+2. Done
 
 ---
 
