@@ -3,16 +3,21 @@
 This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Backlog
-- refactor Track, to more modal design
-- create physical controller model
-- fix smoother bugs:
-   1. add kalman smoother for every trackId
-   2. apply world coordinates to kalman filter
-- write expressions
+
 - research node and eyes position to determinate face direction
+- read image and send image multiprocessing threads
 
 
 ## Logs
+
+### 30/45 -- Mo 21. Maerz
+1. Aufbau mit aktuellem Stand
+   1. von PC senden
+   2. mit Raspberry empfangen und auf beamer
+
+
+---
+
 
 ### 29 -- Mo 21. Maerz
 1. verschiedene Befehle orchestrieren
