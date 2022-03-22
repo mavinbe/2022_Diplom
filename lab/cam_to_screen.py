@@ -1,4 +1,3 @@
-import numpy as np
 import cv2
 
 cap = cv2.VideoCapture("rtsp://malte:diplom@192.168.0.105:554//h264Preview_06_main")
