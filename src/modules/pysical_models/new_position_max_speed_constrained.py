@@ -27,10 +27,22 @@ class NewPositionMaxSpeedConstrained:
         # print(target)
         if self.position.shape != target.shape:
             raise RuntimeError("self.position.shape != target.shape "+ str(self.position.shape)+" "+str(target.shape))
-        max_velocity_for_time_delta = self.max_velocity * time_delta
-        velocity = NewPositionMaxSpeedConstrained.calculate_velocity_for_dimensions(self.position, max_velocity_for_time_delta, target)
+        velocity_for_time_delta = self._calculate_velocity_based_on_distance(time_delta, self.position, target)
+
+        #velocity_for_time_delta = self.max_velocity * time_delta
+        print(velocity_for_time_delta)
+        velocity = NewPositionMaxSpeedConstrained.calculate_velocity_for_dimensions(self.position, velocity_for_time_delta, target)
 
         return self.position + velocity
+
+    def _calculate_velocity_based_on_distance(self, time_delta, start_vector,  target_vector):
+        delta_vector = target_vector - start_vector
+        delta_vector_magnitude = np.linalg.norm(delta_vector)
+        velocity = delta_vector_magnitude * 4
+        velocity = min(velocity, self.max_velocity)
+
+        velocity_for_time_delta = velocity * time_delta
+        return velocity_for_time_delta
 
     # immutable
     def _calculate_time_delta(self, new_time):

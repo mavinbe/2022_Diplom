@@ -47,9 +47,9 @@ class LandmarkTarget(CuePoint):
         self.zoom_model = None
 
     def start(self, start_time, start_position, start_zoom):
-        self.position_model = NewPositionMaxSpeedConstrained(start_time, start_position, 240)
+        self.position_model = NewPositionMaxSpeedConstrained(start_time, start_position, 480)
         self.zoom_model = NewPositionMaxSpeedConstrained(
-                        time_sync(), start_zoom, 5)
+                        time_sync(), start_zoom, 10)
 
     def is_finished(self, pose_detect_dict_in_global):
         if not self.self_is_finished(pose_detect_dict_in_global):
