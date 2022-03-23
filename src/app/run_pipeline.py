@@ -132,10 +132,14 @@ def run(handle_image, serialize=True):
         object_tracker = ObjectTracker(show_vid=False)
         frame_count = 0
         #img_stream = cv2.VideoCapture(ROOT_DIR+"/data/05_20211102141647/output014.mp4")
+        #img_stream = cv2.VideoCapture("rtsp://malte:diplom@192.168.0.105:554//h264Preview_06_main")
         #height, width = determ_dimensions_of_video(img_stream)
-        img_stream = VideoStreamProvider(ROOT_DIR + "/data/05_20211102141647/output017.mp4", play_back_speed=0.4)
+        #img_stream = VideoStreamProvider(ROOT_DIR + "/data/05_20211102141647/output017.mp4", play_back_speed=0.4)
+        img_stream = VideoStreamProvider("rtsp://malte:diplom@192.168.0.105:554//h264Preview_06_main")
         atexit.register(img_stream.release)
+
         height, width = (1920, 2560)
+        #height, width = (1536, 2048)
         movement_constrains_model = None
         zoom_constrains_model = None
 
@@ -154,6 +158,9 @@ def run(handle_image, serialize=True):
             try:
                 # t_read_image
                 original_image = handle_read_image(frame_count, img_stream, t)
+                #print(original_image.shape)
+
+                #original_image = cv2.resize(original_image, (int(width/2), int(height/2)), interpolation=cv2.INTER_NEAREST)
                 image = original_image
 
                 # t_object_track
@@ -306,15 +313,32 @@ def inference_pose(pose_detector, image, object_detection_dict, track_id_to_trac
 
 def read_frame_till_x(img_stream, frame_count, x):
     if frame_count >= x:
-        exit()
+        pass
+        #exit()
     success, image = img_stream.read()
     if not success:
         print("Ignoring empty camera frame.")
     return image, success
 
-
+#image_sending_provider = ImageSendingProvider(server_port=5556)
+screen = None
 def show_image(image, t):
+    global screen
+    if screen is None:
+        screen = screeninfo.get_monitors()[0]
+        print(F"Screen {screen}")
+        cv2.namedWindow("asd", cv2.WND_PROP_FULLSCREEN)
+        cv2.moveWindow("asd", int(screen.x - 1), int(screen.y - 1))
+        cv2.setWindowProperty("asd", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
     cv2.imshow("asd", image)
+    height, width, _ = image.shape
+
+
+    #image = cv2.resize(image, (int(width/4), int(height/4)), interpolation=cv2.INTER_NEAREST)
+
+    #print(image.shape)
+    #image_sending_provider.send(image)
+
     if cv2.waitKey(1) == ord('q'):  # q to quit
         exit(0)
     t["handle_image"] = time_sync()
