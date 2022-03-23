@@ -10,12 +10,15 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Logs
 
-### 30/45 -- Mo 21. Maerz
+### 30/48 -- Di 22. Maerz
 1. Aufbau mit aktuellem Stand
    1. von PC senden
    2. mit Raspberry empfangen und auf beamer
 
-
+#### DONE
+1. part
+   1. done
+   2. verschoben
 ---
 
 
