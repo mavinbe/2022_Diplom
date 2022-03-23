@@ -88,7 +88,7 @@ class LandmarkTarget(CuePoint):
 
         diff = self.target_zoom - np.array([self.zoom_model.get_position()])
         magnitude = np.linalg.norm(diff)
-        print(magnitude)
+        #print(magnitude)
         return magnitude < 0.1
 
 

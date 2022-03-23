@@ -203,7 +203,7 @@ def run():
                 current_frame = min(length, current_frame)
                 frames_shift = 0
                 img_stream.set(cv2.CAP_PROP_POS_FRAMES, current_frame)
-                print(current_frame)
+                #print(current_frame)
 
             #print(f'{current_frame}/\t\t{length}')
 
