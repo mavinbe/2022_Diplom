@@ -1,11 +1,12 @@
 import numpy as np
 
 class NewPositionMaxSpeedConstrained:
-    def __init__(self, time, position, max_velocity):
+    def __init__(self, time, position, velocity_coefficient, max_velocity):
         self.current_time = time
         #self.position_bounds = (0, 1920, 0, 1080)
         self.max_velocity = max_velocity * 1.
         self.position = target = np.array(position) * 1.
+        self.velocity_coefficient = velocity_coefficient
 
     def get_position(self):
         return tuple(self.position)
@@ -38,7 +39,7 @@ class NewPositionMaxSpeedConstrained:
     def _calculate_velocity_based_on_distance(self, time_delta, start_vector,  target_vector):
         delta_vector = target_vector - start_vector
         delta_vector_magnitude = np.linalg.norm(delta_vector)
-        velocity = delta_vector_magnitude * 4
+        velocity = delta_vector_magnitude * self.velocity_coefficient
         velocity = min(velocity, self.max_velocity)
 
         velocity_for_time_delta = velocity * time_delta

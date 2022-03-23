@@ -135,7 +135,7 @@ def run():
                     continue
                 if position_model is None:
 
-                    position_model = NewPositionMaxSpeedConstrained(time_sync(), np.asarray((int(width/2), int(height/2))), 20)
+                    position_model = NewPositionMaxSpeedConstrained(time_sync(), np.asarray((int(width/2), int(height/2))), 1, 20)
                 frame_count += 1
                 object_detection_dict = object_tracker.inference_frame(image)
 
