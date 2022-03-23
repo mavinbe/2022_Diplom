@@ -204,7 +204,7 @@ def run(handle_image, serialize=True):
                     if isinstance(run_item, LandmarkTarget):
                         if current_position is None:
                             current_position = determ_position_by_landmark_from_pose_detection(pose_to_follow,
-                                                                            run_item.target)
+                                                                                               run_item.target)
                             #print(current_position)
                         run_item.start(time_sync(), current_position, current_zoom)
 
@@ -221,7 +221,7 @@ def run(handle_image, serialize=True):
                     #print("Pause: ")
                 if isinstance(run_item, LandmarkTarget):
                     image, current_box, current_position, current_zoom = handle_camera_movement_with_LandmarkTarget(image, pose_to_follow,
-                                                                       run_item, t)
+                                                                                                                    run_item, t)
                     #print("landmark: "+str(current_zoom))
                 else:
                     if current_box:
