@@ -36,20 +36,23 @@ class Pause(CuePoint):
 
 
 class LandmarkTarget(CuePoint):
-    def __init__(self, target, target_zoom=None, after_finished=None):
+    def __init__(self, target, target_zoom=None, movement_v_coefficient=4, zoom_v_coefficient=4, after_finished=None):
         self.target = target
         self.target_zoom = target_zoom
         if target_zoom is not None:
             self.target_zoom = np.array([target_zoom])
+        self.movement_v_coefficient = movement_v_coefficient
+        self.zoom_v_coefficient = zoom_v_coefficient
         self.after_finished = after_finished
 
         self.position_model = None
         self.zoom_model = None
 
+
     def start(self, start_time, start_position, start_zoom):
-        self.position_model = NewPositionMaxSpeedConstrained(start_time, start_position, 4, 480)
+        self.position_model = NewPositionMaxSpeedConstrained(start_time, start_position, self.movement_v_coefficient, 480)
         self.zoom_model = NewPositionMaxSpeedConstrained(
-                        time_sync(), start_zoom, 1, 5)
+                        time_sync(), start_zoom, self.zoom_v_coefficient, 5)
 
     def is_finished(self, pose_detect_dict_in_global):
         if not self.self_is_finished(pose_detect_dict_in_global):
