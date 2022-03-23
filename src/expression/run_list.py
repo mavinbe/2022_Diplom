@@ -49,7 +49,7 @@ class LandmarkTarget(CuePoint):
     def start(self, start_time, start_position, start_zoom):
         self.position_model = NewPositionMaxSpeedConstrained(start_time, start_position, 480)
         self.zoom_model = NewPositionMaxSpeedConstrained(
-                        time_sync(), start_zoom, 10)
+                        time_sync(), start_zoom, 5)
 
     def is_finished(self, pose_detect_dict_in_global):
         if not self.self_is_finished(pose_detect_dict_in_global):
@@ -95,7 +95,16 @@ class LandmarkTarget(CuePoint):
 def run_list():
     return [
         Pause(1.5),
-        LandmarkTarget(PoseLandmark.NOSE, 20, after_finished=Pause(20)),
+        LandmarkTarget(PoseLandmark.NOSE, 8, after_finished=Pause(2)),
+        LandmarkTarget(PoseLandmark.RIGHT_EYE_OUTER, 30, after_finished=Pause(0.01)),
+        LandmarkTarget(PoseLandmark.LEFT_EYE_OUTER, 30, after_finished=Pause(0.01)),
+        LandmarkTarget(PoseLandmark.RIGHT_EYE_OUTER, 30, after_finished=Pause(0.01)),
+        LandmarkTarget(PoseLandmark.LEFT_EYE_OUTER, 30, after_finished=Pause(0.01)),
+        LandmarkTarget(PoseLandmark.RIGHT_EYE_OUTER, 30, after_finished=Pause(0.01)),
+        LandmarkTarget(PoseLandmark.LEFT_EYE_OUTER, 30, after_finished=Pause(0.01)),
+        LandmarkTarget(PoseLandmark.RIGHT_EYE_OUTER, 30, after_finished=Pause(0.01)),
+        LandmarkTarget(PoseLandmark.LEFT_EYE_OUTER, 30, after_finished=Pause(0.01)),
+        LandmarkTarget(PoseLandmark.NOSE, 20, after_finished=Pause(5)),
         LandmarkTarget(PoseLandmark.NOSE, 8, after_finished=Pause(5)),
         LandmarkTarget(PoseLandmark.RIGHT_ANKLE,
                        after_finished=Pause(0.01)),
