@@ -95,8 +95,8 @@ class LandmarkTarget(CuePoint):
 def run_list():
     return [
         Pause(1.5),
-        LandmarkTarget(PoseLandmark.NOSE, 20, after_finished=Pause(3)),
-        LandmarkTarget(PoseLandmark.NOSE, 8, after_finished=Pause(1.5)),
+        LandmarkTarget(PoseLandmark.NOSE, 20, after_finished=Pause(20)),
+        LandmarkTarget(PoseLandmark.NOSE, 8, after_finished=Pause(5)),
         LandmarkTarget(PoseLandmark.RIGHT_ANKLE,
                        after_finished=Pause(0.01)),
         LandmarkTarget(PoseLandmark.LEFT_ANKLE,
@@ -104,7 +104,7 @@ def run_list():
         LandmarkTarget(PoseLandmark.NOSE,
                        after_finished=Pause(0.1)),
         LandmarkTarget(PoseLandmark.NOSE, after_finished=Pause(3)),
-        LandmarkTarget(PoseLandmark.RIGHT_THUMB, 25, after_finished=Pause(6)),
+        LandmarkTarget(PoseLandmark.RIGHT_THUMB, 14, after_finished=Pause(6)),
         LandmarkTarget(PoseLandmark.LEFT_THUMB, after_finished=Pause(6)),
         LandmarkTarget(PoseLandmark.RIGHT_THUMB, after_finished=Pause(6)),
         LandmarkTarget(PoseLandmark.NOSE, 4,after_finished=Pause(1000)),
