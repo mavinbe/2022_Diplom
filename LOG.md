@@ -10,6 +10,13 @@ This is a daily log, where aims and ideas for a day are formulated and reviewed.
 
 ## Logs
 
+### 31/48 -- Mi 23. Maerz
+#### DONE
+1. speed movement improve, its smooth now: good enough
+2. 
+---
+
+
 ### 30/48 -- Di 22. Maerz
 1. Aufbau mit aktuellem Stand
    1. von PC senden
