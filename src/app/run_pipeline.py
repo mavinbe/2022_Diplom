@@ -148,7 +148,7 @@ def run(handle_image, serialize=True):
         run_item = None
         _run_list = run_list()
         current_box = None
-        current_position = np.array((int(width / 2), int(height / 2)))
+        current_position = None
         current_zoom = np.array([1])
         while True:
             current_time = time_sync()
@@ -192,6 +192,10 @@ def run(handle_image, serialize=True):
                     if isinstance(run_item, Pause):
                         run_item.start(time_sync())
                     if isinstance(run_item, LandmarkTarget):
+                        if current_position is None:
+                            current_position = determ_position_by_landmark_from_pose_detection(pose_to_follow,
+                                                                            run_item.target)
+                            #print(current_position)
                         run_item.start(time_sync(), current_position, current_zoom)
 
                 # clean up run_items

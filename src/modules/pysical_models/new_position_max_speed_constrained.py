@@ -5,7 +5,7 @@ class NewPositionMaxSpeedConstrained:
         self.current_time = time
         #self.position_bounds = (0, 1920, 0, 1080)
         self.max_velocity = max_velocity * 1.
-        self.position = position * 1.
+        self.position = target = np.array(position) * 1.
 
     def get_position(self):
         return tuple(self.position)
@@ -30,7 +30,7 @@ class NewPositionMaxSpeedConstrained:
         velocity_for_time_delta = self._calculate_velocity_based_on_distance(time_delta, self.position, target)
 
         #velocity_for_time_delta = self.max_velocity * time_delta
-        print(velocity_for_time_delta)
+        #print(velocity_for_time_delta)
         velocity = NewPositionMaxSpeedConstrained.calculate_velocity_for_dimensions(self.position, velocity_for_time_delta, target)
 
         return self.position + velocity
