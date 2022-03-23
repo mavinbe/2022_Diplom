@@ -1,8 +1,11 @@
 import os
+import sys
+
 import cv2
 import mediapipe as mp
 import numpy as np
 import pickle
+import atexit
 
 from expression.run_list import run_list, Pause, CuePoint, LandmarkTarget
 from media.VideoStreamProvider import VideoStreamProvider
@@ -12,6 +15,9 @@ from utils.general import LOGGER
 from modules.pysical_models.new_position_max_speed_constrained import NewPositionMaxSpeedConstrained
 from yolov5.utils.torch_utils import time_sync
 # Root directory of the project
+#from network.ImageSendingProvider import ImageSendingProvider
+import screeninfo
+
 ROOT_DIR = os.path.abspath(os.path.join(__file__, "../../.."))
 
 PoseLandmark = mp.solutions.pose.PoseLandmark
@@ -128,6 +134,7 @@ def run(handle_image, serialize=True):
         #img_stream = cv2.VideoCapture(ROOT_DIR+"/data/05_20211102141647/output014.mp4")
         #height, width = determ_dimensions_of_video(img_stream)
         img_stream = VideoStreamProvider(ROOT_DIR + "/data/05_20211102141647/output017.mp4", play_back_speed=0.4)
+        atexit.register(img_stream.release)
         height, width = (1920, 2560)
         movement_constrains_model = None
         zoom_constrains_model = None

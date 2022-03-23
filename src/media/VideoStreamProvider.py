@@ -91,10 +91,14 @@ class VideoStreamProvider:
         # convert to RGB
         return self.grabbed, frame
 
-    def stop(self):
+    def release(self):
         self.started = False
         self.thread.join()
+        self.cap.release()
+        print("Cam released")
+
 
     def __exit__(self, exec_type, exc_value, traceback):
-        self.cap.release()
+        self.release()
+
 
