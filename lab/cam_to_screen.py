@@ -1,7 +1,7 @@
 import cv2
 import screeninfo
 
-cap = cv2.VideoCapture("rtsp://malte:diplom@192.168.0.105:554//h264Preview_06_main")
+cap = cv2.VideoCapture("rtsp://malte:diplom@192.168.0.105:554//h264Preview_07_sub")
 screen = screeninfo.get_monitors()[0]
 print(f"screen {screen}")
 cv2.namedWindow("frame", cv2.WND_PROP_FULLSCREEN)
@@ -15,6 +15,8 @@ while(True):
 
     # Our operations on the frame come here
     #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    frame = frame[:-180, 60:-60]
+    frame = cv2.resize(frame, (screen.width, screen.height))
 
     # Display the resulting frame
     cv2.imshow('frame', frame)

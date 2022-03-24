@@ -1,3 +1,5 @@
+# taken from https://yunusmuhammad007.medium.com/build-and-install-opencv-4-5-3-on-raspberry-pi-3-with-opencl-opengl-and-gstreamer-enable-8c493fc992f0
+
 #!/usr/bin/env bash
 # 2019 Michael de Gans
 
@@ -112,7 +114,7 @@ configure () {
         -D BUILD_opencv_world=OFF
         -D EIGEN_INCLUDE_PATH=/usr/include/eigen3 
         -D ENABLE_NEON=ON
-        -D WITH_OPENCL=ON
+        -D WITH_OPENCL=OFF
         -D WITH_OPENMP=OFF
         -D WITH_TBB=ON
         -D WITH_1394=OFF
@@ -121,7 +123,7 @@ configure () {
         -D OPENCV_GENERATE_PKGCONFIG=ON
         -D WITH_GSTREAMER=ON
         -D WITH_LIBV4L=ON
-        -D WITH_OPENGL=ON
+        -D WITH_OPENGL=OFF
         -D WITH_GTK=OFF
         -D WITH_QT=4"
 
