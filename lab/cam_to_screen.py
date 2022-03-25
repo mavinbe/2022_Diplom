@@ -3,9 +3,13 @@ import screeninfo
 
 import atexit
 
-#from media.VideoStreamProvider import VideoStreamProvider
+import sys
+sys.path.insert(0, "./src/")
 
-cap = cv2.VideoCapture("rtsp://malte:diplom@192.168.0.105:554//h264Preview_07_main")
+from media.VideoStreamProvider import VideoStreamProvider
+
+cap = VideoStreamProvider("rtsp://malte:diplom@192.168.0.105:554//h264Preview_07_main")
+#cap = cv2.VideoCapture("rtsp://malte:diplom@192.168.0.105:554//h264Preview_07_main")
 atexit.register(cap.release)
 screen = screeninfo.get_monitors()[0]
 # print(f"screen {screen}")
@@ -20,13 +24,14 @@ while(True):
 
     # Our operations on the frame come here
     #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    frame = frame[:-180, 60:-60]
-    #frame = cv2.resize(frame, (screen.width, screen.height))
+    #frame = frame[:-180, 60:-60]
+    frame = cv2.resize(frame, (860, 620))
+    print(frame.shape)
 
     # Display the resulting frame
     cv2.imshow('frame', frame)
     # print(f"frame.shape {frame.shape}")
-    if cv2.waitKey(100) & 0xFF == ord('q'):
+    if cv2.waitKey(10) & 0xFF == ord('q'):
         break
 
 # When everything done, release the capture
