@@ -167,8 +167,7 @@ def run(handle_image, serialize=True):
 
                 # crop and zoom for beamer fit at probeaugbau
                 original_image = original_image[478:,:]
-                original_image = cv2.resize(original_image, (screen.width, screen.height))
-                #print(original_image.shape)
+                original_image = cv2.resize(original_image, (int(screen.width/2), int(screen.height/2)))
 
                 #original_image = cv2.resize(original_image, (int(width/2), int(height/2)), interpolation=cv2.INTER_NEAREST)
                 image = original_image
