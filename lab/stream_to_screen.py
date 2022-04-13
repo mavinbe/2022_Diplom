@@ -29,15 +29,16 @@ import screeninfo
 import atexit
 print("asd")
 
-cap = cv2.VideoCapture('udpsrc port=7001 !  application/x-rtp-stream,encoding-name=JPEG ! rtpstreamdepay ! rtpjpegdepay ! jpegdec ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
 
-atexit.register(cap.release)
 screen = screeninfo.get_monitors()[0]
 
 print(f"screen {screen}")
-#cv2.namedWindow("frame", cv2.WND_PROP_FULLSCREEN)
-#cv2.moveWindow("frame", int(screen.x - 1), int(screen.y - 1))
-#cv2.setWindowProperty('frame', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+cv2.namedWindow("frame", cv2.WND_PROP_FULLSCREEN)
+cv2.moveWindow("frame", int(screen.x - 1), int(screen.y - 1))
+cv2.setWindowProperty('frame', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
+cap = cv2.VideoCapture('udpsrc port=7001 !  application/x-rtp-stream,encoding-name=JPEG ! rtpstreamdepay ! rtpjpegdepay ! jpegdec ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
+atexit.register(cap.release)
 
 while(True):
     # Capture frame-by-frame
@@ -52,7 +53,7 @@ while(True):
     #frame = frame[:-180, 60:-60]
     #print(frame)
     #print((screen.width, screen.height))
-    #frame = cv2.resize(frame, (screen.width, screen.height))
+    frame = cv2.resize(frame, (int(screen.width/2), int(screen.height/2)), interpolation=cv2.INTER_NEAREST)
     #print(frame.shape)
 
     # Display the resulting frame
