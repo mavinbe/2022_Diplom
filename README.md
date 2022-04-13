@@ -7,7 +7,7 @@ In Log.md u can find a hopefully consistent and daily work log.
 
 to activate env
 ```bash
-conda activate /home/mavinbe/2021_Diplom/2022_Diplom/env/Yolov5_DeepSort_Pytorch
+conda activate diplom
 ```
 
 to run pipeline
