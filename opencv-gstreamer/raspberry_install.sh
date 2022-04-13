@@ -13,6 +13,9 @@ exit # dont ru it
 # INSTALL GSTREAMER
 # https://qengineering.eu/install-gstreamer-1.18-on-raspberry-pi-4.html
 
+sudo apt-get clean
+sudo apt-get autoremove
+
 sudo apt-get install libx264-dev libjpeg-dev -y
 sudo apt-get install libgstreamer1.0-dev \
      libgstreamer-plugins-base1.0-dev \
@@ -117,6 +120,10 @@ cmake -D CMAKE_BUILD_TYPE=RELEASE \
         -D OPENCV_GENERATE_PKGCONFIG=ON \
         -D BUILD_EXAMPLES=OFF ..
 
+# sudo nano /etc/dphys-swapfile
+# set CONF_SWAPSIZE=2048 with the Nano text editor
+# sudo /etc/init.d/dphys-swapfile stop
+# sudo /etc/init.d/dphys-swapfile start
 
 make -j4
 
