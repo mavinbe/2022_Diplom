@@ -9,4 +9,10 @@ gst-launch-1.0 videotestsrc ! videoconvert ! videorate ! video/x-raw,width=1280,
 
 
 # receive
-# gst-launch-1.0 udpsrc port=5000 ! application/x-rtp, media=video, encoding-name=JPEG, framerate=30/1, payload=26, clock-rate=90000 ! rtpjpegdepay ! jpegdec ! videoconvert ! autovideosink
+gst-launch-1.0 udpsrc port=5000 ! application/x-rtp, media=video, encoding-name=JPEG, framerate=30/1, payload=26, clock-rate=90000 ! rtpjpegdepay ! jpegdec ! videoconvert ! autovideosink
+
+
+https://stackoverflow.com/questions/45544877/write-in-gstreamer-pipeline-from-opencv-in-python
+
+https://stackoverflow.com/questions/50549584/gstreamer-udpsink-udpsrc-versus-tcpserversink-tcpclientsrc
+
