@@ -92,7 +92,6 @@ dependencies:
     - pyasn1==0.4.8
     - pyasn1-modules==0.2.8
     - pycodestyle==2.8.0
-    - pycoral==2.0.0
     - pyflakes==2.4.0
     - pyparsing==3.0.7
     - python-dateutil==2.8.2
@@ -107,7 +106,7 @@ dependencies:
     - tb-nightly==2.9.0a20220201
     - tensorboard-data-server==0.6.1
     - tensorboard-plugin-wit==1.8.1
-    - tflite-runtime==2.5.0.post1
+#    - tflite-runtime==2.5.0.post1
     - torch==1.7.0
     - torchvision==0.8.1
     - tqdm==4.41.0
