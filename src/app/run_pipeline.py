@@ -138,16 +138,27 @@ def run(handle_image, serialize=True):
         #img_stream = VideoStreamProvider("rtsp://malte:diplom@192.168.0.105:554//h264Preview_07_main")
         atexit.register(img_stream.release)
 
-        height, width = (1920, 2560)
-        #height, width = (1536, 2048)
-        movement_constrains_model = None
-        zoom_constrains_model = None
 
         screen = screeninfo.get_monitors()[0]
         print(F"Screen {screen}")
         cv2.namedWindow("asd", cv2.WND_PROP_FULLSCREEN)
         cv2.moveWindow("asd", int(screen.x - 1), int(screen.y - 1))
         cv2.setWindowProperty("asd", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
+        #height, width = (1536, 2048)
+        #height, width = (int(screen.height/2), int(screen.width/2))
+        height, width = (960, 1280)
+        print((width, height))
+        send_out = cv2.VideoWriter(
+            "appsrc ! videoconvert ! video/x-raw,format=I420 ! jpegenc ! rtpjpegpay ! rtpstreampay ! udpsink host=192.168.178.46 port=7001",
+            cv2.CAP_GSTREAMER, 0, 24, (width, height), True)
+        atexit.register(send_out.release)
+
+        #height, width = (1920, 2560)
+        movement_constrains_model = None
+        zoom_constrains_model = None
+
+
 
         serialize_path = create_serialize_path() if serialize else None
         serialize_store = {} if serialize_path else None
@@ -167,7 +178,7 @@ def run(handle_image, serialize=True):
 
                 # crop and zoom for beamer fit at probeaugbau
                 original_image = original_image[478:,:]
-                original_image = cv2.resize(original_image, (int(screen.width/2), int(screen.height/2)))
+                original_image = cv2.resize(original_image, (width, height))
 
                 #original_image = cv2.resize(original_image, (int(width/2), int(height/2)), interpolation=cv2.INTER_NEAREST)
                 image = original_image
@@ -233,6 +244,7 @@ def run(handle_image, serialize=True):
 
                 # t_handle_image
                 handle_image(image, t)
+                send_out.write(image)
 
                 LOGGER.info(
                     f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)')
@@ -244,6 +256,7 @@ def run(handle_image, serialize=True):
                     if t[key] is None:
                         t[key] = time_sync()
                 handle_image(original_image, t)
+                send_out.write(image)
                 LOGGER.info(
                     f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)\t--- {warn}')
 
@@ -253,6 +266,7 @@ def run(handle_image, serialize=True):
 
         write_detection(frame_count, object_detection_dict, serialize_path)
         img_stream.release()
+        send_out.release()
 
 
 def handle_read_image(frame_count, img_stream, t):
@@ -336,8 +350,7 @@ def read_frame_till_x(img_stream, frame_count, x):
 
 #image_sending_provider = ImageSendingProvider(server_port=5556)
 def show_image(image, t):
-
-    cv2.imshow("asd", image)
+    #cv2.imshow("asd", image)
     height, width, _ = image.shape
 
 
