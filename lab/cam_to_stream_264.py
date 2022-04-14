@@ -14,7 +14,7 @@ height = int(960)
 
 #out = cv2.VideoWriter('appsrc ! videoconvert ! videorate ! video/x-raw,width=1280,height=960,framerate=25/1 ! jpegenc ! rtpjpegpay  ! udpsink host=192.168.178.46  port=7001',
 #                      0, framerate, (1280, 960))
-out = cv2.VideoWriter("appsrc ! videoconvert ! video/x-raw,format=I420 ! jpegenc ! rtpjpegpay ! rtpstreampay ! udpsink host=192.168.178.48 port=7001", cv2.CAP_GSTREAMER, 0, framerate, (width, height), True)
+out = cv2.VideoWriter("appsrc ! videoconvert ! x264enc tune=zerolatency speed-preset=fast ! rtph264pay ! udpsink host=192.168.178.48 port=5004", cv2.CAP_GSTREAMER, 0, framerate, (width, height), True)
 
 
 while cap.isOpened():

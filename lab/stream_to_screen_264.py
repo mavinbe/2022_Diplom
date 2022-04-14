@@ -37,7 +37,8 @@ cv2.namedWindow("frame", cv2.WND_PROP_FULLSCREEN)
 cv2.moveWindow("frame", int(screen.x - 1), int(screen.y - 1))
 cv2.setWindowProperty('frame', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
-cap = cv2.VideoCapture('udpsrc port=7001 !  application/x-rtp-stream,encoding-name=JPEG ! rtpstreamdepay ! rtpjpegdepay ! jpegdec ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
+cap = cv2.VideoCapture('udpsrc port=5004 caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
+print("fds")
 atexit.register(cap.release)
 
 while(True):
