@@ -134,16 +134,16 @@ def run(handle_image, serialize=True):
         #img_stream = cv2.VideoCapture(ROOT_DIR+"/data/05_20211102141647/output014.mp4")
         #img_stream = cv2.VideoCapture("rtsp://malte:diplom@192.168.0.105:554//h264Preview_06_main")
         #height, width = determ_dimensions_of_video(img_stream)
-        img_stream = VideoStreamProvider(ROOT_DIR + "/data/05_20211102141647/output017.mp4", play_back_speed=0.4)
-        #img_stream = VideoStreamProvider("rtsp://malte:diplom@192.168.0.105:554//h264Preview_07_main")
+        #img_stream = VideoStreamProvider(ROOT_DIR + "/data/05_20211102141647/output017.mp4", play_back_speed=0.4)
+        img_stream = VideoStreamProvider("rtsp://malte:diplom@192.168.0.106:554//h264Preview_06_main")
         atexit.register(img_stream.release)
 
 
         screen = screeninfo.get_monitors()[0]
         print(F"Screen {screen}")
-        cv2.namedWindow("asd", cv2.WND_PROP_FULLSCREEN)
-        cv2.moveWindow("asd", int(screen.x - 1), int(screen.y - 1))
-        cv2.setWindowProperty("asd", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        #cv2.namedWindow("asd", cv2.WND_PROP_FULLSCREEN)
+        #cv2.moveWindow("asd", int(screen.x - 1), int(screen.y - 1))
+        #cv2.setWindowProperty("asd", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
         #height, width = (1536, 2048)
         #height, width = (int(screen.height/2), int(screen.width/2))
