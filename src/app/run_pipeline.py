@@ -145,16 +145,17 @@ def run(handle_image, serialize=True):
         #cv2.moveWindow("asd", int(screen.x - 1), int(screen.y - 1))
         #cv2.setWindowProperty("asd", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
+        #height, width = (1920, 2560)
         #height, width = (1536, 2048)
         #height, width = (int(screen.height/2), int(screen.width/2))
         height, width = (960, 1280)
+        height, width = (1080, 1920)
         print((width, height))
         send_out = cv2.VideoWriter(
             "appsrc ! videoconvert ! video/x-raw,format=I420 ! jpegenc ! rtpjpegpay ! rtpstreampay ! udpsink host=192.168.178.46 port=7001",
             cv2.CAP_GSTREAMER, 0, 24, (width, height), True)
         atexit.register(send_out.release)
 
-        #height, width = (1920, 2560)
         movement_constrains_model = None
         zoom_constrains_model = None
 
