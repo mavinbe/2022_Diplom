@@ -8,13 +8,13 @@ ROOT_DIR = os.path.abspath(os.path.join(__file__, "../.."))
 cap  = cv2.VideoCapture(ROOT_DIR+"/data/05_20211102141647/output014.mp4")
 #cap  = cv2.VideoCapture('videotestsrc is-live=true ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
 
-framerate = 25
+framerate = 15
 width = int(1280)
 height = int(960)
 
 #out = cv2.VideoWriter('appsrc ! videoconvert ! videorate ! video/x-raw,width=1280,height=960,framerate=25/1 ! jpegenc ! rtpjpegpay  ! udpsink host=192.168.178.46  port=7001',
 #                      0, framerate, (1280, 960))
-out = cv2.VideoWriter("appsrc ! videoconvert ! video/x-raw,format=I420 ! jpegenc ! rtpjpegpay ! rtpstreampay ! udpsink host=192.168.178.46 port=7001", cv2.CAP_GSTREAMER, 0, framerate, (width, height), True)
+out = cv2.VideoWriter("appsrc ! videoconvert ! video/x-raw,format=I420 ! jpegenc ! rtpjpegpay ! rtpstreampay ! udpsink host=192.168.0.102 port=7001", cv2.CAP_GSTREAMER, 0, framerate, (width, height), True)
 
 
 while cap.isOpened():
