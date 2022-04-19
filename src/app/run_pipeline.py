@@ -151,10 +151,16 @@ def run(handle_image, serialize=True):
         height, width = (960, 1280)
         height, width = (1080, 1920)
         print((width, height))
-        send_out = cv2.VideoWriter(
-            "appsrc ! videoconvert ! video/x-raw,format=I420 ! jpegenc ! rtpjpegpay ! rtpstreampay ! udpsink host=192.168.178.46 port=7001",
-            cv2.CAP_GSTREAMER, 0, 24, (width, height), True)
-        atexit.register(send_out.release)
+        framerate = 25
+        send_out_1 = cv2.VideoWriter(
+            "appsrc ! videoconvert ! video/x-raw,format=I420 ! jpegenc ! rtpjpegpay ! rtpstreampay ! udpsink host=192.168.0.101 port=7001",
+            cv2.CAP_GSTREAMER, 0, framerate, (width, height), True)
+        atexit.register(send_out_1.release)
+        send_out_2 = cv2.VideoWriter(
+            "appsrc ! videoconvert ! video/x-raw,format=I420 ! jpegenc ! rtpjpegpay ! rtpstreampay ! udpsink host=192.168.0.102 port=7001",
+            cv2.CAP_GSTREAMER, 0, framerate, (width, height), True)
+        atexit.register(send_out_2.release)
+
 
         movement_constrains_model = None
         zoom_constrains_model = None
@@ -244,8 +250,9 @@ def run(handle_image, serialize=True):
 
 
                 # t_handle_image
+                send_out_1.write(image)
+                send_out_2.write(image)
                 handle_image(image, t)
-                send_out.write(image)
 
                 LOGGER.info(
                     f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)')
@@ -256,8 +263,9 @@ def run(handle_image, serialize=True):
                 for key in t.keys():
                     if t[key] is None:
                         t[key] = time_sync()
+                send_out_1.write(image)
+                send_out_2.write(image)
                 handle_image(original_image, t)
-                send_out.write(image)
                 LOGGER.info(
                     f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)\t--- {warn}')
 
@@ -267,7 +275,8 @@ def run(handle_image, serialize=True):
 
         write_detection(frame_count, object_detection_dict, serialize_path)
         img_stream.release()
-        send_out.release()
+        send_out_1.release()
+        send_out_2.release()
 
 
 def handle_read_image(frame_count, img_stream, t):
