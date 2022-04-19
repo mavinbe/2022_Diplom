@@ -53,7 +53,7 @@ while(True):
     #frame = frame[:-180, 60:-60]
     #print(frame)
     #print((screen.width, screen.height))
-    frame = cv2.resize(frame, (int(screen.width/2), int(screen.height/2)), interpolation=cv2.INTER_NEAREST)
+    frame = cv2.resize(frame, (int(screen.width), int(screen.height)), interpolation=cv2.INTER_NEAREST)
     #print(frame.shape)
 
     # Display the resulting frame
