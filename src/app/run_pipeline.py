@@ -135,7 +135,11 @@ def run(handle_image, serialize=True):
         #img_stream = cv2.VideoCapture("rtsp://malte:diplom@192.168.0.105:554//h264Preview_06_main")
         #height, width = determ_dimensions_of_video(img_stream)
         #img_stream = VideoStreamProvider(ROOT_DIR + "/data/05_20211102141647/output017.mp4", play_back_speed=0.4)
-        img_stream = VideoStreamProvider("rtsp://malte:diplom@192.168.0.106:554//h264Preview_06_main")
+        #img_stream = VideoStreamProvider("rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main")
+        img_stream = cv2.VideoCapture(
+            'rtspsrc location=rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main latency=10 !  rtph264depay ! avdec_h264 !  videoconvert ! videoscale ! appsink',
+            cv2.CAP_GSTREAMER)
+
         atexit.register(img_stream.release)
 
 
