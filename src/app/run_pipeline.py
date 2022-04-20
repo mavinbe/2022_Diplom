@@ -290,7 +290,8 @@ def handle_read_image(frame_count, img_stream, t):
         raise Warning("No Frame")
     return image
 
-
+# object_detection_dict is current detected id
+# confirmed_id_list all ids that are not deleted yet
 def handle_object_track(image, object_tracker, t):
     object_detection_dict, confirmed_id_list = object_tracker.inference_frame(image)
     t["object_track"] = time_sync()
