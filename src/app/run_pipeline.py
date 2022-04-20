@@ -255,8 +255,8 @@ def run(handle_image, serialize=True):
                 # t_handle_image
                 send_out_1.write(image)
                 send_out_2.write(image)
-                handle_image(image, t)
-
+                handle_image(image)
+                t["handle_image"] = time_sync()
                 LOGGER.info(
                     f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)')
 
@@ -268,7 +268,8 @@ def run(handle_image, serialize=True):
                         t[key] = time_sync()
                 send_out_1.write(image)
                 send_out_2.write(image)
-                handle_image(original_image, t)
+                handle_image(original_image)
+                t["handle_image"] = time_sync()
                 LOGGER.info(
                     f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)\t--- {warn}')
 
@@ -362,7 +363,7 @@ def read_frame_till_x(img_stream, frame_count, x):
     return image, success
 
 #image_sending_provider = ImageSendingProvider(server_port=5556)
-def show_image(image, t):
+def show_image(image):
     #cv2.imshow("asd", image)
     height, width, _ = image.shape
 
@@ -374,7 +375,7 @@ def show_image(image, t):
 
     if cv2.waitKey(1) == ord('q'):  # q to quit
         exit(0)
-    t["handle_image"] = time_sync()
+
 
 
 if __name__ == '__main__':
