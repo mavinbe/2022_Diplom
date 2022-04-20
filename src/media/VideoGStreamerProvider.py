@@ -1,4 +1,4 @@
-# file: videocaptureasync.py
+# clone of VideoStreamProvider.py
 import threading
 import os
 import cv2
@@ -6,7 +6,7 @@ import time
 
 from datetime import datetime
 
-class VideoStreamProvider:
+class VideoGStreamerProvider:
     def __init__(self, src=None, width=None, height=None, play_back_speed=1):
         if src is None:
             print('Error: stream path for VideoStreamProvider not set.')
@@ -15,9 +15,8 @@ class VideoStreamProvider:
         print("VideoStreamProvider: load images from " + str(src))
 
         self.src = src
-        self.cap = cv2.VideoCapture(self.src)
-        self.play_back_speed = play_back_speed
-        self.cap.set(cv2.CAP_PROP_POS_FRAMES, 25.04 * 60 * 0)
+        self.cap = cv2.VideoCapture(self.src, cv2.CAP_GSTREAMER)
+
 
         if width is None and height is None:
             print('Use native width & height')
@@ -29,12 +28,7 @@ class VideoStreamProvider:
         # Find OpenCV version
         (major_ver, minor_ver, subminor_ver) = (cv2.__version__).split('.')
 
-        self.fps = self.cap.get(cv2.CAP_PROP_FPS)
-        if self.fps is not None:
-            print("Frames per second using self.cap.get(cv2.CAP_PROP_FPS) : {0}".format(self.fps))
-        else:
-            self.fps = 5
-            print("Frames per second using default : {0}".format(self.fps))
+
 
 
         self.grabbed, self.frame = self.cap.read()
@@ -61,10 +55,6 @@ class VideoStreamProvider:
         return self
 
     def update(self):
-        frame_time = 1/self.fps / self.play_back_speed
-        start_time = time.time()
-        last_time = start_time
-        print ("frame_time "+str(frame_time))
         while self.started:
             grabbed, frame = self.cap.read()
             with self.read_lock:
@@ -72,12 +62,7 @@ class VideoStreamProvider:
                 self.frame = frame
                 self.update_count += 1
 
-                diff = time.time() - last_time
-                
-                # print(time.time() -last_time)
-                #print(self.update_count / (time.time() - start_time))
-                last_time = time.time()
-            time.sleep(max(0, frame_time - diff))
+
 
 
     def read(self):

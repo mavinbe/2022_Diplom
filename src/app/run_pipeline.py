@@ -8,7 +8,7 @@ import pickle
 import atexit
 
 from expression.run_list import run_list, Pause, CuePoint, LandmarkTarget
-from media.VideoStreamProvider import VideoStreamProvider
+from media.VideoGStreamerProvider import VideoGStreamerProvider
 from modules.object_tracker import ObjectTracker
 from modules.pose_detector import PoseDetector
 from utils.general import LOGGER
@@ -136,9 +136,8 @@ def run(handle_image, serialize=True):
         #height, width = determ_dimensions_of_video(img_stream)
         #img_stream = VideoStreamProvider(ROOT_DIR + "/data/05_20211102141647/output017.mp4", play_back_speed=0.4)
         #img_stream = VideoStreamProvider("rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main")
-        img_stream = cv2.VideoCapture(
-            'rtspsrc location=rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main latency=10 !  rtph264depay ! avdec_h264 !  videoconvert ! videoscale ! appsink',
-            cv2.CAP_GSTREAMER)
+        img_stream = VideoGStreamerProvider(
+            'rtspsrc location=rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main latency=1 !  rtph264depay ! avdec_h264 !  videoconvert ! videoscale ! appsink')
 
         atexit.register(img_stream.release)
 
