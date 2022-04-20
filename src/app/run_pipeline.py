@@ -148,10 +148,6 @@ def run(handle_image, serialize=True):
         #cv2.moveWindow("asd", int(screen.x - 1), int(screen.y - 1))
         #cv2.setWindowProperty("asd", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
-        #height, width = (1920, 2560)
-        #height, width = (1536, 2048)
-        #height, width = (int(screen.height/2), int(screen.width/2))
-        #height, width = (960, 1280)
         height, width = (1080, 1920)
         print((width, height))
         framerate = 25
@@ -165,13 +161,7 @@ def run(handle_image, serialize=True):
         atexit.register(send_out_2.release)
 
 
-        movement_constrains_model = None
-        zoom_constrains_model = None
-
-
-
         serialize_path = create_serialize_path() if serialize else None
-        serialize_store = {} if serialize_path else None
         run_item = None
         _run_list = run_list()
         current_box = None
@@ -181,7 +171,6 @@ def run(handle_image, serialize=True):
             current_time = time_sync()
             t = {"start": current_time, "read_image": None, "object_track": None, "pose_detect": None, "pose_detect_count": 0, "camera_movement": None, "handle_image": None}
             frame_count += 1
-            serialize_store[frame_count] = {}
             try:
                 # t_read_image
                 original_image = handle_read_image(frame_count, img_stream, t)
@@ -195,11 +184,8 @@ def run(handle_image, serialize=True):
 
                 # t_object_track
                 object_detection_dict, confirmed_id_list = handle_object_track(image, object_tracker, t)
-                serialize_store[frame_count]["object_track"] = object_detection_dict
 
                 # t_pose_detect
-                pose_detect_dict_in_global = None
-                #pose_detect_dict_in_global = handle_pose_detect(image, object_detection_dict, pose_detector, t)
                 pose_id_to_follow = min(confirmed_id_list)
                 if pose_id_to_follow not in object_detection_dict:
                     continue
@@ -209,13 +195,10 @@ def run(handle_image, serialize=True):
 
                 pose_detect_dict_in_global = handle_pose_detect_list(image, object_detection_dict_filtered, pose_detector_pool, t)
                 pose_to_follow = pose_detect_dict_in_global[pose_id_to_follow]
-                # print(pose_id_to_follow)
-                # print(pose_detect_dict_in_global)
 
 
                 # t_post
 
-                #print(run_item)
                 # start run_items
                 if run_item is None:
                     run_item = _run_list.pop(0)
