@@ -97,7 +97,7 @@ class LandmarkTarget(CuePoint):
 
 def run_list():
     return [
-        Pause(1.5),
+        Pause(15),
         LandmarkTarget(PoseLandmark.NOSE, target_zoom=8, zoom_v_coefficient=1, after_finished=Pause(2)),
         LandmarkTarget(PoseLandmark.RIGHT_EYE_OUTER, 30, movement_v_coefficient=6,  after_finished=Pause(0.01)),
         LandmarkTarget(PoseLandmark.LEFT_EYE_OUTER, movement_v_coefficient=6, after_finished=Pause(0.01)),

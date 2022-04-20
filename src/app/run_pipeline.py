@@ -7,6 +7,8 @@ import numpy as np
 import pickle
 import atexit
 
+import multiprocessing as multiP
+
 from expression.run_list import run_list, Pause, CuePoint, LandmarkTarget
 from media.VideoGStreamerProvider import VideoGStreamerProvider
 from modules.object_tracker import ObjectTracker
@@ -126,7 +128,7 @@ def handle_pose_detect_list(image, object_detection_dict, pose_detector_pool, t)
     return pose_detect_dict_in_global_dict
 
 
-def run(handle_image, serialize=True):
+def run(handle_image, cam_url, sink_ip, track_highest):
     with PoseDetectorPool() as pose_detector_pool:
 
         object_tracker = ObjectTracker(show_vid=False)
@@ -137,7 +139,7 @@ def run(handle_image, serialize=True):
         #img_stream = VideoStreamProvider(ROOT_DIR + "/data/05_20211102141647/output017.mp4", play_back_speed=0.4)
         #img_stream = VideoStreamProvider("rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main")
         img_stream = VideoGStreamerProvider(
-            'rtspsrc location=rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main latency=1 !  rtph264depay ! avdec_h264 !  videoconvert ! videoscale ! appsink')
+            'rtspsrc location='+cam_url+' latency=1 !  rtph264depay ! avdec_h264 !  videoconvert ! videoscale ! appsink')
 
         atexit.register(img_stream.release)
 
@@ -152,16 +154,10 @@ def run(handle_image, serialize=True):
         print((width, height))
         framerate = 25
         send_out_1 = cv2.VideoWriter(
-            "appsrc ! videoconvert ! video/x-raw,format=I420 ! jpegenc ! rtpjpegpay ! rtpstreampay ! udpsink host=192.168.0.101 port=7001",
+            "appsrc ! videoconvert ! video/x-raw,format=I420 ! jpegenc ! rtpjpegpay ! rtpstreampay ! udpsink host="+sink_ip+" port=7001",
             cv2.CAP_GSTREAMER, 0, framerate, (width, height), True)
         atexit.register(send_out_1.release)
-        send_out_2 = cv2.VideoWriter(
-            "appsrc ! videoconvert ! video/x-raw,format=I420 ! jpegenc ! rtpjpegpay ! rtpstreampay ! udpsink host=192.168.0.102 port=7001",
-            cv2.CAP_GSTREAMER, 0, framerate, (width, height), True)
-        atexit.register(send_out_2.release)
 
-
-        serialize_path = create_serialize_path() if serialize else None
         run_item = None
         _run_list = run_list()
         current_box = None
@@ -184,9 +180,15 @@ def run(handle_image, serialize=True):
 
                 # t_object_track
                 object_detection_dict, confirmed_id_list = handle_object_track(image, object_tracker, t)
-
+                #print(object_detection_dict)
                 # t_pose_detect
-                pose_id_to_follow = min(confirmed_id_list)
+                if len(confirmed_id_list) == 0:
+                    raise Warning("No Confirmed Ids")
+                pose_id_to_follow = None
+                if track_highest:
+                    pose_id_to_follow = max(confirmed_id_list)
+                else:
+                    pose_id_to_follow = min(confirmed_id_list)
                 if pose_id_to_follow not in object_detection_dict:
                     continue
                 poses_to_detect = [pose_id_to_follow]
@@ -237,7 +239,6 @@ def run(handle_image, serialize=True):
 
                 # t_handle_image
                 send_out_1.write(image)
-                send_out_2.write(image)
                 handle_image(image)
                 t["handle_image"] = time_sync()
                 LOGGER.info(
@@ -250,7 +251,6 @@ def run(handle_image, serialize=True):
                     if t[key] is None:
                         t[key] = time_sync()
                 send_out_1.write(image)
-                send_out_2.write(image)
                 handle_image(original_image)
                 t["handle_image"] = time_sync()
                 LOGGER.info(
@@ -260,10 +260,9 @@ def run(handle_image, serialize=True):
             #finally:
                 #print(t)
 
-        write_detection(frame_count, object_detection_dict, serialize_path)
+        #write_detection(frame_count, object_detection_dict, serialize_path)
         img_stream.release()
         send_out_1.release()
-        send_out_2.release()
 
 
 def handle_read_image(frame_count, img_stream, t):
@@ -278,8 +277,8 @@ def handle_read_image(frame_count, img_stream, t):
 def handle_object_track(image, object_tracker, t):
     object_detection_dict, confirmed_id_list = object_tracker.inference_frame(image)
     t["object_track"] = time_sync()
-    if len(object_detection_dict) == 0:
-        raise Warning("No Objects Detected")
+    # if len(object_detection_dict) == 0:
+    #     raise Warning("No Objects Detected")
     return object_detection_dict, confirmed_id_list
 
 def handle_camera_movement_with_LandmarkTarget(image, pose_detect_dict_in_global, landmark_target, t):
@@ -363,4 +362,14 @@ def show_image(image):
 
 
 if __name__ == '__main__':
-    run(show_image)
+    multiP.set_start_method('spawn')
+    q_1 = multiP.Queue()
+    p_1 = multiP.Process(target=run, args=(show_image, 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_01_main', '192.168.0.102', False))
+    p_1.start()
+
+    p_2 = multiP.Process(target=run, args=(
+    show_image, 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main', '192.168.0.101', False))
+    p_2.start()
+
+    p_1.join()
+    p_2.join()

@@ -110,7 +110,7 @@ class ObjectTracker:
                                        max_det=self.max_det)
             result_dict = {}
             t4, t5, t6 = t3, t3, t3
-            confirmed_id_list = None
+            confirmed_id_list = []
             # Process detections
             for i, det in enumerate(pred):  # detections per image
 
