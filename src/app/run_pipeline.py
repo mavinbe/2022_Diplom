@@ -134,7 +134,7 @@ def handle_pose_detect_list(image, object_detection_dict, pose_detector_pool, t)
     return pose_detect_dict_in_global_dict
 
 
-def run(handle_image, cam_url, sink_ip, track_highest, _run_list):
+def run(handle_image, cam_url, sink_ip, track_highest, _run_list, out_queue=None, in_queue=None):
     with PoseDetectorPool() as pose_detector_pool:
 
         object_tracker = ObjectTracker(show_vid=False)
@@ -169,6 +169,11 @@ def run(handle_image, cam_url, sink_ip, track_highest, _run_list):
         current_position = None
         current_zoom = np.array([1])
         while True:
+            # is in_queue is set wait till get returns a value
+            if in_queue:
+                print(in_queue.get())
+            if out_queue:
+                out_queue.put('go')
             current_time = time_sync()
             t = {"start": current_time, "read_image": None, "object_track": None, "pose_detect": None, "pose_detect_count": 0, "camera_movement": None, "handle_image": None}
             frame_count += 1
@@ -248,7 +253,6 @@ def run(handle_image, cam_url, sink_ip, track_highest, _run_list):
                 t["handle_image"] = time_sync()
                 LOGGER.info(
                     f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)')
-
 
             except Warning as warn:
                 #print(str(warn))
@@ -368,13 +372,17 @@ def show_image(image):
 
 if __name__ == '__main__':
     multiP.set_start_method('spawn')
-    q_1 = multiP.Queue()
-    p_1 = multiP.Process(target=run, args=(show_image, 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_01_main', '192.168.0.101', False, run_list_1()))
+    sync_queues = [multiP.Queue(), multiP.Queue()]
+    p_1 = multiP.Process(target=run, args=(show_image, 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_01_main', '192.168.0.101', False, run_list_1()), kwargs={'in_queue': sync_queues[1], 'out_queue': sync_queues[0]})
     p_1.start()
 
     p_2 = multiP.Process(target=run, args=(
-    show_image, 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main', '192.168.0.102', False, run_list_2()))
+    show_image, 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main', '192.168.0.102', False, run_list_2()), kwargs={'in_queue': sync_queues[0], 'out_queue': sync_queues[1]})
     p_2.start()
+
+
+    for out_queue in sync_queues:
+        out_queue.put('go')
 
     p_1.join()
     p_2.join()
