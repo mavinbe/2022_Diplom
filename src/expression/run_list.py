@@ -35,7 +35,7 @@ class Pause(CuePoint):
         return time - self.start_time >= self.seconds
 
 
-class LandmarkTarget(CuePoint):
+class PositionTarget(CuePoint):
     def __init__(self, target, target_zoom=None, movement_v_coefficient=4, zoom_v_coefficient=4, after_finished=None):
         self.target = target
         self.target_zoom = target_zoom
@@ -73,8 +73,8 @@ class LandmarkTarget(CuePoint):
         return self._is_position_finished(pose_detect_dict_in_global) and self._is_zoom_finished(pose_detect_dict_in_global)
 
     def _is_position_finished(self, pose_detect_dict_in_global):
-        target_position = determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
-                                                                  self.target)
+        target_position = self.determ_position(pose_detect_dict_in_global)
+        #print(target_position)
         current_position = self.position_model.get_position()
         if target_position is None or current_position is None:
             return False
@@ -85,6 +85,9 @@ class LandmarkTarget(CuePoint):
 
         return magnitude < 5
 
+    def determ_position(self, pose_detect_dict_in_global):
+        return self.target
+
     def _is_zoom_finished(self, pose_detect_dict_in_global):
         if self.target_zoom is None:
             return True
@@ -94,6 +97,10 @@ class LandmarkTarget(CuePoint):
         #print(magnitude)
         return magnitude < 0.1
 
+class LandmarkTarget(PositionTarget):
+    def determ_position(self, pose_detect_dict_in_global):
+        return determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
+                                                               self.target)
 
 def run_list_1():
     return [
@@ -115,10 +122,11 @@ def run_list_1():
         LandmarkTarget(PoseLandmark.NOSE, 15, after_finished=Pause(0.1)),
         LandmarkTarget(PoseLandmark.NOSE, 8, after_finished=Pause(7)),
 
-        LandmarkTarget(PoseLandmark.RIGHT_THUMB, 14, after_finished=Pause(6)),
-        LandmarkTarget(PoseLandmark.LEFT_THUMB, after_finished=Pause(6)),
-        LandmarkTarget(PoseLandmark.RIGHT_THUMB, after_finished=Pause(6)),
+        LandmarkTarget(PoseLandmark.RIGHT_THUMB, 14, after_finished=Pause(12)),
+        LandmarkTarget(PoseLandmark.LEFT_THUMB, after_finished=Pause(12)),
         LandmarkTarget(PoseLandmark.NOSE, 4,after_finished=Pause(15)),
+
+        PositionTarget((200, 700), target_zoom=2.5, zoom_v_coefficient=1, after_finished=None),
 
     ]
 
@@ -135,10 +143,9 @@ def run_list_2():
                        after_finished=Pause(0.1)),
         LandmarkTarget(PoseLandmark.NOSE, after_finished=Pause(5)),
 
-        LandmarkTarget(PoseLandmark.RIGHT_THUMB, 14, after_finished=Pause(6)),
-        LandmarkTarget(PoseLandmark.LEFT_THUMB, after_finished=Pause(6)),
-        LandmarkTarget(PoseLandmark.RIGHT_THUMB, after_finished=Pause(6)),
-        LandmarkTarget(PoseLandmark.NOSE, 8, after_finished=None),
+        LandmarkTarget(PoseLandmark.RIGHT_THUMB, 14, after_finished=Pause(12)),
+        LandmarkTarget(PoseLandmark.LEFT_THUMB, after_finished=Pause(12)),
+        LandmarkTarget(PoseLandmark.NOSE, 8, after_finished=Pause(7)),
 
         LandmarkTarget(PoseLandmark.NOSE, 15, after_finished=Pause(0.1)),
         LandmarkTarget(PoseLandmark.RIGHT_EYE_OUTER, 23, movement_v_coefficient=6, after_finished=Pause(0.01)),
@@ -150,8 +157,8 @@ def run_list_2():
         LandmarkTarget(PoseLandmark.RIGHT_EYE_OUTER, movement_v_coefficient=6, after_finished=Pause(0.01)),
         LandmarkTarget(PoseLandmark.LEFT_EYE_OUTER, movement_v_coefficient=6, after_finished=Pause(0.01)),
         LandmarkTarget(PoseLandmark.NOSE, 15, after_finished=Pause(0.1)),
-        LandmarkTarget(PoseLandmark.NOSE, 4, after_finished=None),
+        LandmarkTarget(PoseLandmark.NOSE, 4, after_finished=Pause(15)),
 
-
+        PositionTarget((1200, 250), target_zoom=4, zoom_v_coefficient=1, after_finished=None),
 
     ]

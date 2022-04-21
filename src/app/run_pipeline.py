@@ -9,7 +9,7 @@ import atexit
 
 import multiprocessing as multiP
 
-from expression.run_list import run_list_1, run_list_2,  Pause, CuePoint, LandmarkTarget
+from expression.run_list import run_list_1, run_list_2,  Pause, CuePoint, LandmarkTarget, PositionTarget
 from media.VideoGStreamerProvider import VideoGStreamerProvider
 from modules.object_tracker import ObjectTracker
 from modules.pose_detector import PoseDetector
@@ -167,11 +167,13 @@ def run(handle_image, cam_url, sink_ip, track_highest, _run_list, out_queue=None
         run_item = None
         current_box = None
         current_position = None
+        pose_to_follow = None
         current_zoom = np.array([1])
         while True:
             # is in_queue is set wait till get returns a value
             if in_queue:
-                print(in_queue.get())
+                in_queue.get()
+                #print(in_queue.get())
             if out_queue:
                 out_queue.put('go')
             current_time = time_sync()
@@ -192,21 +194,22 @@ def run(handle_image, cam_url, sink_ip, track_highest, _run_list, out_queue=None
                 object_detection_dict, confirmed_id_list = handle_object_track(image, object_tracker, t)
                 #print(object_detection_dict)
                 # t_pose_detect
-                if len(confirmed_id_list) == 0:
-                    raise Warning("No Confirmed Ids")
                 pose_id_to_follow = None
-                if track_highest:
-                    pose_id_to_follow = max(confirmed_id_list)
-                else:
-                    pose_id_to_follow = min(confirmed_id_list)
-                if pose_id_to_follow not in object_detection_dict:
-                    continue
-                poses_to_detect = [pose_id_to_follow]
+                if len(confirmed_id_list) >= 1:
 
-                object_detection_dict_filtered = {your_key: object_detection_dict[your_key] for your_key in poses_to_detect}
 
-                pose_detect_dict_in_global = handle_pose_detect_list(image, object_detection_dict_filtered, pose_detector_pool, t)
-                pose_to_follow = pose_detect_dict_in_global[pose_id_to_follow]
+                    if track_highest:
+                        pose_id_to_follow = max(confirmed_id_list)
+                    else:
+                        pose_id_to_follow = min(confirmed_id_list)
+                    if pose_id_to_follow not in object_detection_dict:
+                        continue
+                    poses_to_detect = [pose_id_to_follow]
+
+                    object_detection_dict_filtered = {your_key: object_detection_dict[your_key] for your_key in poses_to_detect}
+
+                    pose_detect_dict_in_global = handle_pose_detect_list(image, object_detection_dict_filtered, pose_detector_pool, t)
+                    pose_to_follow = pose_detect_dict_in_global[pose_id_to_follow]
 
 
                 # t_post
@@ -220,7 +223,11 @@ def run(handle_image, cam_url, sink_ip, track_highest, _run_list, out_queue=None
                         if current_position is None:
                             current_position = determ_position_by_landmark_from_pose_detection(pose_to_follow,
                                                                                                run_item.target)
-                            #print(current_position)
+                            print(current_position)
+                        run_item.start(time_sync(), current_position, current_zoom)
+                    elif isinstance(run_item, PositionTarget):
+                        if current_position is None:
+                            current_position = (int(width/2), int(height/2))
                         run_item.start(time_sync(), current_position, current_zoom)
 
                 # clean up run_items
@@ -230,14 +237,22 @@ def run(handle_image, cam_url, sink_ip, track_highest, _run_list, out_queue=None
                 if isinstance(run_item, LandmarkTarget):
                     if run_item.is_finished(pose_to_follow):
                         run_item = None
+                elif isinstance(run_item, PositionTarget):
+                    if run_item.is_finished(None):
+                        run_item = None
                 # process run_item
                 if isinstance(run_item, Pause):
                     pass
                     #print("Pause: ")
                 if isinstance(run_item, LandmarkTarget):
-                    image, current_box, current_position, current_zoom = handle_camera_movement_with_LandmarkTarget(image, pose_to_follow,
+                    image, current_box, current_position, current_zoom = handle_camera_movement_with_LandmarkTarget(image, determ_position_by_landmark_from_pose_detection(pose_to_follow,
+                                                                      run_item.target),
                                                                                                                     run_item, t)
                     #print("landmark: "+str(current_zoom))
+                elif isinstance(run_item, PositionTarget):
+                    image, current_box, current_position, current_zoom = handle_camera_movement_with_LandmarkTarget(image, run_item.determ_position(None),
+                                                                                                                    run_item, t)
+
                 else:
                     if current_box:
                         image = zoom(image, current_box)
@@ -251,8 +266,8 @@ def run(handle_image, cam_url, sink_ip, track_highest, _run_list, out_queue=None
                 send_out_1.write(image)
                 handle_image(image)
                 t["handle_image"] = time_sync()
-                LOGGER.info(
-                    f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)')
+                # LOGGER.info(
+                #     f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)')
 
             except Warning as warn:
                 #print(str(warn))
@@ -262,8 +277,8 @@ def run(handle_image, cam_url, sink_ip, track_highest, _run_list, out_queue=None
                 send_out_1.write(image)
                 handle_image(original_image)
                 t["handle_image"] = time_sync()
-                LOGGER.info(
-                    f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)\t--- {warn}')
+                # LOGGER.info(
+                #     f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)\t--- {warn}')
 
                 continue
             #finally:
@@ -290,9 +305,7 @@ def handle_object_track(image, object_tracker, t):
     #     raise Warning("No Objects Detected")
     return object_detection_dict, confirmed_id_list
 
-def handle_camera_movement_with_LandmarkTarget(image, pose_detect_dict_in_global, landmark_target, t):
-    target_position = determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
-                                                                      landmark_target.target)
+def handle_camera_movement_with_LandmarkTarget(image, target_position, landmark_target, t):
     if target_position is None:
         t["camera_movement"] = time_sync()
         raise Warning("No Landmark found " + str(PoseLandmark.NOSE))
