@@ -211,6 +211,8 @@ def run(handle_image, cam_url, sink_ip, track_highest, _run_list, out_queue=None
                     pose_detect_dict_in_global = handle_pose_detect_list(image, object_detection_dict_filtered, pose_detector_pool, t)
                     pose_to_follow = pose_detect_dict_in_global[pose_id_to_follow]
 
+                if not pose_to_follow:
+                    continue
 
                 # t_post
 
