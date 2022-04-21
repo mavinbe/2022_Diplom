@@ -232,6 +232,10 @@ def run(handle_image, cam_url, sink_ip, track_highest, _run_list, out_queue=None
                             current_position = (int(width/2), int(height/2))
                         run_item.start(time_sync(), current_position, current_zoom)
 
+                if type(run_item) == PositionTarget:
+                    if run_item.self_is_finished(None):
+                        image = cv2.blur(image, (5, 5))
+
                 # clean up run_items
                 if isinstance(run_item, Pause):
                     if run_item.is_finished(time_sync()):
