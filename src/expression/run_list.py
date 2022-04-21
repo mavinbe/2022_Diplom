@@ -59,7 +59,7 @@ class LandmarkTarget(CuePoint):
             return False
 
         if self.after_finished is None:
-           return True
+           return False
         else:
             return self.after_finished_is_finished()
 
