@@ -134,7 +134,7 @@ def handle_pose_detect_list(image, object_detection_dict, pose_detector_pool, t)
     return pose_detect_dict_in_global_dict
 
 
-def run(handle_image, cam_url, sink_ip, track_highest, _run_list, out_queue=None, in_queue=None):
+def run(handle_image, cam_url, sink_ip, track_highest, run_list, out_queue=None, in_queue=None):
     with PoseDetectorPool() as pose_detector_pool:
 
         object_tracker = ObjectTracker(show_vid=False)
@@ -165,6 +165,7 @@ def run(handle_image, cam_url, sink_ip, track_highest, _run_list, out_queue=None
         atexit.register(send_out_1.release)
 
         run_item = None
+        _run_list = run_list()
         current_box = None
         current_position = None
         pose_to_follow = None
@@ -392,11 +393,11 @@ def show_image(image):
 if __name__ == '__main__':
     multiP.set_start_method('spawn')
     sync_queues = [multiP.Queue(), multiP.Queue()]
-    p_1 = multiP.Process(target=run, args=(show_image, 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_01_main', '192.168.0.101', False, run_list_1()), kwargs={'in_queue': sync_queues[1], 'out_queue': sync_queues[0]})
+    p_1 = multiP.Process(target=run, args=(show_image, 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_01_main', '192.168.0.101', False, run_list_1), kwargs={'in_queue': sync_queues[1], 'out_queue': sync_queues[0]})
     p_1.start()
 
     p_2 = multiP.Process(target=run, args=(
-    show_image, 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main', '192.168.0.102', False, run_list_2()), kwargs={'in_queue': sync_queues[0], 'out_queue': sync_queues[1]})
+    show_image, 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main', '192.168.0.102', False, run_list_2), kwargs={'in_queue': sync_queues[0], 'out_queue': sync_queues[1]})
     p_2.start()
 
 
