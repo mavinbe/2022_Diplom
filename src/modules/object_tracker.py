@@ -151,9 +151,9 @@ class ObjectTracker:
                             annotator.box_label(bboxes, label, color=colors(c, True))
                     t6 = time_sync()
 
-
                 else:
                     self.deepsort.increment_ages()
+                    confirmed_id_list = [(track.track_id, track.state) for track in self.deepsort.tracker.tracks]
                     #LOGGER.info('No detections')
 
                 # Stream results
