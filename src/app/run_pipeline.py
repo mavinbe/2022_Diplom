@@ -108,7 +108,7 @@ class PoseDetectorPool:
 
     def _get_first_free_detector(self):
         for detector in self.pool:
-            if detector not in self.pool_map:
+            if detector not in self.pool_map.values():
                 return detector
         raise RuntimeError("PoseDetectorPool is exhausted")
 
