@@ -364,11 +364,11 @@ def show_image(image):
 if __name__ == '__main__':
     multiP.set_start_method('spawn')
     q_1 = multiP.Queue()
-    p_1 = multiP.Process(target=run, args=(show_image, 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_01_main', '192.168.0.102', False))
+    p_1 = multiP.Process(target=run, args=(show_image, 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_01_main', '192.168.0.101', False))
     p_1.start()
 
     p_2 = multiP.Process(target=run, args=(
-    show_image, 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main', '192.168.0.101', False))
+    show_image, 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main', '192.168.0.102', False))
     p_2.start()
 
     p_1.join()
