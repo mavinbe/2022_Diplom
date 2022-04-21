@@ -90,7 +90,7 @@ class PoseDetectorPool:
         self.pool = []
         self.pool_map = {}
 
-        for i in range(10):
+        for i in range(1):
             self.pool.append(PoseDetector(show_vid=False))
 
     def __enter__(self):
@@ -106,6 +106,9 @@ class PoseDetectorPool:
 
         return self.pool_map[key]
 
+    def get_first_detector(self):
+        return self.pool[0]
+
     def _get_first_free_detector(self):
         for detector in self.pool:
             if detector not in self.pool_map.values():
@@ -118,9 +121,12 @@ def handle_pose_detect_list(image, object_detection_dict, pose_detector_pool, t)
     for key in object_detection_dict:
         # print(key)
         # print(pose_detector_pool.get(key))
-        pose_detect_dict, pose_detect_dict_in_global = inference_pose(pose_detector_pool.get(key), image,
-                                                                      object_detection_dict,
-                                                                      key)
+        # pose_detect_dict, pose_detect_dict_in_global = inference_pose(pose_detector_pool.get(key), image,
+        #                                                               object_detection_dict,
+        #                                                               key)
+        pose_detect_dict, pose_detect_dict_in_global = inference_pose(pose_detector_pool.get_first_detector(), image,
+                                                                     object_detection_dict,
+                                                                     key)
         pose_detect_dict_in_global_dict[key] = pose_detect_dict_in_global
 
     t["pose_detect"] = time_sync()
