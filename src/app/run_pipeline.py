@@ -195,7 +195,7 @@ def run(handle_image, cam_url, sink_ip, track_highest, _run_list, out_queue=None
                 print(confirmed_id_list)
                 # t_pose_detect
                 pose_id_to_follow = None
-                if len(confirmed_id_list) >= 1:
+                if len(object_detection_dict) >= 1:
 
 
                     if track_highest:

@@ -30,6 +30,8 @@ from yolov5.utils.plots import Annotator, colors
 from deep_sort.utils.parser import get_config
 from deep_sort.deep_sort import DeepSort
 
+from deep_sort.sort.track import TrackState
+
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # yolov5 deepsort root directory
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
@@ -153,7 +155,7 @@ class ObjectTracker:
 
                 else:
                     self.deepsort.increment_ages()
-                    confirmed_id_list = [(track.track_id, track.state) for track in self.deepsort.tracker.tracks]
+                    confirmed_id_list = [track.track_id for track in filter(lambda track: track.state == TrackState.Confirmed, self.deepsort.tracker.tracks)]
                     #LOGGER.info('No detections')
 
                 # Stream results
