@@ -134,6 +134,50 @@ def handle_pose_detect_list(image, object_detection_dict, pose_detector_pool, t)
     return pose_detect_dict_in_global_dict
 
 
+def print_data_to_image(image, state, position):
+    text = str(state)
+    cv2.putText(image, text, position, cv2.FONT_HERSHEY_SIMPLEX,
+                1.0, (0, 0, 0), 2)
+
+    return image
+
+
+def draw_box_to_image(image, in_room_zone, param):
+    print(in_room_zone)
+    return cv2.rectangle(image, in_room_zone[0], in_room_zone[1], (0,0,255), thickness=2, lineType=cv2.LINE_AA)
+
+
+def determ_is_empty_room(object_detection_dict, confirmed_id_list):
+    return True
+
+
+def determ_is_following():
+    raise NotImplementedError
+
+
+def determ_are_persons_left():
+    raise NotImplementedError
+
+
+def print_detections(image, object_detection_dict):
+    for key in object_detection_dict.keys():
+        box = object_detection_dict[key]
+        color = (255, 0, 0)
+        lw = 2
+
+        p1, p2 = (int(box[0]), int(box[1])), (int(box[2]), int(box[3]))
+        cv2.rectangle(image, p1, p2, color, thickness=lw, lineType=cv2.LINE_AA)
+        if key:
+            key = str(key)
+            tf = max(lw - 1, 1)
+            w, h = cv2.getTextSize(key, 0, fontScale=lw / 3,  thickness=tf)[0]  # text width, height
+            outside = p1[1] - h - 3 >= 0  # label fits outside box
+            p2 = p1[0] + w, p1[1] - h - 3 if outside else p1[1] + h + 3
+            cv2.rectangle(image, p1, p2, color, -1, cv2.LINE_AA)  # filled
+            cv2.putText(image, key, (p1[0], p1[1] - 2 if outside else p1[1] + h + 2), 0, lw / 3, (255,255,255),
+                        thickness=tf, lineType=cv2.LINE_AA)
+    return image
+
 def run(handle_image, cam_url, sink_ip, track_highest, run_list, out_queue=None, in_queue=None):
     with PoseDetectorPool() as pose_detector_pool:
 
