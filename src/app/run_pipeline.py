@@ -172,11 +172,8 @@ def run(handle_image, cam_url, sink_ip, track_highest, run_list, out_queue=None,
         current_zoom = np.array([1])
         while True:
             # is in_queue is set wait till get returns a value
-            if in_queue:
-                in_queue.get()
-                #print(in_queue.get())
-            if out_queue:
-                out_queue.put('go')
+            wait_for_sync(in_queue, out_queue)
+
             current_time = time_sync()
             t = {"start": current_time, "read_image": None, "object_track": None, "pose_detect": None, "pose_detect_count": 0, "camera_movement": None, "handle_image": None}
             frame_count += 1
@@ -185,10 +182,9 @@ def run(handle_image, cam_url, sink_ip, track_highest, run_list, out_queue=None,
                 original_image = handle_read_image(frame_count, img_stream, t)
 
                 # crop and zoom for beamer fit at probeaugbau
-                original_image = original_image[383:,:]
-                original_image = cv2.resize(original_image, (width, height))
+                original_image = crop_and_zoom_for_beamer_fit(height, original_image, width)
 
-                #original_image = cv2.resize(original_image, (int(width/2), int(height/2)), interpolation=cv2.INTER_NEAREST)
+                # create clone
                 image = original_image
 
                 # t_object_track
@@ -294,6 +290,20 @@ def run(handle_image, cam_url, sink_ip, track_highest, run_list, out_queue=None,
         #write_detection(frame_count, object_detection_dict, serialize_path)
         img_stream.release()
         send_out_1.release()
+
+
+def crop_and_zoom_for_beamer_fit(height, original_image, width):
+    original_image = original_image[383:, :]
+    original_image = cv2.resize(original_image, (width, height))
+    return original_image
+
+
+def wait_for_sync(in_queue, out_queue):
+    if in_queue:
+        in_queue.get()
+        # print(in_queue.get())
+    if out_queue:
+        out_queue.put('go')
 
 
 def handle_read_image(frame_count, img_stream, t):
