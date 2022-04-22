@@ -134,7 +134,7 @@ def run_list_1():
 
 def run_list_2():
     return [
-        Pause(1),
+        Pause(15),
         LandmarkTarget(PoseLandmark.NOSE, target_zoom=8, zoom_v_coefficient=1, after_finished=Pause(10)),
         LandmarkTarget(PoseLandmark.NOSE, target_zoom=8, zoom_v_coefficient=1, after_finished=Pause(1)),
         LandmarkTarget(PoseLandmark.RIGHT_ANKLE,
