@@ -265,35 +265,36 @@ def run(handle_image, cam_url, sink_ip, track_highest, run_list, out_queue=None,
                 #raise Warning("asdf")
                 # t_object_track
                 object_detection_dict, confirmed_id_list = handle_object_track(image, object_tracker, t)
-                # #print((confirmed_id_list,object_detection_dict))
-                #
-                # #exit_zone_2 = ((int(width / 2), 0), (width, int(height / 2)))
-                # exit_zone = ((0, int(height * 19 / 40)), (int(width / 6), int(height * 17 / 20)))
-                # to_do = []
-                #
-                #
-                # persons_not_in_exit_zone = update_persons_not_in_exit_zone(persons_not_in_exit_zone, exit_zone, object_detection_dict)
-                #
-                #
-                #
-                # if determ_is_empty_room(object_detection_dict, confirmed_id_list, exit_zone):
-                #     to_do.append("reset")
-                # else:
-                #     if determ_is_following():
-                #         to_do.append("follow")
-                #     else:
-                #         if determ_are_persons_left():
-                #             to_do.append("next_person")
-                #         else:
-                #             to_do.append("sleep")
-                #
-                # image = print_detections(image, object_detection_dict)
-                # image = print_data_to_image(image, to_do, (100, 100))
-                # image = print_data_to_image(image, (frame_count, confirmed_id_list, object_detection_dict), (100, 500))
-                # image = print_data_to_image(image, (persons_not_in_exit_zone), (100, 600))
-                # image = draw_box_to_image(image, exit_zone, (100, 100))
-                #
-                #
+                #print((confirmed_id_list,object_detection_dict))
+
+                #exit_zone_2 = ((int(width / 2), 0), (width, int(height / 2)))
+                exit_zone = ((0, int(height * 19 / 40)), (int(width / 6), int(height * 17 / 20)))
+                to_do = []
+
+
+                persons_not_in_exit_zone = update_persons_not_in_exit_zone(persons_not_in_exit_zone, exit_zone, object_detection_dict)
+
+
+
+                if determ_is_empty_room(object_detection_dict, confirmed_id_list, exit_zone):
+                    to_do.append("reset")
+                else:
+                    if determ_is_following():
+                        to_do.append("follow")
+                    else:
+                        if determ_are_persons_left():
+                            to_do.append("next_person")
+                        else:
+                            to_do.append("sleep")
+
+                if True:
+                    image = print_detections(image, object_detection_dict)
+                    image = print_data_to_image(image, to_do, (100, 100))
+                    image = print_data_to_image(image, (frame_count, confirmed_id_list, object_detection_dict), (100, 500))
+                    image = print_data_to_image(image, (persons_not_in_exit_zone), (100, 600))
+                    image = draw_box_to_image(image, exit_zone, (100, 100))
+
+
 
                 # t_pose_detect
                 pose_id_to_follow = None
