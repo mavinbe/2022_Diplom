@@ -208,60 +208,13 @@ def run(handle_image, cam_url, sink_ip, track_highest, run_list, out_queue=None,
                     pose_detect_dict_in_global = handle_pose_detect_list(image, object_detection_dict_filtered, pose_detector_pool, t)
                     pose_to_follow = pose_detect_dict_in_global[pose_id_to_follow]
 
-                if not pose_to_follow:
-                    continue
+                if pose_to_follow:
+                    _run_list, current_box, current_position, current_zoom, height, image, pose_to_follow, run_item, t, width = run_animation(
+                        _run_list, current_box, current_position, current_zoom, height, image, pose_to_follow, run_item,
+                        t,
+                        width)
 
                 # t_post
-
-                # start run_items
-                if run_item is None:
-                    run_item = _run_list.pop(0)
-                    if isinstance(run_item, Pause):
-                        run_item.start(time_sync())
-                    if isinstance(run_item, LandmarkTarget):
-                        if current_position is None:
-                            current_position = determ_position_by_landmark_from_pose_detection(pose_to_follow,
-                                                                                               run_item.target)
-                            print(current_position)
-                        run_item.start(time_sync(), current_position, current_zoom)
-                    elif isinstance(run_item, PositionTarget):
-                        if current_position is None:
-                            current_position = (int(width/2), int(height/2))
-                        run_item.start(time_sync(), current_position, current_zoom)
-
-                if type(run_item) == PositionTarget:
-                    if run_item.self_is_finished(None):
-                        image = cv2.blur(image, (5, 5))
-
-                # clean up run_items
-                if isinstance(run_item, Pause):
-                    if run_item.is_finished(time_sync()):
-                        run_item = None
-                if isinstance(run_item, LandmarkTarget):
-                    if run_item.is_finished(pose_to_follow):
-                        run_item = None
-                elif isinstance(run_item, PositionTarget):
-                    if run_item.is_finished(None):
-                        run_item = None
-                # process run_item
-                if isinstance(run_item, Pause):
-                    pass
-                    #print("Pause: ")
-                if isinstance(run_item, LandmarkTarget):
-                    image, current_box, current_position, current_zoom = handle_camera_movement_with_LandmarkTarget(image, determ_position_by_landmark_from_pose_detection(pose_to_follow,
-                                                                      run_item.target),
-                                                                                                                    run_item, t)
-                    #print("landmark: "+str(current_zoom))
-                elif isinstance(run_item, PositionTarget):
-                    image, current_box, current_position, current_zoom = handle_camera_movement_with_LandmarkTarget(image, run_item.determ_position(None),
-                                                                                                                    run_item, t)
-
-                else:
-                    if current_box:
-                        image = zoom(image, current_box)
-                    t["camera_movement"] = time_sync()
-
-
 
 
 
@@ -290,6 +243,60 @@ def run(handle_image, cam_url, sink_ip, track_highest, run_list, out_queue=None,
         #write_detection(frame_count, object_detection_dict, serialize_path)
         img_stream.release()
         send_out_1.release()
+
+
+def run_animation(_run_list, current_box, current_position, current_zoom, height, image, pose_to_follow, run_item, t,
+                  width):
+    # start run_items
+    if run_item is None:
+        run_item = _run_list.pop(0)
+        if isinstance(run_item, Pause):
+            run_item.start(time_sync())
+        if isinstance(run_item, LandmarkTarget):
+            if current_position is None:
+                current_position = determ_position_by_landmark_from_pose_detection(pose_to_follow,
+                                                                                   run_item.target)
+                print(current_position)
+            run_item.start(time_sync(), current_position, current_zoom)
+        elif isinstance(run_item, PositionTarget):
+            if current_position is None:
+                current_position = (int(width / 2), int(height / 2))
+            run_item.start(time_sync(), current_position, current_zoom)
+    if type(run_item) == PositionTarget:
+        if run_item.self_is_finished(None):
+            image = cv2.blur(image, (5, 5))
+    # clean up run_items
+    if isinstance(run_item, Pause):
+        if run_item.is_finished(time_sync()):
+            run_item = None
+    if isinstance(run_item, LandmarkTarget):
+        if run_item.is_finished(pose_to_follow):
+            run_item = None
+    elif isinstance(run_item, PositionTarget):
+        if run_item.is_finished(None):
+            run_item = None
+    # process run_item
+    if isinstance(run_item, Pause):
+        pass
+        # print("Pause: ")
+    if isinstance(run_item, LandmarkTarget):
+        image, current_box, current_position, current_zoom = handle_camera_movement_with_LandmarkTarget(image,
+                                                                                                        determ_position_by_landmark_from_pose_detection(
+                                                                                                            pose_to_follow,
+                                                                                                            run_item.target),
+                                                                                                        run_item, t)
+        # print("landmark: "+str(current_zoom))
+    elif isinstance(run_item, PositionTarget):
+        image, current_box, current_position, current_zoom = handle_camera_movement_with_LandmarkTarget(image,
+                                                                                                        run_item.determ_position(
+                                                                                                            None),
+                                                                                                        run_item, t)
+
+    else:
+        if current_box:
+            image = zoom(image, current_box)
+        t["camera_movement"] = time_sync()
+    return _run_list, current_box, current_position, current_zoom, height, image, pose_to_follow, run_item, t, width
 
 
 def crop_and_zoom_for_beamer_fit(height, original_image, width):
