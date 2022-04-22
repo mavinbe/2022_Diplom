@@ -147,8 +147,9 @@ def draw_box_to_image(image, in_room_zone, param):
 
 
 def determ_is_empty_room(object_detection_dict, confirmed_id_list, exit_zone):
-    return True
-
+    # print(len(confirmed_id_list))
+    # print((object_detection_dict, confirmed_id_list, exit_zone))
+    return len(confirmed_id_list) == 0
 
 def determ_is_following():
     raise NotImplementedError
@@ -190,7 +191,7 @@ def is_detection_in_zone(det, exit_zone):
 def remove_old_persons(persons_not_in_exit_zone):
     keys = list(persons_not_in_exit_zone.keys())
     for key in keys:
-        if persons_not_in_exit_zone[key]['last_time'] + 60 < time_sync():
+        if persons_not_in_exit_zone[key]['last_time'] + 6 < time_sync():
             del persons_not_in_exit_zone[key]
     return persons_not_in_exit_zone
 
@@ -276,18 +277,28 @@ def run(handle_image, cam_url, sink_ip, track_highest, run_list, out_queue=None,
 
 
 
-                if determ_is_empty_room(object_detection_dict, confirmed_id_list, exit_zone):
+                if determ_is_empty_room(object_detection_dict, confirmed_id_list, persons_not_in_exit_zone):
                     to_do.append("reset")
-                else:
-                    if determ_is_following():
-                        to_do.append("follow")
-                    else:
-                        if determ_are_persons_left():
-                            to_do.append("next_person")
-                        else:
-                            to_do.append("sleep")
+                    #print("------------------------ RESET ")
 
-                if True:
+                    run_item = None
+                    _run_list = run_list()
+                    current_box = None
+                    current_position = None
+                    pose_to_follow = None
+                    current_zoom = np.array([1])
+                    persons_not_in_exit_zone = {}
+
+                # else:
+                #     if determ_is_following():
+                #         to_do.append("follow")
+                #     else:
+                #         if determ_are_persons_left():
+                #             to_do.append("next_person")
+                #         else:
+                #             to_do.append("sleep")
+
+                if False:
                     image = print_detections(image, object_detection_dict)
                     image = print_data_to_image(image, to_do, (100, 100))
                     image = print_data_to_image(image, (frame_count, confirmed_id_list, object_detection_dict), (100, 500))
@@ -370,7 +381,7 @@ def run_animation(_run_list, current_box, current_position, current_zoom, height
             run_item.start(time_sync(), current_position, current_zoom)
     if type(run_item) == PositionTarget:
         if run_item.self_is_finished(None):
-            image = cv2.blur(image, (5, 5))
+            image = cv2.blur(image, (10, 10))
     # clean up run_items
     if isinstance(run_item, Pause):
         if run_item.is_finished(time_sync()):
