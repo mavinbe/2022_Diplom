@@ -143,11 +143,10 @@ def print_data_to_image(image, state, position):
 
 
 def draw_box_to_image(image, in_room_zone, param):
-    print(in_room_zone)
     return cv2.rectangle(image, in_room_zone[0], in_room_zone[1], (0,0,255), thickness=2, lineType=cv2.LINE_AA)
 
 
-def determ_is_empty_room(object_detection_dict, confirmed_id_list):
+def determ_is_empty_room(object_detection_dict, confirmed_id_list, exit_zone):
     return True
 
 
@@ -177,6 +176,37 @@ def print_detections(image, object_detection_dict):
             cv2.putText(image, key, (p1[0], p1[1] - 2 if outside else p1[1] + h + 2), 0, lw / 3, (255,255,255),
                         thickness=tf, lineType=cv2.LINE_AA)
     return image
+
+
+def x_is_in_range(x, range):
+    return range[0] < x < range[1]
+
+
+def is_detection_in_zone(det, exit_zone):
+
+    return x_is_in_range(det[0], exit_zone[0]) and x_is_in_range(det[2], exit_zone[0]) and x_is_in_range(det[1], exit_zone[1]) and x_is_in_range(det[3], exit_zone[1])
+
+
+def remove_old_persons(persons_not_in_exit_zone):
+    keys = list(persons_not_in_exit_zone.keys())
+    for key in keys:
+        if persons_not_in_exit_zone[key]['last_time'] + 60 < time_sync():
+            del persons_not_in_exit_zone[key]
+    return persons_not_in_exit_zone
+
+def update_persons_not_in_exit_zone(persons_not_in_exit_zone, exit_zone, object_detection_dict):
+    persons_not_in_exit_zone = remove_old_persons(persons_not_in_exit_zone)
+
+    for key in object_detection_dict.keys():
+        det = object_detection_dict[key]
+        if is_detection_in_zone(det, exit_zone):
+            if key in persons_not_in_exit_zone.keys():
+                del persons_not_in_exit_zone[key]
+        else:
+            persons_not_in_exit_zone[key] = {'last_time': time_sync()}
+
+    return persons_not_in_exit_zone
+
 
 def run(handle_image, cam_url, sink_ip, track_highest, run_list, out_queue=None, in_queue=None):
     with PoseDetectorPool() as pose_detector_pool:
@@ -214,6 +244,7 @@ def run(handle_image, cam_url, sink_ip, track_highest, run_list, out_queue=None,
         current_position = None
         pose_to_follow = None
         current_zoom = np.array([1])
+        persons_not_in_exit_zone = {}
         while True:
             # is in_queue is set wait till get returns a value
             wait_for_sync(in_queue, out_queue)
@@ -231,9 +262,39 @@ def run(handle_image, cam_url, sink_ip, track_highest, run_list, out_queue=None,
                 # create clone
                 image = original_image
 
+                #raise Warning("asdf")
                 # t_object_track
                 object_detection_dict, confirmed_id_list = handle_object_track(image, object_tracker, t)
-                print(confirmed_id_list)
+                # #print((confirmed_id_list,object_detection_dict))
+                #
+                # #exit_zone_2 = ((int(width / 2), 0), (width, int(height / 2)))
+                # exit_zone = ((0, int(height * 19 / 40)), (int(width / 6), int(height * 17 / 20)))
+                # to_do = []
+                #
+                #
+                # persons_not_in_exit_zone = update_persons_not_in_exit_zone(persons_not_in_exit_zone, exit_zone, object_detection_dict)
+                #
+                #
+                #
+                # if determ_is_empty_room(object_detection_dict, confirmed_id_list, exit_zone):
+                #     to_do.append("reset")
+                # else:
+                #     if determ_is_following():
+                #         to_do.append("follow")
+                #     else:
+                #         if determ_are_persons_left():
+                #             to_do.append("next_person")
+                #         else:
+                #             to_do.append("sleep")
+                #
+                # image = print_detections(image, object_detection_dict)
+                # image = print_data_to_image(image, to_do, (100, 100))
+                # image = print_data_to_image(image, (frame_count, confirmed_id_list, object_detection_dict), (100, 500))
+                # image = print_data_to_image(image, (persons_not_in_exit_zone), (100, 600))
+                # image = draw_box_to_image(image, exit_zone, (100, 100))
+                #
+                #
+
                 # t_pose_detect
                 pose_id_to_follow = None
                 if len(object_detection_dict) >= 1:
