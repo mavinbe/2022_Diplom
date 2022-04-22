@@ -104,8 +104,9 @@ class LandmarkTarget(PositionTarget):
 
 def run_list_1():
     return [
-        Pause(15),
+        Pause(1),
         LandmarkTarget(PoseLandmark.NOSE, target_zoom=8, zoom_v_coefficient=1, after_finished=Pause(10)),
+        LandmarkTarget(PoseLandmark.NOSE, target_zoom=8, zoom_v_coefficient=1, after_finished=Pause(1)),
         LandmarkTarget(PoseLandmark.RIGHT_ANKLE,
                        after_finished=Pause(0.01)),
         LandmarkTarget(PoseLandmark.LEFT_ANKLE,
@@ -133,8 +134,9 @@ def run_list_1():
 
 def run_list_2():
     return [
-        Pause(15),
+        Pause(1),
         LandmarkTarget(PoseLandmark.NOSE, target_zoom=8, zoom_v_coefficient=1, after_finished=Pause(10)),
+        LandmarkTarget(PoseLandmark.NOSE, target_zoom=8, zoom_v_coefficient=1, after_finished=Pause(1)),
         LandmarkTarget(PoseLandmark.RIGHT_ANKLE,
                        after_finished=Pause(0.01)),
         LandmarkTarget(PoseLandmark.LEFT_ANKLE,
