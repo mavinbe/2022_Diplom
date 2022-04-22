@@ -112,7 +112,7 @@ class ObjectTracker:
                                        max_det=self.max_det)
             result_dict = {}
             t4, t5, t6 = t3, t3, t3
-            confirmed_id_list = []
+            confirmed_id_list = {}
             # Process detections
             for i, det in enumerate(pred):  # detections per image
 
@@ -135,7 +135,7 @@ class ObjectTracker:
 
                     # pass detections to deepsort
                     t4 = time_sync()
-                    outputs, confirmed_id_list = self.deepsort.update(xywhs.cpu(), confs.cpu(), clss.cpu(), im0)
+                    outputs, confirmed_track_list = self.deepsort.update(xywhs.cpu(), confs.cpu(), clss.cpu(), im0)
                     t5 = time_sync()
 
                     # draw boxes for visualization
@@ -155,7 +155,7 @@ class ObjectTracker:
 
                 else:
                     self.deepsort.increment_ages()
-                    confirmed_id_list = [track.track_id for track in filter(lambda track: track.state == TrackState.Confirmed, self.deepsort.tracker.tracks)]
+                    confirmed_track_list = [track for track in filter(lambda track: track.state == TrackState.Confirmed, self.deepsort.tracker.tracks)]
                     #LOGGER.info('No detections')
 
                 # Stream results
@@ -166,6 +166,9 @@ class ObjectTracker:
                     #    pass
                         #raise StopIteration
 
+            for track in confirmed_track_list:
+                meta_info = {"track_id": track.track_id, "time_since_update": track.time_since_update}
+                confirmed_id_list[track.track_id] = meta_info
             t7 = time_sync()
 
             #LOGGER.info(f'inference_frame:({(t7 - t1) * 1000:.3f}ms) prepare::({(t2 - t1) * 1000:.3f}ms), YOLO::({(t3 - t2) * 1000:.3f}ms), diverses::({(t4 - t3) * 1000:.3f}ms), DeepSort::({(t5 - t4) * 1000:.3f}ms), draw::({(t6 - t5) * 1000:.3f}ms), display::({(t7 - t6) * 1000:.3f}ms)')
