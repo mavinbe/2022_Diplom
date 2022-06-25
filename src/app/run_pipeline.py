@@ -538,17 +538,19 @@ if __name__ == '__main__':
     multiP.set_start_method('spawn')
     sync_queues = [multiP.Queue(), multiP.Queue()]
     # p_1 = multiP.Process(target=run, args=(show_image, {'type': 'cam', 'url': 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_01_main'}, '192.168.0.101', False, run_list_1), kwargs={'in_queue': sync_queues[1], 'out_queue': sync_queues[0]})
-    p_1 = multiP.Process(target=run, args=(show_image, {'type': 'file', 'path': ROOT_DIR + "/data/2022_04_nice/01_20220421125951.mp4", 'fps': 25.04, 'minute_to_start': 29.8}, '192.168.0.101', False, run_list_1), kwargs={'in_queue': sync_queues[1], 'out_queue': sync_queues[0]})
+    # p_1 = multiP.Process(target=run, args=(show_image, {'type': 'file', 'path': ROOT_DIR + "/data/2022_04_nice/01_20220421125951.mp4", 'fps': 25.04, 'minute_to_start': 29.8}, '192.168.0.101', False, run_list_1), kwargs={'in_queue': sync_queues[1], 'out_queue': sync_queues[0]})
 
-    p_1.start()
+    # p_1.start()
 
     # p_2 = multiP.Process(target=run, args=(show_image, {'type': 'cam', 'url': 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main'}, '192.168.0.102', False, run_list_2), kwargs={'in_queue': sync_queues[0], 'out_queue': sync_queues[1]})
-    p_2 = multiP.Process(target=run, args=(show_image, {'type': 'file', 'path': ROOT_DIR + "/data/2022_04_nice/06_20220421125959_part1_split_2.mp4", 'fps': 10.02, 'minute_to_start': 0}, '192.168.0.102', False, run_list_2), kwargs={'in_queue': sync_queues[0], 'out_queue': sync_queues[1]})
+    #p_2 = multiP.Process(target=run, args=(show_image, {'type': 'file', 'path': ROOT_DIR + "/data/2022_04_nice/06_20220421125959_part1_split_2.mp4", 'fps': 10.02, 'minute_to_start': 0}, '192.168.0.102', False, run_list_2), kwargs={'in_queue': sync_queues[0], 'out_queue': sync_queues[1]})
+    p_2 = multiP.Process(target=run, args=(show_image, {'type': 'file', 'path': ROOT_DIR + "/data/2022_04_nice/06_20220421125959_part1_split_2.mp4", 'fps': 10.02, 'minute_to_start': 5.6}, '192.168.0.102', False, run_list_2), kwargs={'in_queue': sync_queues[0], 'out_queue': sync_queues[0]})
+
     p_2.start()
 
 
     for out_queue in sync_queues:
         out_queue.put('go')
 
-    p_1.join()
+    # p_1.join()
     p_2.join()
