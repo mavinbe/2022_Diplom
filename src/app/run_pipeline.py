@@ -138,7 +138,7 @@ def handle_pose_detect_list(image, object_detection_dict, pose_detector_pool, t)
 def print_data_to_image(image, state, position):
     text = str(state)
     cv2.putText(image, text, position, cv2.FONT_HERSHEY_SIMPLEX,
-                1.0, (0, 0, 0), 2)
+                0.5, (0, 0, 0), 2)
 
     return image
 
@@ -326,7 +326,7 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                     else:
                         pose_id_to_follow = min(confirmed_id_list)
                     if pose_id_to_follow not in object_detection_dict:
-                        continue
+                        raise Warning("pose_id_to_follow '" + str(pose_id_to_follow) + "' not in object_detection_dict '"+ str(object_detection_dict) +"'")
                     poses_to_detect = [pose_id_to_follow]
 
                     object_detection_dict_filtered = {your_key: object_detection_dict[your_key] for your_key in poses_to_detect}
@@ -352,12 +352,13 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                 #     f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)')
 
             except Warning as warn:
-                #print(str(warn))
+                print(str(warn))
                 for key in t.keys():
                     if t[key] is None:
                         t[key] = time_sync()
+                image = zoom(image, current_box)
                 send_out_1.write(image)
-                handle_image(original_image)
+                handle_image(image)
                 t["handle_image"] = time_sync()
                 # LOGGER.info(
                 #     f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)\t--- {warn}')
