@@ -25,6 +25,8 @@ ROOT_DIR = os.path.abspath(os.path.join(__file__, "../../.."))
 
 PoseLandmark = mp.solutions.pose.PoseLandmark
 
+VEBOSE_MODE = True
+
 
 def calculate_newest_track_id(object_detection_dict):
     return max(object_detection_dict.keys())
@@ -276,7 +278,7 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                 # t_object_track
                 object_detection_dict, confirmed_id_list = handle_object_track(image, object_tracker, t)
                 #print((confirmed_id_list,object_detection_dict))
-
+                                    # x1               y1                      x2                        y2
                 exit_zone = ((int(width * 13 / 20), int(height * 2 / 40)), (int(width * 15 / 20), int(height * 17 / 40)))
                 # exit_zone = ((0, int(height * 19 / 40)), (int(width / 6), int(height * 17 / 20)))
                 to_do = []
@@ -307,12 +309,13 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                 #         else:
                 #             to_do.append("sleep")
 
-                if True:
+                if VEBOSE_MODE:
                     image = print_detections(image, object_detection_dict)
                     image = print_data_to_image(image, to_do, (100, 100))
                     image = print_data_to_image(image, (frame_count, confirmed_id_list, object_detection_dict), (100, 500))
                     image = print_data_to_image(image, (persons_not_in_exit_zone), (100, 600))
                     image = draw_box_to_image(image, exit_zone, (100, 100))
+                    image_with_hud = image
 
 
 
@@ -348,7 +351,16 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
 
                 # t_post
 
+                if VEBOSE_MODE:
+                    print("exit_zone")
+                    print(exit_zone)
+                    print("current_box")
+                    print(current_box)
 
+                    if current_box:
+                        image_with_hud = draw_box_to_image(image_with_hud, ((current_box[2], current_box[0]),(current_box[3], current_box[1])), (100, 100))
+
+                    image = image_with_hud
 
                 # t_handle_image
                 send_out_1.write(image)
@@ -362,7 +374,8 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                 for key in t.keys():
                     if t[key] is None:
                         t[key] = time_sync()
-                image = zoom(image, current_box)
+                if not VEBOSE_MODE:
+                    image = zoom(image, current_box)
                 send_out_1.write(image)
                 handle_image(image)
                 t["handle_image"] = time_sync()
