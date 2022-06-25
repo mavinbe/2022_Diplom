@@ -25,7 +25,7 @@ ROOT_DIR = os.path.abspath(os.path.join(__file__, "../../.."))
 
 PoseLandmark = mp.solutions.pose.PoseLandmark
 
-VEBOSE_MODE = True
+VEBOSE_MODE = False
 
 
 def calculate_newest_track_id(object_detection_dict):
