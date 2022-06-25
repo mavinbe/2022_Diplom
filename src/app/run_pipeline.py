@@ -290,7 +290,7 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
 
                 if determ_is_empty_room(object_detection_dict, confirmed_id_list, persons_not_in_exit_zone):
                     to_do.append("reset")
-                    #print("------------------------ RESET ")
+                    print("------------------------ RESET ")
 
                     run_item = None
                     _run_list = run_list()
@@ -373,7 +373,7 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                 #     f'frame_count {frame_count} DONE on hole: \t({(t["handle_image"] - t["start"]) * 1000:.2f}ms)\tread_image:({(t["read_image"] - t["start"]) * 1000:.2f}ms)\tobject_track:({(t["object_track"] - t["read_image"]) * 1000:.2f}ms)\tpose_detect({t["pose_detect_count"]}):({(t["pose_detect"] - t["object_track"]) * 1000:.2f}ms) \tcamera_movement:({(t["camera_movement"] - t["pose_detect"]) * 1000:.2f}ms)\thandle_image:({(t["handle_image"] - t["camera_movement"]) * 1000:.2f}ms)')
 
             except Warning as warn:
-                print(str(warn))
+                print("WARN: "+str(warn))
                 for key in t.keys():
                     if t[key] is None:
                         t[key] = time_sync()
