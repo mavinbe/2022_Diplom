@@ -277,8 +277,8 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                 object_detection_dict, confirmed_id_list = handle_object_track(image, object_tracker, t)
                 #print((confirmed_id_list,object_detection_dict))
 
-                #exit_zone_2 = ((int(width / 2), 0), (width, int(height / 2)))
-                exit_zone = ((0, int(height * 19 / 40)), (int(width / 6), int(height * 17 / 20)))
+                exit_zone = ((int(width * 13 / 20), int(height * 2 / 40)), (int(width * 15 / 20), int(height * 17 / 40)))
+                # exit_zone = ((0, int(height * 19 / 40)), (int(width / 6), int(height * 17 / 20)))
                 to_do = []
 
 
@@ -307,7 +307,7 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                 #         else:
                 #             to_do.append("sleep")
 
-                if False:
+                if True:
                     image = print_detections(image, object_detection_dict)
                     image = print_data_to_image(image, to_do, (100, 100))
                     image = print_data_to_image(image, (frame_count, confirmed_id_list, object_detection_dict), (100, 500))
@@ -318,6 +318,7 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
 
                 # t_pose_detect
                 pose_id_to_follow = None
+                # print(object_detection_dict)
                 if len(object_detection_dict) >= 1:
 
 
@@ -325,6 +326,8 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                         pose_id_to_follow = max(confirmed_id_list)
                     else:
                         pose_id_to_follow = min(confirmed_id_list)
+                    print("pose_id_to_follow")
+                    print(pose_id_to_follow)
                     if pose_id_to_follow not in object_detection_dict:
                         raise Warning("pose_id_to_follow '" + str(pose_id_to_follow) + "' not in object_detection_dict '"+ str(object_detection_dict) +"'")
                     poses_to_detect = [pose_id_to_follow]
@@ -524,7 +527,7 @@ def show_image(image):
     height, width, _ = image.shape
 
 
-    image = cv2.resize(image, (int(width/2), int(height/2)), interpolation=cv2.INTER_NEAREST)
+    # image = cv2.resize(image, (int(width/2), int(height/2)), interpolation=cv2.INTER_NEAREST)
     cv2.imshow("asd", image)
 
     #print(image.shape)
