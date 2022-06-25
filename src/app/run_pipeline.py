@@ -329,6 +329,9 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                     print("pose_id_to_follow")
                     print(pose_id_to_follow)
                     if pose_id_to_follow not in object_detection_dict:
+                        run_item = None
+                        _run_list = run_list()
+                        pose_to_follow = None
                         raise Warning("pose_id_to_follow '" + str(pose_id_to_follow) + "' not in object_detection_dict '"+ str(object_detection_dict) +"'")
                     poses_to_detect = [pose_id_to_follow]
 
