@@ -294,7 +294,8 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
 
                     run_item = None
                     _run_list = run_list()
-                    current_box = None
+
+                    current_box = (0, original_image.shape[0], 0, original_image.shape[1])
                     current_position = None
                     pose_to_follow = None
                     current_zoom = np.array([1])
@@ -348,7 +349,9 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                         _run_list, current_box, current_position, current_zoom, height, image, pose_to_follow, run_item,
                         t,
                         width)
-
+                else:
+                    raise Warning(
+                        "pose_to_follow is "+str(pose_to_follow))
                 # t_post
 
                 if VEBOSE_MODE:
