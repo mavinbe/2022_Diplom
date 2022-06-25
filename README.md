@@ -20,3 +20,13 @@ to run tests
 ```bash
 pytest
 ```
+
+
+
+### tooling
+
+extract split from video
+```ffmpeg
+ffmpeg -ss 00:29:39.0 -i XXXX1.mp4 -c copy -t 00:10:00.0 XXXX_split_1.mp4
+
+```
