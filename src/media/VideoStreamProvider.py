@@ -7,7 +7,7 @@ import time
 from datetime import datetime
 
 class VideoStreamProvider:
-    def __init__(self, src=None, width=None, height=None, play_back_speed=1):
+    def __init__(self, src=None, width=None, height=None, play_back_speed=1, fps=25.04, minute_to_start=0):
         if src is None:
             print('Error: stream path for VideoStreamProvider not set.')
             exit()
@@ -17,7 +17,7 @@ class VideoStreamProvider:
         self.src = src
         self.cap = cv2.VideoCapture(self.src)
         self.play_back_speed = play_back_speed
-        self.cap.set(cv2.CAP_PROP_POS_FRAMES, 25.04 * 60 * 0)
+        self.cap.set(cv2.CAP_PROP_POS_FRAMES, fps * 60 * minute_to_start)
 
         if width is None and height is None:
             print('Use native width & height')

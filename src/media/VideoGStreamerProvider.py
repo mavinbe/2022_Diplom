@@ -7,14 +7,14 @@ import time
 from datetime import datetime
 
 class VideoGStreamerProvider:
-    def __init__(self, src=None, width=None, height=None, play_back_speed=1):
-        if src is None:
-            print('Error: stream path for VideoStreamProvider not set.')
+    def __init__(self, cam_url=None, width=None, height=None, play_back_speed=1):
+        if cam_url is None:
+            print('Error: stream cam_url for VideoStreamProvider not set.')
             exit()
 
-        print("VideoStreamProvider: load images from " + str(src))
+        self.src = 'rtspsrc location='+cam_url+' latency=1 !  rtph264depay ! avdec_h264 !  videoconvert ! videoscale ! appsink'
+        print("VideoStreamProvider: load images from " + str(self.src))
 
-        self.src = src
         self.cap = cv2.VideoCapture(self.src, cv2.CAP_GSTREAMER)
 
 

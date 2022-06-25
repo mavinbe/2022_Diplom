@@ -11,6 +11,7 @@ import multiprocessing as multiP
 
 from expression.run_list import run_list_1, run_list_2,  Pause, CuePoint, LandmarkTarget, PositionTarget
 from media.VideoGStreamerProvider import VideoGStreamerProvider
+from media.VideoStreamProvider import VideoStreamProvider
 from modules.object_tracker import ObjectTracker
 from modules.pose_detector import PoseDetector
 from utils.general import LOGGER
@@ -209,9 +210,17 @@ def update_persons_not_in_exit_zone(persons_not_in_exit_zone, exit_zone, object_
     return persons_not_in_exit_zone
 
 
-def run(handle_image, cam_url, sink_ip, track_highest, run_list, out_queue=None, in_queue=None):
+def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_queue=None, in_queue=None):
     with PoseDetectorPool() as pose_detector_pool:
 
+        print(img_stream_data)
+        img_stream = None
+        if img_stream_data['type'] == 'cam':
+            img_stream = VideoGStreamerProvider('rtspsrc location='+img_stream_data['url']+' latency=1 !  rtph264depay ! avdec_h264 !  videoconvert ! videoscale ! appsink')
+        elif img_stream_data['type'] == 'file':
+            img_stream = VideoStreamProvider(img_stream_data['path'], play_back_speed=0.4, fps=img_stream_data['fps'],
+                                             minute_to_start=img_stream_data['minute_to_start'])
+        print(img_stream)
         object_tracker = ObjectTracker(show_vid=False)
         frame_count = 0
         #img_stream = cv2.VideoCapture(ROOT_DIR+"/data/05_20211102141647/output014.mp4")
@@ -219,8 +228,8 @@ def run(handle_image, cam_url, sink_ip, track_highest, run_list, out_queue=None,
         #height, width = determ_dimensions_of_video(img_stream)
         #img_stream = VideoStreamProvider(ROOT_DIR + "/data/05_20211102141647/output017.mp4", play_back_speed=0.4)
         #img_stream = VideoStreamProvider("rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main")
-        img_stream = VideoGStreamerProvider(
-            'rtspsrc location='+cam_url+' latency=1 !  rtph264depay ! avdec_h264 !  videoconvert ! videoscale ! appsink')
+        # img_stream = VideoGStreamerProvider(
+        #     'rtspsrc location='+cam_url+' latency=1 !  rtph264depay ! avdec_h264 !  videoconvert ! videoscale ! appsink')
 
         atexit.register(img_stream.release)
 
@@ -527,13 +536,14 @@ def show_image(image):
 if __name__ == '__main__':
     multiP.set_start_method('spawn')
     sync_queues = [multiP.Queue(), multiP.Queue()]
-    p_1 = multiP.Process(target=run, args=(show_image, 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_01_main', '192.168.0.101', False, run_list_1), kwargs={'in_queue': sync_queues[1], 'out_queue': sync_queues[0]})
+    p_1 = multiP.Process(target=run, args=(show_image, {'type': 'cam', 'url': 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_01_main'}, '192.168.0.101', False, run_list_1), kwargs={'in_queue': sync_queues[1], 'out_queue': sync_queues[0]})
+
+    # p_1 = multiP.Process(target=run, args=(show_image, {'type': 'file', 'path': ROOT_DIR + "/data/2022_04_nice/01_20220421125951.mp4", 'fps': 25.04, 'minute_to_start': 29.8}, '192.168.0.101', False, run_list_1), kwargs={'in_queue': sync_queues[1], 'out_queue': sync_queues[0]})
+
     p_1.start()
 
-    p_2 = multiP.Process(target=run, args=(
-    show_image, 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main', '192.168.0.102', False, run_list_2), kwargs={'in_queue': sync_queues[0], 'out_queue': sync_queues[1]})
-    # p_2 = multiP.Process(target=run, args=(
-    #     show_image, 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main', '192.168.0.102', False, run_list_2))
+    p_2 = multiP.Process(target=run, args=(show_image, {'type': 'cam', 'url': 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main'}, '192.168.0.102', False, run_list_2), kwargs={'in_queue': sync_queues[0], 'out_queue': sync_queues[1]})
+    # p_2 = multiP.Process(target=run, args=(show_image, {'type': 'file', 'path': ROOT_DIR + "/data/2022_04_nice/06_20220421125959_part1_split_2.mp4", 'fps': 10.02, 'minute_to_start': 0}, '192.168.0.102', False, run_list_2), kwargs={'in_queue': sync_queues[0], 'out_queue': sync_queues[1]})
     p_2.start()
 
 
