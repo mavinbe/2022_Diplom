@@ -10,6 +10,7 @@ import atexit
 import multiprocessing as multiP
 
 from expression.run_list import run_list_1, run_list_2,  Pause, CuePoint, LandmarkTarget, PositionTarget
+from media.SampleDataProvider import get_sample_video_specification_by_key, get_video_stream_provider
 from media.VideoGStreamerProvider import VideoGStreamerProvider
 from media.VideoStreamProvider import VideoStreamProvider
 from modules.object_tracker import ObjectTracker
@@ -215,13 +216,11 @@ def update_persons_not_in_exit_zone(persons_not_in_exit_zone, exit_zone, object_
 def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_queue=None, in_queue=None):
     with PoseDetectorPool() as pose_detector_pool:
 
-        print(img_stream_data)
         img_stream = None
         if img_stream_data['type'] == 'cam':
             img_stream = VideoGStreamerProvider('rtspsrc location='+img_stream_data['url']+' latency=1 !  rtph264depay ! avdec_h264 !  videoconvert ! videoscale ! appsink')
         elif img_stream_data['type'] == 'file':
-            img_stream = VideoStreamProvider(img_stream_data['path'], play_back_speed=0.4, fps=img_stream_data['fps'],
-                                             minute_to_start=img_stream_data['minute_to_start'])
+            img_stream = get_video_stream_provider(ROOT_DIR, img_stream_data['video_specification'])
         print(img_stream)
         object_tracker = ObjectTracker(show_vid=False)
         frame_count = 0
@@ -568,16 +567,21 @@ def show_image(image):
 
 
 if __name__ == '__main__':
+    sample_data = get_sample_video_specification_by_key("clara_simon_kira_me_hole")
+
+
     multiP.set_start_method('spawn')
     sync_queues = [multiP.Queue(), multiP.Queue()]
     # p_1 = multiP.Process(target=run, args=(show_image, {'type': 'cam', 'url': 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_01_main'}, '192.168.0.101', False, run_list_1), kwargs={'in_queue': sync_queues[1], 'out_queue': sync_queues[0]})
-    # p_1 = multiP.Process(target=run, args=(show_image, {'type': 'file', 'path': ROOT_DIR + "/data/2022_04_nice/01_20220421125951.mp4", 'fps': 25.04, 'minute_to_start': 29.8}, '192.168.0.101', False, run_list_1), kwargs={'in_queue': sync_queues[1], 'out_queue': sync_queues[0]})
+    # p_1 = multiP.Process(target=run, args=(show_image, {'type': 'file', 'video_specification': sample_data[0]}, '192.168.0.101', False, run_list_1), kwargs={'in_queue': sync_queues[1], 'out_queue': sync_queues[0]})
 
     # p_1.start()
 
     # p_2 = multiP.Process(target=run, args=(show_image, {'type': 'cam', 'url': 'rtsp://malte:diplom@192.168.0.110:554//h264Preview_06_main'}, '192.168.0.102', False, run_list_2), kwargs={'in_queue': sync_queues[0], 'out_queue': sync_queues[1]})
     #p_2 = multiP.Process(target=run, args=(show_image, {'type': 'file', 'path': ROOT_DIR + "/data/2022_04_nice/06_20220421125959_part1_split_2.mp4", 'fps': 10.02, 'minute_to_start': 0}, '192.168.0.102', False, run_list_2), kwargs={'in_queue': sync_queues[0], 'out_queue': sync_queues[1]})
-    p_2 = multiP.Process(target=run, args=(show_image, {'type': 'file', 'path': ROOT_DIR + "/data/2022_04_nice/06_20220421125959_part1_split_2.mp4", 'fps': 10.02, 'minute_to_start': 5.6}, '192.168.0.102', False, run_list_2), kwargs={'in_queue': sync_queues[0], 'out_queue': sync_queues[0]})
+
+
+    p_2 = multiP.Process(target=run, args=(show_image, {'type': 'file', 'video_specification': sample_data[1]}, '192.168.0.102', False, run_list_2), kwargs={'in_queue': sync_queues[0], 'out_queue': sync_queues[0]})
 
     p_2.start()
 
