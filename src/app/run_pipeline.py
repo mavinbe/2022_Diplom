@@ -392,8 +392,10 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                         print("dddddddddddddddddddddddddddddd")
                         current_is_blury = True
                         to_do.remove("pose_id_to_follow_IS_LOST")
+                        run_item = PositionTarget((1417, 633), target_zoom=8, zoom_v_coefficient=1,
+                                                  after_finished=None)
+                        run_item.start(time_sync(), current_position, current_zoom)
                         _run_list = []
-                        run_item = None
                 else:
                     if run_item is None and len(_run_list) == 0:
                         run_item = None

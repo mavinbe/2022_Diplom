@@ -133,7 +133,6 @@ def run_list_1():
         LandmarkTarget(PoseLandmark.LEFT_THUMB, after_finished=Pause(12)),
         LandmarkTarget(PoseLandmark.NOSE, 4,after_finished=Pause(15)),
 
-        PositionTarget((623, 945), target_zoom=5, zoom_v_coefficient=1, after_finished=None),
 
     ]
 
@@ -167,6 +166,5 @@ def run_list_2():
         LandmarkTarget(PoseLandmark.NOSE, 15, after_finished=Pause(0.1)),
         LandmarkTarget(PoseLandmark.NOSE, 4, after_finished=Pause(15)),
 
-        PositionTarget((1417, 633), target_zoom=8, zoom_v_coefficient=1, after_finished=None),
 
     ]
