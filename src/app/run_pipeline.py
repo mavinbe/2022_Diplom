@@ -253,6 +253,7 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
         run_item = None
         _run_list = run_list()
         current_box = None
+        current_is_blury = False
         current_position = None
         pose_to_follow = None
         current_zoom = np.array([1])
@@ -297,6 +298,7 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
 
                     current_box = (0, original_image.shape[0], 0, original_image.shape[1])
                     current_position = None
+                    current_is_blury = False
                     pose_to_follow = None
                     current_zoom = np.array([1])
                     persons_not_in_exit_zone = {}
@@ -343,12 +345,14 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
 
                     pose_detect_dict_in_global = handle_pose_detect_list(image, object_detection_dict_filtered, pose_detector_pool, t)
                     pose_to_follow = pose_detect_dict_in_global[pose_id_to_follow]
+                else:
+                    raise Warning(
+                        "object_detection_dict is empty ")
 
                 if pose_to_follow:
-                    _run_list, current_box, current_position, current_zoom, height, image, pose_to_follow, run_item, t, width = run_animation(
-                        _run_list, current_box, current_position, current_zoom, height, image, pose_to_follow, run_item,
-                        t,
-                        width)
+                    _run_list, current_box, current_position, current_is_blury, current_zoom, height, image, pose_to_follow, run_item, t, width = run_animation(
+                        _run_list, current_box, current_position, current_is_blury, current_zoom, height, image, pose_to_follow,
+                        run_item, t, width)
                 else:
                     raise Warning(
                         "pose_to_follow is "+str(pose_to_follow))
@@ -366,6 +370,8 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                     image = image_with_hud
 
                 # t_handle_image
+                if current_is_blury is True:
+                    image = cv2.blur(image, (10, 10))
                 send_out_1.write(image)
                 handle_image(image)
                 t["handle_image"] = time_sync()
@@ -379,6 +385,10 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                         t[key] = time_sync()
                 if not VEBOSE_MODE:
                     image = zoom(image, current_box)
+
+
+                if current_is_blury is True:
+                    image = cv2.blur(image, (10, 10))
                 send_out_1.write(image)
                 handle_image(image)
                 t["handle_image"] = time_sync()
@@ -394,8 +404,8 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
         send_out_1.release()
 
 
-def run_animation(_run_list, current_box, current_position, current_zoom, height, image, pose_to_follow, run_item, t,
-                  width):
+def run_animation(_run_list, current_box, current_position, current_is_blury, current_zoom, height, image,
+                  pose_to_follow, run_item, t, width):
     # start run_items
     if run_item is None:
         run_item = _run_list.pop(0)
@@ -413,7 +423,7 @@ def run_animation(_run_list, current_box, current_position, current_zoom, height
             run_item.start(time_sync(), current_position, current_zoom)
     if type(run_item) == PositionTarget:
         if run_item.self_is_finished(None):
-            image = cv2.blur(image, (10, 10))
+            current_is_blury = True
     # clean up run_items
     if isinstance(run_item, Pause):
         if run_item.is_finished(time_sync()):
@@ -445,7 +455,7 @@ def run_animation(_run_list, current_box, current_position, current_zoom, height
         if current_box:
             image = zoom(image, current_box)
         t["camera_movement"] = time_sync()
-    return _run_list, current_box, current_position, current_zoom, height, image, pose_to_follow, run_item, t, width
+    return _run_list, current_box, current_position, current_is_blury, current_zoom, height, image, pose_to_follow, run_item, t, width
 
 
 def crop_and_zoom_for_beamer_fit(height, original_image, width):
