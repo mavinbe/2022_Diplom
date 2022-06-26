@@ -55,13 +55,19 @@ class PositionTarget(CuePoint):
                         time_sync(), start_zoom, self.zoom_v_coefficient, 5)
 
     def is_finished(self, pose_detect_dict_in_global):
-        if not self.self_is_finished(pose_detect_dict_in_global):
-            return False
 
         if self.after_finished is None:
-           return False
+            return self.self_is_finished(pose_detect_dict_in_global)
         else:
-            return self.after_finished_is_finished()
+            return self.self_is_finished(pose_detect_dict_in_global) and self.after_finished_is_finished()
+
+        # if not self.self_is_finished(pose_detect_dict_in_global):
+        #     return False
+        #
+        # if self.after_finished is None:
+        #    return False
+        # else:
+        #     return self.after_finished_is_finished()
 
     def after_finished_is_finished(self):
         if not self.after_finished.is_started():
