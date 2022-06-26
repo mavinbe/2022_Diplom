@@ -30,3 +30,16 @@ extract split from video
 ffmpeg -ss 00:29:39.0 -i XXXX1.mp4 -c copy -t 00:10:00.0 XXXX_split_1.mp4
 
 ```
+
+
+
+TODO 
+- catch "global" errors in "run()" to restart process, so we can restore from crashing errors
+- check system heat
+- pause just after reset
+- smoothern movement
+- test mit 4 videos
+
+
+REFACTOR BEFORE continue
+
