@@ -426,6 +426,7 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                 # t_handle_image
                 if current_is_blury is True:
                     image = cv2.blur(image, (10, 10))
+                    #image = (255 - image)
                 send_out_1.write(image)
                 handle_image(image)
                 t["handle_image"] = time_sync()
@@ -443,6 +444,7 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
 
                 if current_is_blury is True:
                     image = cv2.blur(image, (10, 10))
+                    #image = (255 - image)
                 send_out_1.write(image)
                 handle_image(image)
                 t["handle_image"] = time_sync()
