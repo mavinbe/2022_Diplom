@@ -9,7 +9,7 @@ import atexit
 
 import multiprocessing as multiP
 
-from expression.run_list import run_list_1, run_list_2,  Pause, CuePoint, LandmarkTarget, PositionTarget
+from expression.run_list import run_list_1, run_list_2, Pause, CuePoint, LandmarkTarget, PositionTarget, sleep_list
 from media.SampleDataProvider import get_sample_video_specification_by_key, get_video_stream_provider
 from media.VideoGStreamerProvider import VideoGStreamerProvider
 from media.VideoStreamProvider import VideoStreamProvider
@@ -26,7 +26,7 @@ ROOT_DIR = os.path.abspath(os.path.join(__file__, "../../.."))
 
 PoseLandmark = mp.solutions.pose.PoseLandmark
 
-VEBOSE_MODE = False
+VEBOSE_MODE = True
 
 
 def calculate_newest_track_id(object_detection_dict):
@@ -257,6 +257,7 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
         pose_to_follow = None
         current_zoom = np.array([1])
         persons_not_in_exit_zone = {}
+        set_of_already_played_pose_ids = set([])
         while True:
             # is in_queue is set wait till get returns a value
             wait_for_sync(in_queue, out_queue)
@@ -327,41 +328,70 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                 if len(object_detection_dict) >= 1:
 
 
-                    if track_highest:
-                        pose_id_to_follow = max(confirmed_id_list)
+
+                    pose_id_to_follow = determinate_pose_id_to_follow(track_highest, confirmed_id_list ,set_of_already_played_pose_ids)
+                    print()
+                    print()
+                    print("----------------------------------------------")
+                    print()
+                    print("pose_id_to_follow " + str(pose_id_to_follow))
+                    print("confirmed_id_list " + str(list(confirmed_id_list.keys())))
+                    print("set_of_already_played_pose_ids " + str(set_of_already_played_pose_ids))
+                    print("run_item " + str(run_item))
+                    print("_run_list " + str(_run_list))
+                    if pose_id_to_follow is None:
+                        if run_item is None:
+                            print("run_item " + str(run_item))
+                            run_item = PositionTarget((1417, 633), target_zoom=8, zoom_v_coefficient=1, after_finished=Pause(1))
+                            print("+++++++++++++++++++++++++++++start")
+
+                            run_item.start(time_sync(), current_position, current_zoom)
+                            _run_list = []
+                            pose_to_follow = None
                     else:
-                        pose_id_to_follow = min(confirmed_id_list)
-                    print("pose_id_to_follow")
-                    print(pose_id_to_follow)
-                    if pose_id_to_follow not in object_detection_dict:
-                        run_item = None
-                        _run_list = run_list()
-                        pose_to_follow = None
-                        raise Warning("pose_id_to_follow '" + str(pose_id_to_follow) + "' not in object_detection_dict '"+ str(object_detection_dict) +"'")
-                    poses_to_detect = [pose_id_to_follow]
+                        # print("pose_id_to_follow")
+                        # print(pose_id_to_follow)
+                        if pose_id_to_follow not in object_detection_dict:
+                            run_item = None
+                            _run_list = run_list()
+                            pose_to_follow = None
+                            raise Warning("pose_id_to_follow '" + str(pose_id_to_follow) + "' not in object_detection_dict '"+ str(object_detection_dict) +"'")
+                        poses_to_detect = [pose_id_to_follow]
 
-                    object_detection_dict_filtered = {your_key: object_detection_dict[your_key] for your_key in poses_to_detect}
+                        object_detection_dict_filtered = {your_key: object_detection_dict[your_key] for your_key in poses_to_detect}
 
-                    pose_detect_dict_in_global = handle_pose_detect_list(image, object_detection_dict_filtered, pose_detector_pool, t)
-                    pose_to_follow = pose_detect_dict_in_global[pose_id_to_follow]
+                        pose_detect_dict_in_global = handle_pose_detect_list(image, object_detection_dict_filtered, pose_detector_pool, t)
+                        pose_to_follow = pose_detect_dict_in_global[pose_id_to_follow]
                 else:
                     raise Warning(
                         "object_detection_dict is empty ")
 
-                if pose_to_follow:
-                    _run_list, current_box, current_position, current_is_blury, current_zoom, height, image, pose_to_follow, run_item, t, width = run_animation(
-                        _run_list, current_box, current_position, current_is_blury, current_zoom, height, image, pose_to_follow,
-                        run_item, t, width)
-                else:
-                    raise Warning(
-                        "pose_to_follow is "+str(pose_to_follow))
+                if run_item is None:
+                    if len(_run_list) < 1:
+                        # add id to already run
+                        print("XXXX")
+                        set_of_already_played_pose_ids.add(pose_id_to_follow)
+                        run_item = None
+                        _run_list = run_list()
+                        pose_to_follow = None
+
+                _run_list, current_box, current_position, current_is_blury, current_zoom, height, image, pose_to_follow, run_item, t, width = run_animation(
+                    _run_list, current_box, current_position, current_is_blury, current_zoom, height, image, pose_to_follow,
+                    run_item, t, width)
+                # if pose_to_follow:
+                #     _run_list, current_box, current_position, current_is_blury, current_zoom, height, image, pose_to_follow, run_item, t, width = run_animation(
+                #         _run_list, current_box, current_position, current_is_blury, current_zoom, height, image, pose_to_follow,
+                #         run_item, t, width)
+                # else:
+                #     raise Warning(
+                #         "pose_to_follow is "+str(pose_to_follow))
                 # t_post
 
                 if VEBOSE_MODE:
-                    print("exit_zone")
-                    print(exit_zone)
-                    print("current_box")
-                    print(current_box)
+                    # print("exit_zone")
+                    # print(exit_zone)
+                    # print("current_box")
+                    # print(current_box)
 
                     if current_box:
                         image_with_hud = draw_box_to_image(image_with_hud, ((current_box[2], current_box[0]),(current_box[3], current_box[1])), (100, 100))
@@ -370,7 +400,8 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
 
                 # t_handle_image
                 if current_is_blury is True:
-                    image = cv2.blur(image, (10, 10))
+                    #image = cv2.blur(image, (10, 10))
+                    image = (255 - image)
                 send_out_1.write(image)
                 handle_image(image)
                 t["handle_image"] = time_sync()
@@ -387,7 +418,8 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
 
 
                 if current_is_blury is True:
-                    image = cv2.blur(image, (10, 10))
+                    #image = cv2.blur(image, (10, 10))
+                    image = (255 - image)
                 send_out_1.write(image)
                 handle_image(image)
                 t["handle_image"] = time_sync()
@@ -403,6 +435,17 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
         send_out_1.release()
 
 
+def determinate_pose_id_to_follow(track_highest, confirmed_id_list ,set_of_already_played_pose_ids):
+    confirmed_ids_which_are_not_played = [x for x in list(confirmed_id_list.keys()) if x not in set_of_already_played_pose_ids]
+    if len(confirmed_ids_which_are_not_played) < 1:
+        return None
+    if track_highest:
+        return max(confirmed_ids_which_are_not_played)
+    else:
+        return min(confirmed_ids_which_are_not_played)
+
+
+
 def run_animation(_run_list, current_box, current_position, current_is_blury, current_zoom, height, image,
                   pose_to_follow, run_item, t, width):
     # start run_items
@@ -414,8 +457,6 @@ def run_animation(_run_list, current_box, current_position, current_is_blury, cu
             if current_position is None:
                 current_position = determ_position_by_landmark_from_pose_detection(pose_to_follow,
                                                                                    run_item.target)
-                if current_position is None:
-                    current_position = (int(width/2), int(height/2))
                 print(current_position)
             run_item.start(time_sync(), current_position, current_zoom)
         elif isinstance(run_item, PositionTarget):
