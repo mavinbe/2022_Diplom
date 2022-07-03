@@ -102,11 +102,14 @@ class LandmarkTarget(PositionTarget):
         return determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
                                                                self.target)
 
+ZOOM_FACTOR = 0.3
+
+
 def run_list_1():
     return [
-        Pause(15),
-        LandmarkTarget(PoseLandmark.NOSE, target_zoom=8, zoom_v_coefficient=1, after_finished=Pause(10)),
-        LandmarkTarget(PoseLandmark.NOSE, target_zoom=8, zoom_v_coefficient=1, after_finished=Pause(1)),
+        Pause(3),
+        LandmarkTarget(PoseLandmark.NOSE, target_zoom=8*ZOOM_FACTOR, zoom_v_coefficient=1, after_finished=Pause(10)),
+        LandmarkTarget(PoseLandmark.NOSE, target_zoom=8*ZOOM_FACTOR, zoom_v_coefficient=1, after_finished=Pause(1)),
         LandmarkTarget(PoseLandmark.RIGHT_ANKLE,
                        after_finished=Pause(0.01)),
         LandmarkTarget(PoseLandmark.LEFT_ANKLE,
@@ -127,16 +130,16 @@ def run_list_1():
         LandmarkTarget(PoseLandmark.LEFT_THUMB, after_finished=Pause(12)),
         LandmarkTarget(PoseLandmark.NOSE, 4,after_finished=Pause(15)),
 
-        PositionTarget((623, 945), target_zoom=5, zoom_v_coefficient=1, after_finished=None),
+        PositionTarget((623, 945), target_zoom=5*ZOOM_FACTOR, zoom_v_coefficient=1, after_finished=None),
 
     ]
 
 
 def run_list_2():
     return [
-        Pause(15),
-        LandmarkTarget(PoseLandmark.NOSE, target_zoom=8, zoom_v_coefficient=1, after_finished=Pause(10)),
-        LandmarkTarget(PoseLandmark.NOSE, target_zoom=8, zoom_v_coefficient=1, after_finished=Pause(1)),
+        Pause(3),
+        LandmarkTarget(PoseLandmark.NOSE, target_zoom=8*ZOOM_FACTOR, zoom_v_coefficient=1, after_finished=Pause(10)),
+        LandmarkTarget(PoseLandmark.NOSE, target_zoom=8*ZOOM_FACTOR, zoom_v_coefficient=1, after_finished=Pause(1)),
         LandmarkTarget(PoseLandmark.RIGHT_ANKLE,
                        after_finished=Pause(0.01)),
         LandmarkTarget(PoseLandmark.LEFT_ANKLE,
@@ -161,6 +164,6 @@ def run_list_2():
         LandmarkTarget(PoseLandmark.NOSE, 15, after_finished=Pause(0.1)),
         LandmarkTarget(PoseLandmark.NOSE, 4, after_finished=Pause(15)),
 
-        PositionTarget((1417, 633), target_zoom=8, zoom_v_coefficient=1, after_finished=None),
+        PositionTarget((1417, 633), target_zoom=8*ZOOM_FACTOR, zoom_v_coefficient=1, after_finished=None),
 
     ]
