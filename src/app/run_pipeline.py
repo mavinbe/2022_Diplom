@@ -9,7 +9,8 @@ import atexit
 
 import multiprocessing as multiP
 
-from expression.run_list import run_list_1, run_list_2,  Pause, CuePoint, LandmarkTarget, PositionTarget
+from expression.run_list import run_list_1, run_list_2, Pause, CuePoint, LandmarkTarget, PositionTarget, \
+    determ_position_by_landmark_from_pose_detection
 from media.SampleDataProvider import get_sample_video_specification_by_key, get_video_stream_provider
 from media.VideoGStreamerProvider import VideoGStreamerProvider
 from media.VideoStreamProvider import VideoStreamProvider
@@ -59,9 +60,7 @@ def zoom(img, target_box):
     return img
 
 
-def determ_position_by_landmark_from_pose_detection(pose_detect_dict, landmark):
-    if landmark in pose_detect_dict:
-        return pose_detect_dict[landmark]['x'], pose_detect_dict[landmark]['y']
+
 
 
 def static_zoom_target_box(image_shape, zoom_factor, center):
