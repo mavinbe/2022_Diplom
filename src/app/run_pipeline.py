@@ -371,20 +371,21 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                 if "landmark_end" in to_do:
                     to_do.remove("landmark_end")
                     print("landmark_end")
-                    set_of_already_played_pose_ids.add(pose_id_to_follow)
-                    pose_id_to_follow = determinate_pose_id_to_follow(track_highest, confirmed_id_list,
+                    if len(_run_list) == 0:
+                        set_of_already_played_pose_ids.add(pose_id_to_follow)
+                        pose_id_to_follow = determinate_pose_id_to_follow(track_highest, confirmed_id_list,
                                                                       set_of_already_played_pose_ids)
-                    pose_to_follow = None
-                    if pose_id_to_follow:
-                        print("poses left")
-                        run_item = None
-                        _run_list = run_list()
-                    else:
-                        print("go to sleep")
-                        run_item = PositionTarget((1417, 633), target_zoom=8, zoom_v_coefficient=1,
-                                                  after_finished=None)
-                        run_item.start(time_sync(), current_position, current_zoom)
-                        _run_list = []
+                        pose_to_follow = None
+                        if pose_id_to_follow:
+                            print("poses left")
+                            run_item = None
+                            _run_list = run_list()
+                        else:
+                            print("go to sleep")
+                            run_item = PositionTarget((1417, 633), target_zoom=8, zoom_v_coefficient=1,
+                                                      after_finished=None)
+                            run_item.start(time_sync(), current_position, current_zoom)
+                            _run_list = []
 
                 if pose_to_follow is None:
                     print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
