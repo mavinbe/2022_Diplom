@@ -339,7 +339,7 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                     print("confirmed_id_list " + str(list(confirmed_id_list.keys())))
                     print("set_of_already_played_pose_ids " + str(set_of_already_played_pose_ids))
                     print("run_item " + str(run_item))
-                    print("_run_list " + str(_run_list))
+                    # print("_run_list " + str(_run_list))
 
                     # print("pose_id_to_follow")
                     # print(pose_id_to_follow)
