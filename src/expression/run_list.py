@@ -89,7 +89,7 @@ class PositionTarget(CuePoint):
         diff = target_position - current_position
         magnitude = np.linalg.norm(diff)
 
-        return magnitude < 5
+        return magnitude < 10
 
     def determ_position(self, pose_detect_dict_in_global):
         return self.target
