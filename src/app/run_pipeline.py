@@ -218,7 +218,7 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
 
         img_stream = None
         if img_stream_data['type'] == 'cam':
-            img_stream = VideoGStreamerProvider('rtspsrc location='+img_stream_data['url']+' latency=1 !  rtph264depay ! avdec_h264 !  videoconvert ! videoscale ! appsink')
+            img_stream = VideoGStreamerProvider(img_stream_data['url'])
         elif img_stream_data['type'] == 'file':
             img_stream = get_video_stream_provider(ROOT_DIR, img_stream_data['video_specification'])
         print(img_stream)
