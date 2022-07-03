@@ -1,6 +1,7 @@
 import mediapipe as mp
 import numpy as np
 
+from expression.ComposedPoseLandmark import VirtualPoseLandmark, determ_position_by_landmark_from_pose_detection
 from yolov5.utils.torch_utils import time_sync
 
 #from app.run_pipeline import determ_position_by_landmark_from_pose_detection
@@ -8,9 +9,9 @@ from modules.pysical_models.new_position_max_speed_constrained import NewPositio
 
 PoseLandmark = mp.solutions.pose.PoseLandmark
 
-def determ_position_by_landmark_from_pose_detection(pose_detect_dict, landmark):
-    if landmark in pose_detect_dict:
-        return pose_detect_dict[landmark]['x'], pose_detect_dict[landmark]['y']
+# def determ_position_by_landmark_from_pose_detection(pose_detect_dict, landmark):
+#     if landmark in pose_detect_dict:
+#         return pose_detect_dict[landmark]['x'], pose_detect_dict[landmark]['y']
 
 class CuePoint:
     pass
@@ -105,8 +106,11 @@ class PositionTarget(CuePoint):
 
 class LandmarkTarget(PositionTarget):
     def determ_position(self, pose_detect_dict_in_global):
-        return determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
-                                                               self.target)
+        print("pose_detect_dict_in_global ")
+        print(pose_detect_dict_in_global)
+        return self.target.determ_position_by_Vlandmark_from_pose_detection(pose_detect_dict_in_global)
+        # return determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
+        #                                                        self.target)
 
 ZOOM_FACTOR = 0.3
 
@@ -114,21 +118,26 @@ ZOOM_FACTOR = 0.3
 def run_list_1():
     return [
         Pause(3),
-        LandmarkTarget(PoseLandmark.NOSE, target_zoom=8*ZOOM_FACTOR, zoom_v_coefficient=1, after_finished=Pause(10)),
-        LandmarkTarget(PoseLandmark.NOSE, target_zoom=8*ZOOM_FACTOR, zoom_v_coefficient=1, after_finished=Pause(1)),
-        LandmarkTarget(PoseLandmark.RIGHT_ANKLE,
+        LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=8*ZOOM_FACTOR, zoom_v_coefficient=1, after_finished=Pause(10)),
+        LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=8*ZOOM_FACTOR, zoom_v_coefficient=1, after_finished=Pause(1)),
+        LandmarkTarget(VirtualPoseLandmark.RIGHT_ANKLE,
                        after_finished=Pause(0.01)),
-        LandmarkTarget(PoseLandmark.LEFT_ANKLE, movement_v_coefficient=1,
+        LandmarkTarget(VirtualPoseLandmark.LEFT_ANKLE, movement_v_coefficient=1,
                        after_finished=Pause(0.3)),
-        LandmarkTarget(PoseLandmark.RIGHT_HIP, movement_v_coefficient=0.4,
-                       after_finished=Pause(0.0001)),
-        LandmarkTarget(PoseLandmark.LEFT_SHOULDER, movement_v_coefficient=0.4,
-                       after_finished=Pause(0.0001)),
+
+        LandmarkTarget(VirtualPoseLandmark.CROTCH, target_zoom=8 * ZOOM_FACTOR, movement_v_coefficient=0.5,
+                       after_finished=Pause(2)),
+        LandmarkTarget(VirtualPoseLandmark.STOMACHE, target_zoom=8 * ZOOM_FACTOR, movement_v_coefficient=0.5,
+                       after_finished=Pause(2)),
+        LandmarkTarget(VirtualPoseLandmark.BREAST, target_zoom=8 * ZOOM_FACTOR, movement_v_coefficient=0.5,
+                       after_finished=Pause(2)),
+
+
         # LandmarkTarget(PoseLandmark.RIGHT_WRIST, movement_v_coefficient=0.5,
         #                after_finished=Pause(1)),
-        LandmarkTarget(PoseLandmark.NOSE, movement_v_coefficient=0.4,
+        LandmarkTarget(VirtualPoseLandmark.NOSE, movement_v_coefficient=0.4,
                        after_finished=Pause(0.0001)),
-        LandmarkTarget(PoseLandmark.NOSE, after_finished=Pause(5)),
+        LandmarkTarget(VirtualPoseLandmark.NOSE, after_finished=Pause(5)),
 
         #
         # LandmarkTarget(PoseLandmark.NOSE, target_zoom=15*ZOOM_FACTOR, after_finished=Pause(0.1)),

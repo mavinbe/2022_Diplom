@@ -514,9 +514,7 @@ def run_animation(_run_list, current_box, current_position, current_is_blury, cu
         # print("Pause: ")
     if isinstance(run_item, LandmarkTarget):
         image, current_box, current_position, current_zoom = handle_camera_movement_with_LandmarkTarget(image,
-                                                                                                        determ_position_by_landmark_from_pose_detection(
-                                                                                                            pose_to_follow,
-                                                                                                            run_item.target),
+                                                                                                        run_item.target.determ_position_by_Vlandmark_from_pose_detection(pose_to_follow),
                                                                                                         run_item, t)
         # print("landmark: "+str(current_zoom))
     elif isinstance(run_item, PositionTarget):
