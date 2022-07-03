@@ -46,6 +46,7 @@ class VirtualPoseLandmark(enum.IntEnum):
     STOMACHE = 35
     BREAST = 36
     CROTCH = 37
+    FEET = 38
 
     def determ_position_by_Vlandmark_from_pose_detection(self, pose_detect_dict):
         if self < 33:
@@ -70,7 +71,11 @@ class VirtualPoseLandmark(enum.IntEnum):
                     return determ_half_Xway(mid_hip, mid_shoulder, -0.2)
             except Exception as e:
                 return None
-
+        elif self is self.FEET:
+            try:
+                return determ_half_way(VirtualPoseLandmark.LEFT_ANKLE.determ_position_by_Vlandmark_from_pose_detection(pose_detect_dict), VirtualPoseLandmark.RIGHT_ANKLE.determ_position_by_Vlandmark_from_pose_detection(pose_detect_dict))
+            except Exception as e:
+                return None
 def all_y_in_x(y, x):
     return all(i in x for i in y)
 
