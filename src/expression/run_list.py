@@ -36,7 +36,7 @@ class Pause(CuePoint):
 
 
 class PositionTarget(CuePoint):
-    def __init__(self, target, target_zoom=None, movement_v_coefficient=4, zoom_v_coefficient=4, after_finished=None):
+    def __init__(self, target, target_zoom=None, movement_v_coefficient=4.0, zoom_v_coefficient=4, after_finished=None):
         self.target = target
         self.target_zoom = target_zoom
         if target_zoom is not None:
