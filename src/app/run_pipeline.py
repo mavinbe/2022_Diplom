@@ -317,8 +317,8 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                     image = print_detections(image, object_detection_dict)
                     image = print_data_to_image(image, to_do, (100, 100))
                     image = print_data_to_image(image, (frame_count, confirmed_id_list, object_detection_dict), (100, 500))
-                    image = print_data_to_image(image, (persons_not_in_exit_zone), (100, 600))
-                    image = draw_box_to_image(image, exit_zone, (100, 100))
+                    # image = print_data_to_image(image, (persons_not_in_exit_zone), (100, 600))
+                    # image = draw_box_to_image(image, exit_zone, (100, 100))
                     image_with_hud = image
 
 
