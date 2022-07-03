@@ -118,7 +118,7 @@ ZOOM_CLOSE = 15
 
 def run_list_1():
     return [
-        Pause(3),
+        Pause(15),
         LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=ZOOM_NORMAL*ZOOM_FACTOR, zoom_v_coefficient=1, after_finished=Pause(10)),
 
         LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=ZOOM_CLOSE*ZOOM_FACTOR, after_finished=Pause(0.1)),
@@ -164,7 +164,7 @@ def run_list_1():
 
 def run_list_2():
     return [
-        Pause(3),
+        Pause(15),
         LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=8*ZOOM_FACTOR, zoom_v_coefficient=1, after_finished=Pause(10)),
         LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=8*ZOOM_FACTOR, zoom_v_coefficient=1, after_finished=Pause(1)),
         LandmarkTarget(VirtualPoseLandmark.RIGHT_ANKLE,
