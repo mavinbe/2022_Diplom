@@ -106,8 +106,6 @@ class PositionTarget(CuePoint):
 
 class LandmarkTarget(PositionTarget):
     def determ_position(self, pose_detect_dict_in_global):
-        print("pose_detect_dict_in_global ")
-        print(pose_detect_dict_in_global)
         return self.target.determ_position_by_Vlandmark_from_pose_detection(pose_detect_dict_in_global)
         # return determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
         #                                                        self.target)
