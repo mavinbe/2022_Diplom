@@ -11,8 +11,8 @@ class SampleVideoSpecification(NamedTuple):
 
 sampel_data = {
     "clara_simon_kira_me_hole": [
-        SampleVideoSpecification("/data/2022_04_nice/01_clara_simon_kira_me_hole.mp4", 25.04, 0),
-        SampleVideoSpecification("/data/2022_04_nice/06_clara_simon_kira_me_hole.mp4", 10.02, 0)
+        SampleVideoSpecification("/data/2022_04_nice/01_clara_simon_kira_me_hole.mp4", 25.04, 0.1),
+        SampleVideoSpecification("/data/2022_04_nice/06_clara_simon_kira_me_hole.mp4", 10.02, 0.1)
     ],
     "clara_simon_kira_me_last_part": [
         SampleVideoSpecification("/data/2022_04_nice/01_clara_simon_kira_me_last_part.mp4", 25.04, 0),

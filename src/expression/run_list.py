@@ -110,19 +110,27 @@ class LandmarkTarget(PositionTarget):
         # return determ_position_by_landmark_from_pose_detection(pose_detect_dict_in_global,
         #                                                        self.target)
 
-ZOOM_FACTOR = 1
+ZOOM_FACTOR = 0.7
 
 ZOOM_NORMAL = 5
-ZOOM_CLOSE = 15
+ZOOM_MID = 10
+ZOOM_CLOSE = 12
 
 
 def run_list_1():
     return [
-        Pause(15),
+        Pause(10),
         LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=ZOOM_NORMAL*ZOOM_FACTOR, zoom_v_coefficient=1, after_finished=Pause(10)),
 
         LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=ZOOM_CLOSE*ZOOM_FACTOR, after_finished=Pause(0.1)),
-        LandmarkTarget(VirtualPoseLandmark.RIGHT_EYE_OUTER, target_zoom=ZOOM_CLOSE*ZOOM_FACTOR, movement_v_coefficient=1, after_finished=Pause(0.01)),
+        LandmarkTarget(VirtualPoseLandmark.RIGHT_EYE_OUTER, target_zoom=ZOOM_CLOSE * ZOOM_FACTOR,
+                       movement_v_coefficient=6, after_finished=Pause(0.01)),
+        LandmarkTarget(VirtualPoseLandmark.LEFT_EYE_OUTER, movement_v_coefficient=1, after_finished=Pause(0.01)),
+        LandmarkTarget(VirtualPoseLandmark.RIGHT_EYE_OUTER, movement_v_coefficient=1, after_finished=Pause(0.01)),
+        LandmarkTarget(VirtualPoseLandmark.LEFT_EYE_OUTER, movement_v_coefficient=1, after_finished=Pause(0.01)),
+        LandmarkTarget(VirtualPoseLandmark.RIGHT_EYE_OUTER, movement_v_coefficient=1, after_finished=Pause(0.01)),
+        LandmarkTarget(VirtualPoseLandmark.LEFT_EYE_OUTER, movement_v_coefficient=1, after_finished=Pause(0.01)),
+        LandmarkTarget(VirtualPoseLandmark.RIGHT_EYE_OUTER, movement_v_coefficient=1, after_finished=Pause(0.01)),
         LandmarkTarget(VirtualPoseLandmark.LEFT_EYE_OUTER, movement_v_coefficient=1, after_finished=Pause(0.01)),
         LandmarkTarget(VirtualPoseLandmark.RIGHT_EYE_OUTER, movement_v_coefficient=1, after_finished=Pause(0.01)),
         LandmarkTarget(VirtualPoseLandmark.LEFT_EYE_OUTER, movement_v_coefficient=1, after_finished=Pause(0.01)),
@@ -143,7 +151,7 @@ def run_list_1():
         #                after_finished=Pause(1)),
         LandmarkTarget(VirtualPoseLandmark.NOSE, movement_v_coefficient=1,
                        after_finished=Pause(0.0001)),
-        LandmarkTarget(VirtualPoseLandmark.NOSE, after_finished=Pause(5)),
+        LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=2*ZOOM_FACTOR, after_finished=Pause(5)),
 
         #
         # LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=ZOOM_CLOSE*ZOOM_FACTOR, after_finished=Pause(0.1)),
@@ -164,9 +172,9 @@ def run_list_1():
 
 def run_list_2():
     return [
-        Pause(15),
-        LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=8*ZOOM_FACTOR, zoom_v_coefficient=1, after_finished=Pause(10)),
-        LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=8*ZOOM_FACTOR, zoom_v_coefficient=1, after_finished=Pause(1)),
+        Pause(10),
+        LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=ZOOM_NORMAL*ZOOM_FACTOR, zoom_v_coefficient=1, after_finished=Pause(10)),
+        LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=ZOOM_NORMAL*ZOOM_FACTOR, zoom_v_coefficient=1, after_finished=Pause(1)),
         LandmarkTarget(VirtualPoseLandmark.RIGHT_ANKLE,
                        after_finished=Pause(0.01)),
         LandmarkTarget(VirtualPoseLandmark.LEFT_ANKLE,
@@ -175,12 +183,14 @@ def run_list_2():
                        after_finished=Pause(0.1)),
         LandmarkTarget(VirtualPoseLandmark.NOSE, after_finished=Pause(5)),
 
-        LandmarkTarget(VirtualPoseLandmark.RIGHT_THUMB, target_zoom=14*ZOOM_FACTOR, after_finished=Pause(12)),
+        LandmarkTarget(VirtualPoseLandmark.RIGHT_THUMB, target_zoom=ZOOM_MID*ZOOM_FACTOR, after_finished=Pause(12)),
         LandmarkTarget(VirtualPoseLandmark.LEFT_THUMB, after_finished=Pause(12)),
-        LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=8*ZOOM_FACTOR, after_finished=Pause(7)),
+        LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=ZOOM_NORMAL*ZOOM_FACTOR, after_finished=Pause(7)),
 
         LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=ZOOM_CLOSE*ZOOM_FACTOR, after_finished=Pause(0.1)),
-        LandmarkTarget(VirtualPoseLandmark.RIGHT_EYE_OUTER, target_zoom=23*ZOOM_FACTOR, movement_v_coefficient=6, after_finished=Pause(0.01)),
+        LandmarkTarget(VirtualPoseLandmark.RIGHT_EYE_OUTER, target_zoom=ZOOM_CLOSE*ZOOM_FACTOR, movement_v_coefficient=6, after_finished=Pause(0.01)),
+        LandmarkTarget(VirtualPoseLandmark.LEFT_EYE_OUTER, movement_v_coefficient=6, after_finished=Pause(0.01)),
+        LandmarkTarget(VirtualPoseLandmark.RIGHT_EYE_OUTER, movement_v_coefficient=6, after_finished=Pause(0.01)),
         LandmarkTarget(VirtualPoseLandmark.LEFT_EYE_OUTER, movement_v_coefficient=6, after_finished=Pause(0.01)),
         LandmarkTarget(VirtualPoseLandmark.RIGHT_EYE_OUTER, movement_v_coefficient=6, after_finished=Pause(0.01)),
         LandmarkTarget(VirtualPoseLandmark.LEFT_EYE_OUTER, movement_v_coefficient=6, after_finished=Pause(0.01)),
@@ -189,7 +199,7 @@ def run_list_2():
         LandmarkTarget(VirtualPoseLandmark.RIGHT_EYE_OUTER, movement_v_coefficient=6, after_finished=Pause(0.01)),
         LandmarkTarget(VirtualPoseLandmark.LEFT_EYE_OUTER, movement_v_coefficient=6, after_finished=Pause(0.01)),
         LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=ZOOM_CLOSE*ZOOM_FACTOR, after_finished=Pause(0.1)),
-        LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=4*ZOOM_FACTOR, after_finished=Pause(15)),
+        LandmarkTarget(VirtualPoseLandmark.NOSE, target_zoom=2*ZOOM_FACTOR, after_finished=Pause(5)),
 
 
     ]

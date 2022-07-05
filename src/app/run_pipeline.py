@@ -647,8 +647,8 @@ if __name__ == '__main__':
     sample_data = get_sample_video_specification_by_key("clara_simon_kira_me_hole")
 
     data_for_cam = [
-        {'type': 'cam', 'url': 'rtsp://malte:diplom@192.168.0.102:554//h264Preview_08_main'},
-        {'type': 'cam', 'url': 'rtsp://malte:diplom@192.168.0.102:554//h264Preview_05_main'}
+        {'type': 'cam', 'url': 'rtsp://malte:diplom@192.168.0.102:554//h264Preview_05_main'},
+        {'type': 'cam', 'url': 'rtsp://malte:diplom@192.168.0.102:554//h264Preview_08_main'}
     ]
 
     data_for_video = [
@@ -664,7 +664,7 @@ if __name__ == '__main__':
 
     p_1.start()
 
-    p_2 = multiP.Process(target=run, args=(show_image, data_to_play[1], '192.168.0.100', False, run_list_1), kwargs={'in_queue': sync_queues[0], 'out_queue': sync_queues[1]})
+    p_2 = multiP.Process(target=run, args=(show_image, data_to_play[1], '192.168.0.100', False, run_list_2), kwargs={'in_queue': sync_queues[0], 'out_queue': sync_queues[1]})
     # p_2 = multiP.Process(target=run, args=(show_image, {'type': 'file', 'video_specification': sample_data[1]}, '192.168.0.100', False, run_list_2), kwargs={'in_queue': sync_queues[0], 'out_queue': sync_queues[0]})
 
     p_2.start()
