@@ -142,13 +142,13 @@ def run_list_1():
                        after_finished=Pause(0.3)),
 
 
-        LandmarkTarget(VirtualPoseLandmark.CROTCH, target_zoom=ZOOM_NORMAL * ZOOM_FACTOR, movement_v_coefficient=0.5,
+        LandmarkTarget(VirtualPoseLandmark.CROTCH, target_zoom=ZOOM_NORMAL * 1.5 * ZOOM_FACTOR, zoom_v_coefficient=1, movement_v_coefficient=0.5,
                        after_finished=Pause(2)),
-        LandmarkTarget(VirtualPoseLandmark.BREAST, target_zoom=ZOOM_NORMAL * ZOOM_FACTOR, movement_v_coefficient=0.5,
+        LandmarkTarget(VirtualPoseLandmark.BREAST, target_zoom=ZOOM_NORMAL * 1 * ZOOM_FACTOR, zoom_v_coefficient=1, movement_v_coefficient=0.5,
                        after_finished=Pause(2)),
-        LandmarkTarget(VirtualPoseLandmark.RIGHT_SHOULDER, target_zoom=ZOOM_NORMAL * ZOOM_FACTOR, movement_v_coefficient=0.5,
+        LandmarkTarget(VirtualPoseLandmark.RIGHT_SHOULDER, target_zoom=ZOOM_NORMAL * 1.5 * ZOOM_FACTOR, movement_v_coefficient=0.5,
                        after_finished=Pause(2)),
-        LandmarkTarget(VirtualPoseLandmark.LEFT_SHOULDER, target_zoom=ZOOM_NORMAL * ZOOM_FACTOR,
+        LandmarkTarget(VirtualPoseLandmark.LEFT_SHOULDER, target_zoom=ZOOM_NORMAL * 1 * ZOOM_FACTOR,
                        movement_v_coefficient=0.5,
                        after_finished=Pause(2)),
 

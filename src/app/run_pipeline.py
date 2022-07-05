@@ -381,7 +381,7 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                             _run_list = run_list()
                         else:
                             print("go to sleep")
-                            run_item = PositionTarget((1417, 633), target_zoom=8, zoom_v_coefficient=1,
+                            run_item = PositionTarget((1617, 833), target_zoom=6, zoom_v_coefficient=1,
                                                       after_finished=None)
                             run_item.start(time_sync(), current_position, current_zoom)
                             _run_list = []
