@@ -146,6 +146,11 @@ def run_list_1():
                        after_finished=Pause(2)),
         LandmarkTarget(VirtualPoseLandmark.BREAST, target_zoom=ZOOM_NORMAL * ZOOM_FACTOR, movement_v_coefficient=0.5,
                        after_finished=Pause(2)),
+        LandmarkTarget(VirtualPoseLandmark.RIGHT_SHOULDER, target_zoom=ZOOM_NORMAL * ZOOM_FACTOR, movement_v_coefficient=0.5,
+                       after_finished=Pause(2)),
+        LandmarkTarget(VirtualPoseLandmark.LEFT_SHOULDER, target_zoom=ZOOM_NORMAL * ZOOM_FACTOR,
+                       movement_v_coefficient=0.5,
+                       after_finished=Pause(2)),
 
         # LandmarkTarget(VirtualPoseLandmark.RIGHT_WRIST, movement_v_coefficient=0.5,
         #                after_finished=Pause(1)),
