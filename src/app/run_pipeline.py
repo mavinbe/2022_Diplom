@@ -249,7 +249,7 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
         atexit.register(send_out_1.release)
 
         run_item = None
-        _run_list = run_list()
+        _run_list = [Pause(10)] + run_list()
         current_box = None
         current_is_blury = False
         current_position = None
@@ -294,7 +294,7 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                     print("------------------------ RESET ")
 
                     run_item = None
-                    _run_list = run_list()
+                    _run_list = [Pause(10)] + run_list()
 
                     current_box = (0, original_image.shape[0], 0, original_image.shape[1])
                     current_position = None
@@ -399,7 +399,7 @@ def run(handle_image, img_stream_data, sink_ip, track_highest, run_list, out_que
                 else:
                     if run_item is None and len(_run_list) == 0:
                         run_item = None
-                        _run_list = run_list()
+                        _run_list = [Pause(10)] + run_list()
                 _run_list, current_box, current_position, current_is_blury, current_zoom, height, image, pose_to_follow, run_item, t, width = run_animation(
                     _run_list, current_box, current_position, current_is_blury, current_zoom, height, image, pose_to_follow,
                     run_item, t, width, to_do)
